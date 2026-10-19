@@ -412,20 +412,20 @@ body > * {
   color: var(--color-text-primary-dark);
 }
 
-/* Swiish logo styling - text-secondary color at 25% opacity by default, snap to original colors on hover (no animation) */
-.swiish-logo {
-  opacity: 0.25;
-  /* Convert to text-secondary color (slate-600 #475569) - dark grayish blue */
-  filter: brightness(0) saturate(100%) invert(28%) sepia(9%) saturate(1000%) hue-rotate(180deg) brightness(0.9) contrast(0.85);
+.macarte-mark {
+  letter-spacing: -0.04em;
 }
 
-.dark .swiish-logo {
-  /* Convert to text-secondary-dark color (stone-300 #d6d3d1) - lighter warm gray */
-  filter: brightness(0) saturate(100%) invert(84%) sepia(2%) saturate(200%) hue-rotate(314deg) brightness(1.1) contrast(0.9);
+.auth-panel {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(204, 251, 241, 0.35), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(15, 118, 110, 0.55), transparent 45%),
+    linear-gradient(160deg, #134e4a 0%, #0f766e 48%, #115e59 100%);
 }
 
-.group:hover .swiish-logo {
-  opacity: 1;
-  filter: none; /* Revert to original colors */
+.password-meter {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
 }
 

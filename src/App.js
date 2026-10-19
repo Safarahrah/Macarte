@@ -7,7 +7,7 @@ import flags from 'country-flag-icons/react/3x2';
 import { 
   Camera, Upload, Save, Share2, Phone, Mail, Globe, 
   Linkedin, Twitter, Instagram, Github, Edit3, Eye, 
-  X, Check, User, MapPin, Briefcase, Lock, LogIn, AlertCircle, 
+  X, Check, User, MapPin, Briefcase, Lock, LogIn, AlertCircle, EyeOff,
   Plus, Trash2, ArrowLeft, Users, ExternalLink, RefreshCw,
   Download, FileText, Calendar, Video, Music, ShoppingCart, 
   Link as LinkIcon, Youtube, Facebook, MessageCircle, Sun, Moon,
@@ -21,6 +21,121 @@ import { arrayMove } from '@dnd-kit/sortable';
 const API_ENDPOINT = '/api';
 const APP_VERSION = require('../package.json').version; // Automatically read from package.json
 const GITHUB_URL = 'https://github.com/MrCrin/swiish';
+const APP_NAME = 'Macarte';
+
+function isReservedFrontendPath(pathname) {
+  return (
+    pathname.startsWith('/people') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/setup') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/users') ||
+    pathname.startsWith('/cards') ||
+    pathname.startsWith('/invite') ||
+    pathname === '/'
+  );
+}
+
+function getPasswordStrength(password) {
+  if (!password) return { score: 0, label: '', width: 'w-0' };
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+  const labels = ['', 'Faible', 'Moyen', 'Bon', 'Fort'];
+  return { score, label: labels[score], bars: score };
+}
+
+function MacarteMark({ className = '' }) {
+  return (
+    <div className={`macarte-mark inline-flex items-center gap-2 ${className}`}>
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-teal-700 text-white shadow-sm">
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+          <rect x="3" y="6" width="18" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="8" cy="12" r="2" fill="currentColor" />
+          <path d="M12.5 10.5h6M12.5 13.5h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+      </span>
+      <span className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">{APP_NAME}</span>
+    </div>
+  );
+}
+
+function PasswordField({ id, value, onChange, placeholder, autoComplete, show, onToggle, autoFocus }) {
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        type={show ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        autoFocus={autoFocus}
+        className="w-full px-5 py-3 pr-12 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute inset-y-0 right-0 px-3 text-text-muted dark:text-text-muted-dark hover:text-text-primary dark:hover:text-text-primary-dark"
+        aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
+function PasswordStrength({ password }) {
+  const { bars, label } = getPasswordStrength(password);
+  if (!password) return null;
+  return (
+    <div className="space-y-1">
+      <div className="password-meter">
+        {[1, 2, 3, 4].map((step) => (
+          <div
+            key={step}
+            className={`h-1.5 rounded-full ${step <= bars ? (bars <= 1 ? 'bg-rose-500' : bars === 2 ? 'bg-amber-500' : bars === 3 ? 'bg-lime-500' : 'bg-teal-500') : 'bg-border dark:bg-border-dark'}`}
+          />
+        ))}
+      </div>
+      <p className="text-xs text-text-muted dark:text-text-muted-dark">{label} — 8 caractères min., une lettre et un chiffre</p>
+    </div>
+  );
+}
+
+function AuthShell({ title, subtitle, children, footer }) {
+  return (
+    <div className="min-h-screen flex bg-main dark:bg-main-dark">
+      <div className="hidden lg:flex w-[44%] auth-panel text-white p-12 flex-col justify-between relative overflow-hidden">
+        <MacarteMark className="[&_span:last-child]:text-white" />
+        <div className="relative z-10 max-w-sm">
+          <p className="text-xs uppercase tracking-[0.2em] text-teal-100/80 mb-3">Carte de visite digitale</p>
+          <h2 className="text-4xl font-semibold leading-tight mb-4">Une carte. Tous vos liens.</h2>
+          <p className="text-teal-50/80 text-sm leading-relaxed">
+            Créez votre carte Macarte, partagez-la par QR code et restez joignable même hors ligne.
+          </p>
+        </div>
+        <p className="text-xs text-teal-100/60">Partage instantané · PWA · QR</p>
+      </div>
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <div className="bg-card dark:bg-card-dark max-w-md w-full rounded-page shadow-xl p-8 border border-border-subtle dark:border-border-dark">
+          <div className="lg:hidden mb-6">
+            <MacarteMark />
+          </div>
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark">{title}</h1>
+            {subtitle && <p className="text-sm text-text-muted dark:text-text-muted-dark mt-2">{subtitle}</p>}
+          </div>
+          {children}
+          {footer}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Try to read branch info from active-branch.json (generated at build time)
 let GIT_BRANCH = null;
@@ -605,7 +720,7 @@ export default function App() {
     const pathParts = initialPath.substring(1).split('/').filter(p => p);
     const isShortCode = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
-    const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !initialPath.startsWith('/people') && !initialPath.startsWith('/login') && !initialPath.startsWith('/setup') && !initialPath.startsWith('/settings') && !initialPath.startsWith('/users') && !initialPath.startsWith('/cards') && initialPath !== '/');
+    const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(initialPath));
     return isPublicRoute ? 'public-loading' : 'loading';
   }); 
   const [data, setData] = useState(() => getDefaultTemplate(null));
@@ -614,6 +729,11 @@ export default function App() {
   const [cardList, setCardList] = useState([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null); // 'owner' or 'member'
   const [csrfToken, setCsrfToken] = useState('');
@@ -873,7 +993,7 @@ const [settings, setSettings] = useState({
     const pathParts = path.substring(1).split('/').filter(p => p);
     const isShortCode = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
-    const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !path.startsWith('/people') && !path.startsWith('/login') && !path.startsWith('/setup') && !path.startsWith('/settings') && !path.startsWith('/users') && !path.startsWith('/cards') && path !== '/');
+    const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(path));
     
     if (isPublicRoute) {
       // Don't interfere with public card routes - let PublicCardRoute handle it
@@ -898,12 +1018,12 @@ const [settings, setSettings] = useState({
         } else {
           // Setup not complete, show wizard
           setView('setup-wizard');
-          document.title = "Initial Setup";
+          document.title = `Configuration · ${APP_NAME}`;
         }
       }).catch(() => {
         // If check fails, show wizard anyway
         setView('setup-wizard');
-        document.title = "Initial Setup";
+        document.title = `Configuration · ${APP_NAME}`;
       });
       return;
     } else if (path === '/login') {
@@ -917,12 +1037,26 @@ const [settings, setSettings] = useState({
         } else {
           // Not authenticated, show login page
           setView('admin-login');
-          document.title = "Admin Login";
+          document.title = `Connexion · ${APP_NAME}`;
         }
       }).catch(() => {
         // Not authenticated, show login page
         setView('admin-login');
-        document.title = "Admin Login";
+        document.title = `Connexion · ${APP_NAME}`;
+      });
+    } else if (path === '/register') {
+      setView('loading');
+      fetchCsrfToken();
+      checkAuth().then((authResult) => {
+        if (authResult.isAuthenticated) {
+          navigate('/people', { replace: true });
+        } else {
+          setView('admin-register');
+          document.title = `Inscription · ${APP_NAME}`;
+        }
+      }).catch(() => {
+        setView('admin-register');
+        document.title = `Inscription · ${APP_NAME}`;
       });
     } else if (path === '/settings') {
       setView('admin-settings');
@@ -960,7 +1094,7 @@ const [settings, setSettings] = useState({
             if (authResult.isAuthenticated) {
               // Demo mode: always show dashboard for demo user (owner role)
               setView('admin-dashboard');
-              document.title = "Admin Dashboard";
+              document.title = `${APP_NAME}`;
             } else {
               // This shouldn't happen in demo mode, but fallback to login just in case
               navigate('/login', { replace: true });
@@ -1006,7 +1140,7 @@ const [settings, setSettings] = useState({
                 // Owner - show dashboard
                 setView('admin-dashboard');
               }
-          document.title = "Admin Dashboard";
+          document.title = `${APP_NAME}`;
             } else {
               // Not authenticated, redirect to login (explicit redirect)
               navigate('/login', { replace: true });
@@ -1089,7 +1223,7 @@ const [settings, setSettings] = useState({
           privacy: json.privacy || defaultTemplate.privacy
         });
         setView('public-card');
-        document.title = json.personal?.name ? `${json.personal.name} - Swiish Card` : "Swiish Card";
+        document.title = json.personal?.name ? `${json.personal.name} · ${APP_NAME}` : APP_NAME;
       } else {
         setError('Card not found');
         setView('404');
@@ -1354,14 +1488,14 @@ const [settings, setSettings] = useState({
       } else {
         setIsAuthenticated(false);
         // Only set view to login if we're on a protected route
-        if (location.pathname !== '/login' && location.pathname !== '/setup') {
+        if (location.pathname !== '/login' && location.pathname !== '/setup' && location.pathname !== '/register') {
         setView('admin-login');
         }
       }
     } catch (e) {
       setIsAuthenticated(false);
       // Only set view to login if we're on a protected route
-      if (location.pathname !== '/login' && location.pathname !== '/setup') {
+      if (location.pathname !== '/login' && location.pathname !== '/setup' && location.pathname !== '/register') {
       setView('admin-login');
       }
     }
@@ -1370,6 +1504,8 @@ const [settings, setSettings] = useState({
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setForgotMessage('');
+    setIsLoggingIn(true);
     try {
       const res = await fetch(`${API_ENDPOINT}/login`, {
         method: 'POST',
@@ -1378,19 +1514,99 @@ const [settings, setSettings] = useState({
         body: JSON.stringify({ email: email.toLowerCase().trim(), password })
       });
       if (res.ok) {
-        // Token is now in httpOnly cookie, fetch CSRF token and check auth
         await fetchCsrfToken();
         const authResult = await checkAuth();
         if (authResult.isAuthenticated) {
-          // Navigate to dashboard after successful login (explicit user action)
           navigate('/people');
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
-        setError(errorData.error || 'Invalid email or password');
+        setError(errorData.error || 'Email ou mot de passe incorrect');
       }
     } catch (e) { 
-      setError('Login failed'); 
+      setError('La connexion a échoué. Réessayez.'); 
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setForgotMessage('');
+    if (!email.trim()) {
+      setError('Entrez votre adresse email');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_ENDPOINT}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: email.toLowerCase().trim() })
+      });
+      if (res.ok) {
+        setForgotMessage('Si un compte existe, un lien de réinitialisation a été envoyé.');
+      } else {
+        setError('Impossible d’envoyer le lien pour le moment.');
+      }
+    } catch (e) {
+      setError('Impossible d’envoyer le lien pour le moment.');
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    const orgName = setupData.organisationName.trim();
+    const registerEmail = setupData.adminEmail.toLowerCase().trim();
+    const registerPassword = setupData.adminPassword;
+
+    if (!orgName || !registerEmail || !registerPassword) {
+      setError('Tous les champs sont obligatoires');
+      return;
+    }
+    if (registerPassword.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+    if (!/[A-Za-z]/.test(registerPassword) || !/\d/.test(registerPassword)) {
+      setError('Le mot de passe doit contenir une lettre et un chiffre');
+      return;
+    }
+    if (registerPassword !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    setIsSettingUp(true);
+    try {
+      const res = await fetch(`${API_ENDPOINT}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          organisationName: orgName,
+          email: registerEmail,
+          password: registerPassword,
+          confirmPassword
+        })
+      });
+      if (res.ok) {
+        setIsSuccessSetup(true);
+        await fetchCsrfToken();
+        const authResult = await checkAuth();
+        if (authResult.isAuthenticated) {
+          navigate('/people');
+        }
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        setError(errorData.error || 'Inscription impossible');
+      }
+    } catch (e) {
+      setError('Inscription impossible. Réessayez.');
+    } finally {
+      setIsSettingUp(false);
     }
   };
 
@@ -1777,100 +1993,184 @@ const [settings, setSettings] = useState({
       )}
       {view === 'setup-wizard' && (
         <>
-          <div className="min-h-screen bg-surface dark:bg-main-dark flex items-center justify-center p-4">
-            <div className="bg-card dark:bg-card-dark max-w-md w-full rounded-page shadow-xl p-8">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400"><Settings className="w-8 h-8" /></div>
-                <h1 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark">Initial Setup</h1>
-                <p className="text-sm text-text-muted dark:text-text-muted-dark mt-2">Configure your organisation and create the first admin user</p>
+          <AuthShell
+            title="Configuration initiale"
+            subtitle="Créez votre organisation et le premier compte administrateur Macarte."
+            footer={
+              <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
+                Déjà configuré ?{' '}
+                <button type="button" onClick={() => navigate('/login')} className="font-medium text-action dark:text-action-dark">Se connecter</button>
+              </p>
+            }
+          >
+            <form onSubmit={handleSetup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Organisation</label>
+                <input
+                  type="text"
+                  value={setupData.organisationName}
+                  onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
+                  placeholder="Mon entreprise"
+                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  required
+                  autoFocus
+                />
               </div>
-              <form onSubmit={handleSetup} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Organisation Name</label>
-                  <input 
-                    type="text" 
-                    value={setupData.organisationName} 
-                    onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })} 
-                    placeholder="My Organization" 
-                    className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" 
-                    required 
-                    autoFocus 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Admin Email</label>
-                  <input 
-                    type="email" 
-                    value={setupData.adminEmail} 
-                    onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })} 
-                    placeholder="admin@example.com" 
-                    className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Admin Password</label>
-                  <input 
-                    type="password" 
-                    value={setupData.adminPassword} 
-                    onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })} 
-                    placeholder="Minimum 8 characters" 
-                    className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" 
-                    required 
-                    minLength={8}
-                  />
-                  <p className="text-xs text-text-muted dark:text-text-muted-dark mt-1">Password must be at least 8 characters long</p>
-                </div>
-                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm">{error}</div>}
-                <button 
-                  type="submit" 
-                  disabled={isSettingUp}
-                  className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSettingUp ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : isSuccessSetup ? (
-                    <Check className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  {isSettingUp ? 'Setting up...' : 'Complete Setup'}
-                </button>
-              </form>
-              <div className="text-center mt-auto pt-8 pb-0 group relative z-10" style={{ boxSizing: 'content-box' }}>
-                <div className="flex justify-center">
-                  <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-                  <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Email administrateur</label>
+                <input
+                  type="email"
+                  value={setupData.adminEmail}
+                  onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })}
+                  placeholder="vous@exemple.com"
+                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  required
+                />
               </div>
-            </div>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Mot de passe</label>
+                <PasswordField
+                  value={setupData.adminPassword}
+                  onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
+                  placeholder="8 caractères min."
+                  autoComplete="new-password"
+                  show={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
+                <div className="mt-2"><PasswordStrength password={setupData.adminPassword} /></div>
+              </div>
+              {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
+              <button
+                type="submit"
+                disabled={isSettingUp}
+                className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isSettingUp ? 'Configuration…' : 'Terminer'}
+              </button>
+            </form>
+          </AuthShell>
           <VersionBadge />
           <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} confirmText={modal.confirmText} cancelText={modal.cancelText} />
         </>
       )}
       {view === 'admin-login' && (
         <>
-          <div className="min-h-screen bg-surface dark:bg-main-dark flex items-center justify-center p-4">
-            <div className="bg-card dark:bg-card-dark max-w-sm w-full rounded-page shadow-xl p-8">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400"><Lock className="w-8 h-8" /></div>
-                <h1 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark">Login</h1>
+          <AuthShell
+            title="Connexion"
+            subtitle="Accédez à votre espace Macarte."
+            footer={
+              <div className="mt-6 space-y-3 text-center text-sm">
+                <button type="button" onClick={() => { setForgotMode(!forgotMode); setError(''); setForgotMessage(''); }} className="text-text-muted dark:text-text-muted-dark hover:text-text-primary">
+                  Mot de passe oublié ?
+                </button>
+                <p className="text-text-muted dark:text-text-muted-dark">
+                  Nouveau sur Macarte ?{' '}
+                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">Créer un compte</button>
+                </p>
               </div>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" autoFocus />
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" />
-                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm">{error}</div>}
-                <button type="submit" className="w-full py-3.5 rounded-full bg-confirm dark:bg-confirm-dark text-confirm-text dark:text-confirm-text-dark font-bold hover:bg-confirm-hover dark:hover:bg-confirm-hover-dark transition-colors">Login</button>
+            }
+          >
+            {forgotMode ? (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Votre email" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" autoFocus required />
+                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
+                {forgotMessage && <div className="text-sm text-success-text dark:text-success-text-dark">{forgotMessage}</div>}
+                <button type="submit" className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors">Envoyer le lien</button>
               </form>
-            <div className="text-center mt-8 group relative z-10">
-              <div className="flex justify-center">
-                <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-                <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+            ) : (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" autoComplete="email" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" autoFocus />
+                <PasswordField
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Mot de passe"
+                  autoComplete="current-password"
+                  show={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
+                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
+                <button type="submit" disabled={isLoggingIn} className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50">
+                  {isLoggingIn ? 'Connexion…' : 'Se connecter'}
+                </button>
+              </form>
+            )}
+          </AuthShell>
+          <VersionBadge />
+          <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} confirmText={modal.confirmText} cancelText={modal.cancelText} />
+        </>
+      )}
+      {view === 'admin-register' && (
+        <>
+          <AuthShell
+            title="Créer un compte"
+            subtitle="Inscrivez-vous pour créer votre organisation et vos cartes Macarte."
+            footer={
+              <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
+                Vous avez déjà un compte ?{' '}
+                <button type="button" onClick={() => { setError(''); navigate('/login'); }} className="font-medium text-action dark:text-action-dark">Se connecter</button>
+              </p>
+            }
+          >
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Nom de l’organisation</label>
+                <input
+                  type="text"
+                  value={setupData.organisationName}
+                  onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
+                  placeholder="Studio, équipe ou votre nom"
+                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  required
+                  autoFocus
+                />
               </div>
-            </div>
-            </div>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Email</label>
+                <input
+                  type="email"
+                  value={setupData.adminEmail}
+                  onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })}
+                  placeholder="vous@exemple.com"
+                  autoComplete="email"
+                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Mot de passe</label>
+                <PasswordField
+                  value={setupData.adminPassword}
+                  onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
+                  placeholder="8 caractères, lettre + chiffre"
+                  autoComplete="new-password"
+                  show={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
+                <div className="mt-2"><PasswordStrength password={setupData.adminPassword} /></div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Confirmer le mot de passe</label>
+                <PasswordField
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Répétez le mot de passe"
+                  autoComplete="new-password"
+                  show={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
+              </div>
+              {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4 shrink-0" />{error}</div>}
+              <button
+                type="submit"
+                disabled={isSettingUp}
+                className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                {isSettingUp ? 'Création du compte…' : 'Créer mon compte'}
+              </button>
+            </form>
+          </AuthShell>
           <VersionBadge />
           <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} confirmText={modal.confirmText} cancelText={modal.cancelText} />
         </>
@@ -2054,8 +2354,7 @@ const [settings, setSettings] = useState({
           </div>
           <div className="fixed bottom-4 right-4 z-10 text-center group">
             <div className="flex justify-center">
-              <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-              <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+              <MacarteMark className="opacity-70 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
           {/* Modals */}
@@ -2318,6 +2617,7 @@ const [settings, setSettings] = useState({
       <Routes>
         {/* Admin routes - must come before public routes to prevent matching */}
         <Route path="/login" element={renderAdminViews()} />
+        <Route path="/register" element={renderAdminViews()} />
         <Route path="/setup" element={renderAdminViews()} />
         <Route path="/people/edit/:slug" element={renderAdminViews()} />
         <Route path="/people" element={renderAdminViews()} />
@@ -2503,15 +2803,15 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
 
   const whatsappLink = ownerPhoneDigits && ownerPhoneDigits.length >= 8
     ? `https://wa.me/${ownerPhoneDigits}?text=${encodeURIComponent(
-        'Hi, we met via your Swiish card. My name is ... and my number/email is ...'
+        'Hi, we met via your Macarte card. My name is ... and my number/email is ...'
       )}`
     : null;
 
   const emailLink = ownerEmail
     ? `mailto:${ownerEmail}?subject=${encodeURIComponent(
-        'My details from Swiish'
+        'My details from Macarte'
       )}&body=${encodeURIComponent(
-        'Hi, we met via your Swiish card.\nMy name is ...\nMy phone number is ...\nMy email address is ...'
+        'Hi, we met via your Macarte card.\nMy name is ...\nMy phone number is ...\nMy email address is ...'
       )}`
     : null;
 
@@ -2805,7 +3105,7 @@ END:VCARD`;
                 <div className="w-full aspect-square flex flex-col items-center justify-center text-text-muted-subtle dark:text-text-secondary-dark text-xs space-y-1">
                   <span>{isOnline ? 'Saved details' : 'Offline mode'}</span>
                   <span className="text-[10px] opacity-80 px-1">
-                    This code includes your saved Swiish details and a link to your card when scanned with an online device.
+                    This code includes your saved Macarte details and a link to your card when scanned with an online device.
                   </span>
                 </div>
               ) : (!isOnline && qrMode === 'simple' && !qrSimpleDataUrl) ? (
@@ -2841,7 +3141,7 @@ END:VCARD`;
           {/* Offline note */}
           {!isOnline && offlineQrPayload && (
             <p className="text-xs text-text-muted dark:text-text-muted-dark mt-4 px-4">
-              Using last saved QR details (offline). The code includes your contact info and a link to your Swiish card.
+              Using last saved QR details (offline). The code includes your contact info and a link to your Macarte card.
             </p>
           )}
         </div>
@@ -2877,11 +3177,10 @@ END:VCARD`;
           {/* Close button */}
           <button onClick={() => setShowQR(false)} className="w-full max-w-md mx-auto py-3 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark font-bold rounded-input hover:bg-surface dark:hover:bg-surface-dark text-sm transition-colors">Close</button>
 
-          {/* Swiish logo */}
+          {/* Macarte logo */}
           <div className="bg-card dark:bg-card-dark text-center space-y-2 mt-[24px] mb-[12px]">
             <div className="flex justify-center py-4">
-              <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-              <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+              <MacarteMark className="opacity-70 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
         </div>
@@ -2965,7 +3264,7 @@ END:VCARD`;
                       showAlert(
                         instructions,
                         'info',
-                        'Install Swiish'
+                        `Install ${APP_NAME}`
                       );
                     } else {
                       // Fallback if showAlert is not available
@@ -3247,11 +3546,10 @@ END:VCARD`;
            <SocialIcon url={social.github} icon={Github} label="Git" themeColor={themeColor} />
         </div>
 
-        {/* Swiish logo */}
+        {/* Macarte logo */}
         <div className="bg-card dark:bg-card-dark pb-4 text-center space-y-2 mt-auto lg:pb-4">
           <div className="flex justify-center">
-            <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-            <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+            <MacarteMark className="opacity-70 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
       </div>
@@ -3737,8 +4035,7 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
       </div>
       <div className="fixed bottom-4 right-4 z-10 text-center group">
         <div className="flex justify-center">
-          <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-          <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+          <MacarteMark className="opacity-70 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
     </div>
@@ -4600,12 +4897,17 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
     }
 
     if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+      setPasswordError('Le mot de passe doit contenir au moins 8 caractères');
+      return false;
+    }
+
+    if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+      setPasswordError('Le mot de passe doit contenir une lettre et un chiffre');
       return false;
     }
 
     if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('Les mots de passe ne correspondent pas');
       return false;
     }
 
@@ -4623,7 +4925,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
     try {
       const res = await apiCall(`${API_ENDPOINT}/invitations/${token}/accept`, {
         method: 'POST',
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ password, confirmPassword })
       });
 
       if (res.ok) {
@@ -4657,106 +4959,76 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
 
   if (error || !invitation) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-bg dark:bg-bg-dark p-4">
-        <div className="max-w-md w-full bg-card dark:bg-card-dark rounded-card shadow-lg p-8 text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-2">Invitation Invalid</h1>
-          <p className="text-text-secondary dark:text-text-secondary-dark mb-6">{error || 'This invitation link is not valid or has expired.'}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="w-full px-4 py-2.5 bg-action dark:bg-action-dark text-white rounded-button font-medium hover:bg-action-hover dark:hover:bg-action-hover-dark"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
+      <AuthShell title="Invitation invalide" subtitle={error || 'Ce lien n’est plus valable.'}>
+        <button
+          onClick={() => navigate('/login')}
+          className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark"
+        >
+          Aller à la connexion
+        </button>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-bg dark:bg-bg-dark p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-card dark:bg-card-dark rounded-card shadow-lg p-8 mb-4">
-          <h1 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark mb-2">Join {invitation.organisationName}</h1>
-          <p className="text-text-secondary dark:text-text-secondary-dark mb-6">
-            You've been invited to join as a <span className="font-semibold capitalize">{invitation.role}</span>
-          </p>
-
-          <form onSubmit={handleAcceptInvitation} className="space-y-4">
-            {/* Email display */}
-            <div>
-              <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Email</label>
-              <input
-                type="email"
-                value={invitation.email}
-                disabled
-                className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-text-secondary dark:text-text-secondary-dark"
-              />
-            </div>
-
-            {/* Password input */}
-            <div>
-              <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError(null);
-                }}
-                placeholder="Enter password (min 8 characters)"
-                className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark focus:border-action dark:focus:border-action-dark"
-              />
-            </div>
-
-            {/* Confirm password input */}
-            <div>
-              <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setPasswordError(null);
-                }}
-                placeholder="Confirm password"
-                className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark focus:border-action dark:focus:border-action-dark"
-              />
-            </div>
-
-            {/* Error message */}
-            {passwordError && (
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-input text-red-700 dark:text-red-200 text-sm">
-                {passwordError}
-              </div>
-            )}
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full px-4 py-2.5 bg-action dark:bg-action-dark text-white rounded-button font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Accept Invitation
-                </>
-              )}
-            </button>
-          </form>
-
-          <p className="text-xs text-text-muted dark:text-text-muted-dark text-center mt-4">
-            By accepting this invitation, you agree to join the organization
-          </p>
+    <AuthShell
+      title={`Rejoindre ${invitation.organisationName}`}
+      subtitle={`Vous êtes invité·e en tant que ${invitation.role}. Choisissez un mot de passe pour créer votre compte Macarte.`}
+    >
+      <form onSubmit={handleAcceptInvitation} className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Email</label>
+          <input
+            type="email"
+            value={invitation.email}
+            disabled
+            className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-text-secondary dark:text-text-secondary-dark"
+          />
         </div>
-      </div>
-    </div>
+        <div>
+          <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Mot de passe</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPasswordError(null);
+            }}
+            placeholder="8 caractères, lettre + chiffre"
+            autoComplete="new-password"
+            className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+          />
+          <div className="mt-2"><PasswordStrength password={password} /></div>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark block mb-2">Confirmer le mot de passe</label>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setPasswordError(null);
+            }}
+            placeholder="Répétez le mot de passe"
+            autoComplete="new-password"
+            className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+          />
+        </div>
+        {passwordError && (
+          <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0" />{passwordError}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          {isSubmitting ? 'Création du compte…' : 'Créer mon compte'}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
 
@@ -5276,7 +5548,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               {isAppThemesOpen && (
                 <div className="mt-4 space-y-3">
                   {[
-                    { id: 'swiish', title: 'Swiish', desc: 'Original Swiish theme with colors and textures.' },
+                    { id: 'swiish', title: 'Macarte', desc: 'Thème Macarte avec couleurs et textures.' },
                     { id: 'minimal', title: 'Minimal', desc: 'Black/white, few grays, no textures, border-only accents.' },
                   ].map(opt => (
                     <label
@@ -5563,8 +5835,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
       </div>
       <div className="fixed bottom-4 right-4 z-10 text-center group">
         <div className="flex justify-center">
-          <img src="/graphics/Swiish_Logo.svg" alt="Swiish" className="h-4 w-auto dark:hidden swiish-logo" />
-          <img src="/graphics/Swiish_Logo_DarkBg.svg" alt="Swiish" className="h-4 w-auto hidden dark:block swiish-logo" />
+          <MacarteMark className="opacity-70 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
     </div>

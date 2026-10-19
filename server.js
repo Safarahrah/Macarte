@@ -1207,6 +1207,120 @@ app.post('/api/login', loginLimiter, [
   }
 });
 
+function slugifyOrgName(name) {
+  return name.toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
+    || 'organisation';
+}
+
+async function initializeOrgSettings(orgId, organisationName) {
+  const defaultColors = getDefaultThemeColors();
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'default_organisation', organisationName]);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'theme_colors', JSON.stringify(defaultColors)]);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'allow_theme_customisation', 'true']);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'allow_image_customisation', 'true']);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'allow_links_customisation', 'true']);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'allow_privacy_customisation', 'true']);
+  await dbRun("INSERT INTO organisation_settings (organisation_id, key, value, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [orgId, 'allow_send_details_customisation', 'true']);
+}
+
+function issueAuthCookie(res, payload) {
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+}
+
+async function findAvailableOrgSlug(baseSlug) {
+  let counter = 0;
+  while (true) {
+    const candidate = counter === 0 ? baseSlug : `${baseSlug}-${counter}`;
+    const existing = await new Promise((resolve, reject) => {
+      db.get("SELECT id FROM organisations WHERE slug = ?", [candidate], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    if (!existing) return candidate;
+    counter += 1;
+  }
+}
+
+// Public self-registration: creates a new organisation + owner account
+app.post('/api/register', loginLimiter, [
+  body('organisationName').trim().isLength({ min: 1, max: 200 }).withMessage('Organisation name is required'),
+  body('email').isEmail({ allow_display_name: false, require_tld: false }).withMessage('Valid email required'),
+  body('password')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+    .matches(/[A-Za-z]/).withMessage('Password must include a letter')
+    .matches(/\d/).withMessage('Password must include a number'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  })
+], handleValidationErrors, async (req, res, next) => {
+  if (IS_DEMO_MODE) {
+    return res.status(403).json({ error: 'Registration is disabled in demo mode' });
+  }
+
+  const organisationName = req.body.organisationName.trim();
+  const email = req.body.email.toLowerCase().trim();
+  const { password } = req.body;
+
+  try {
+    const existingUser = await new Promise((resolve, reject) => {
+      db.get("SELECT id FROM users WHERE email = ?", [email], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    if (existingUser) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+
+    const slug = await findAvailableOrgSlug(slugifyOrgName(organisationName));
+    const orgId = require('crypto').randomUUID();
+    const userId = require('crypto').randomUUID();
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO organisations (id, name, slug, subscription_tier) VALUES (?, ?, ?, ?)`,
+        [orgId, organisationName, slug, 'individual'],
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
+
+    await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO users (id, email, password_hash, organisation_id, role, email_verified) VALUES (?, ?, ?, ?, ?, ?)`,
+        [userId, email, passwordHash, orgId, 'owner', 0],
+        (err) => (err ? reject(err) : resolve())
+      );
+    });
+
+    await initializeOrgSettings(orgId, organisationName);
+
+    issueAuthCookie(res, {
+      user_id: userId,
+      organisation_id: orgId,
+      role: 'owner'
+    });
+
+    res.status(201).json({ success: true, userId, email, role: 'owner' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Logout
 app.post('/api/logout', (req, res) => {
   res.clearCookie('authToken');
@@ -2909,17 +3023,17 @@ app.post('/api/admin/invitations', requireAuth, requireRole('owner'), apiLimiter
         const invitationUrl = `${APP_URL}/invite/${token}`;
         const emailHtml = `
           <h2>You've been invited to join ${orgName}</h2>
-          <p>You've been invited to join ${orgName} on Swiish. Click the link below to accept the invitation and create your account.</p>
+          <p>You've been invited to join ${orgName} on Macarte. Click the link below to accept the invitation and create your account.</p>
           <p><a href="${invitationUrl}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Accept Invitation</a></p>
           <p>This invitation will expire in 7 days.</p>
           <p>If you didn't expect this invitation, you can safely ignore this email.</p>
         `;
-        const emailText = `You've been invited to join ${orgName} on Swiish. Visit ${invitationUrl} to accept the invitation. This invitation expires in 7 days.`;
+        const emailText = `You've been invited to join ${orgName} on Macarte. Visit ${invitationUrl} to accept the invitation. This invitation expires in 7 days.`;
 
         await emailTransporter.sendMail({
           from: SMTP_FROM,
           to: emailLower,
-          subject: `Invitation to join ${orgName} on Swiish`,
+          subject: `Invitation to join ${orgName} on Macarte`,
           text: emailText,
           html: emailHtml
         });
@@ -2999,7 +3113,16 @@ app.get('/api/invitations/:token', publicReadLimiter, [
 // POST Accept Invitation
 app.post('/api/invitations/:token/accept', publicReadLimiter, [
   param('token').isLength({ min: 64, max: 64 }).withMessage('Invalid invitation token'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+  body('password')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+    .matches(/[A-Za-z]/).withMessage('Password must include a letter')
+    .matches(/\d/).withMessage('Password must include a number'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwords do not match');
+    }
+    return true;
+  })
 ], handleValidationErrors, async (req, res, next) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -3227,17 +3350,17 @@ app.post('/api/admin/invitations/:invitationId/retry', requireAuth, requireRole(
         const invitationUrl = `${APP_URL}/invite/${invitation.token}`;
         const emailHtml = `
           <h2>You've been invited to join ${invitation.org_name}</h2>
-          <p>You've been invited to join ${invitation.org_name} on Swiish. Click the link below to accept the invitation and create your account.</p>
+          <p>You've been invited to join ${invitation.org_name} on Macarte. Click the link below to accept the invitation and create your account.</p>
           <p><a href="${invitationUrl}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Accept Invitation</a></p>
           <p>This invitation will expire in 7 days.</p>
           <p>If you didn't expect this invitation, you can safely ignore this email.</p>
         `;
-        const emailText = `You've been invited to join ${invitation.org_name} on Swiish. Visit ${invitationUrl} to accept the invitation. This invitation expires in 7 days.`;
+        const emailText = `You've been invited to join ${invitation.org_name} on Macarte. Visit ${invitationUrl} to accept the invitation. This invitation expires in 7 days.`;
 
         await emailTransporter.sendMail({
           from: SMTP_FROM,
           to: invitation.email,
-          subject: `Invitation to join ${invitation.org_name} on Swiish`,
+          subject: `Invitation to join ${invitation.org_name} on Macarte`,
           text: emailText,
           html: emailHtml
         });
@@ -3323,7 +3446,7 @@ app.post('/api/auth/forgot-password', apiLimiter, [
           const resetUrl = `${APP_URL}/reset-password/${token}`;
           const emailHtml = `
             <h2>Password Reset Request</h2>
-            <p>You requested to reset your password for your Swiish account. Click the link below to reset your password:</p>
+            <p>You requested to reset your password for your Macarte account. Click the link below to reset your password:</p>
             <p><a href="${resetUrl}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
             <p>This link will expire in 1 hour.</p>
             <p>If you didn't request a password reset, you can safely ignore this email.</p>
@@ -3335,7 +3458,7 @@ app.post('/api/auth/forgot-password', apiLimiter, [
               await emailTransporter.sendMail({
                 from: SMTP_FROM,
                 to: emailLower,
-                subject: 'Reset your Swiish password',
+                subject: 'Reset your Macarte password',
                 text: emailText,
                 html: emailHtml
               });
@@ -3500,7 +3623,7 @@ app.post('/api/auth/send-verification', requireAuth, apiLimiter, csrfProtection,
                 await emailTransporter.sendMail({
                   from: SMTP_FROM,
                   to: user.email,
-                  subject: 'Verify your Swiish email address',
+                  subject: 'Verify your Macarte email address',
                   text: emailText,
                   html: emailHtml
                 });
@@ -3580,12 +3703,12 @@ app.get('/manifest/:slug.json', publicReadLimiter, [
 
   // Load base manifest from disk (fallback if needed)
   let baseManifest = {
-    short_name: 'Swiish',
-    name: 'Swiish',
+    short_name: 'Macarte',
+    name: 'Macarte',
     start_url: '.',
     display: 'standalone',
-    background_color: '#020617',
-    theme_color: '#020617',
+    background_color: '#0f766e',
+    theme_color: '#0f766e',
     icons: [
       { src: '/swiish-logo.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }
     ]
@@ -3628,7 +3751,7 @@ app.get('/manifest/:slug.json', publicReadLimiter, [
     // Use the actual card slug for icon generation (not the short code or org slug)
     const cardSlug = row.slug;
     
-    let cardName = 'Swiish Card';
+    let cardName = 'Macarte';
     if (row && row.data) {
       try {
         const parsed = JSON.parse(row.data);

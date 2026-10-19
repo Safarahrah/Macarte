@@ -27,14 +27,14 @@ module.exports = {
     
     // Primary action button
     action: {
-      light: tailwindColors.violet[800],  // Primary buttons (light theme)
-      dark: tailwindColors.fuchsia[800],   // Primary buttons (dark theme)
+      light: tailwindColors.teal[700],
+      dark: tailwindColors.teal[500],
     },
     
     // Primary action button hover
     actionHover: {
-      light: tailwindColors.violet[600],  // Button hover states (light theme)
-      dark: tailwindColors.fuchsia[500],   // Button hover states (dark theme)
+      light: tailwindColors.teal[600],
+      dark: tailwindColors.teal[400],
     },
     
     // Primary text
