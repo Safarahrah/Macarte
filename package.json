@@ -1,7 +1,7 @@
 {
   "name": "macarte",
   "version": "0.7.0",
-  "description": "Open-source digital business card platform with QR codes and PWA support",
+  "description": "Macarte — cartes de visite numériques avec QR codes et PWA",
   "private": false,
   "repository": {
     "type": "git",
