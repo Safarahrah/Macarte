@@ -37,7 +37,7 @@ function applyOverride(node, overrides) {
 }
 
 function constrainToDocument(node, widthMm, heightMm) {
-  if (node.locked || ['rect', 'line', 'path'].includes(node.type)) return node;
+  if (node.locked || ['rect', 'line', 'path', 'polygon', 'circle'].includes(node.type)) return node;
   const w = node.w || 10;
   const h = node.h || 6;
   return {
@@ -50,13 +50,34 @@ function constrainToDocument(node, widthMm, heightMm) {
 function buildQrNode(config, x, y, size, side) {
   if (!config.visibility?.qr) return null;
   if (side === 'back' && !config.qrOnBack) return null;
-  if (side === 'front' && config.qrOnBack && config.doubleSided) return null;
+  if (side === 'front' && config.qrOnBack && config.doubleSided) {
+    return null;
+  }
+
+  // Dimensions et position du QR en millimètres.
+  const qrSize = Number(config.qr?.size) > 0
+    ? Number(config.qr.size)
+    : Number(size);
+
+  const qrX = Number.isFinite(Number(config.qr?.x))
+    && config.qr?.x !== null
+    && config.qr?.x !== ''
+    ? Number(config.qr.x)
+    : Number(x);
+
+  const qrY = Number.isFinite(Number(config.qr?.y))
+    && config.qr?.y !== null
+    && config.qr?.y !== ''
+    ? Number(config.qr.y)
+    : Number(y);
+
   return {
-    id: `qr-${side}`, type: 'qr',
-    x: config.qr?.x != null ? config.qr.x : x,
-    y: config.qr?.y != null ? config.qr.y : y,
-    w: config.qr?.size || size,
-    h: config.qr?.size || size,
+    id: `qr-${side}`,
+    type: 'qr',
+    x: qrX,
+    y: qrY,
+    w: qrSize,
+    h: qrSize,
     selectable: true
   };
 }
@@ -82,16 +103,71 @@ function rect(id, x, y, w, h, fill, stroke) {
   };
 }
 
-function line(id, x1, y1, x2, y2, stroke, width = 0.35) {
-  return { id, type: 'line', x1, y1, x2, y2, stroke, width, locked: true };
+function line(id, x1, y1, x2, y2, stroke, width = 0.35, opacity) {
+  return { id, type: 'line', x1, y1, x2, y2, stroke, width, locked: true, ...(opacity != null ? { opacity } : {}) };
 }
+
+
+// --- NOUVEAUX PRIMITIFS GRAPHIQUES (polygone, cercle, courbe, dégradé, opacité) ---
+function mix(a, b, t) {
+  const ok = (h) => /^#[0-9a-f]{6}$/i.test(h || '');
+  if (!ok(a) || !ok(b)) return a;
+  const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const A = p(a); const B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+function gradient(from, to, angle = 135) {
+  return { type: 'linear', angle, stops: [[0, from], [1, to]] };
+}
+function poly(id, points, fill, opts = {}) {
+  return { id, type: 'polygon', points, fill, locked: true, ...opts };
+}
+function circle(id, cx, cy, r, fill, opts = {}) {
+  return { id, type: 'circle', cx, cy, r, fill, locked: true, ...opts };
+}
+// d = chemin SVG exprimé en millimètres
+function curve(id, d, opts = {}) {
+  return { id, type: 'path', d, locked: true, width: 0.3, ...opts };
+}
+function leaf(id, cx, cy, len, deg, wid, fill, opacity = 0.9) {
+  const a = (deg * Math.PI) / 180;
+  const tx = cx + len * Math.cos(a); const ty = cy + len * Math.sin(a);
+  const mx = (cx + tx) / 2; const my = (cy + ty) / 2;
+  const nx = -Math.sin(a) * wid; const ny = Math.cos(a) * wid;
+  const f = (n) => n.toFixed(2);
+  return curve(id, `M${f(cx)} ${f(cy)} Q${f(mx + nx)} ${f(my + ny)} ${f(tx)} ${f(ty)} Q${f(mx - nx)} ${f(my - ny)} ${f(cx)} ${f(cy)}Z`,
+    { fill, opacity, width: 0 });
+}
+// Générateur pseudo-aléatoire déterministe (même rendu à l'écran et au PDF)
+function seeded(seed) {
+  let s = seed;
+  return () => ((s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296);
+}
+
+
+ // Paramètres de mise en page propres à chaque nouveau design (carte 85 x 55 mm)
+const FRONT_PARAMS = {
+  'luxury-gold': { nameX: 10, nameW: 65, nameY: 13, align: 'center', upper: true, spacing: 0.5, titleUpper: true, titleSpacing: 0.4,
+    detailsX: 17, detailsW: 48, detailsY: 35, detailsAlign: 'center', qrSize: 13, backX: 8, backW: 69 },
+  neon: { nameX: 10, nameW: 46, nameY: 14, titleY: 21, detailsX: 10, detailsY: 29, detailsW: 46, qrSize: 17, hideCompany: true, backX: 12, backW: 61 },
+  artistic: { nameX: 30, nameW: 48, nameY: 15, detailsX: 30, detailsY: 37, detailsW: 48, qrSize: 14, backX: 26, backW: 52 },
+  vintage: { nameX: 9, nameW: 50, nameY: 15, detailsX: 9, detailsY: 37, detailsW: 50, qrSize: 14, backX: 10, backW: 65 },
+  nordic: { nameX: 12, nameW: 50, nameY: 12, detailsX: 12, detailsY: 37, detailsW: 48, qrSize: 14, backX: 14, backW: 57 },
+  botanical: { nameX: 13, nameW: 45, nameY: 10, detailsX: 13, detailsY: 33, detailsW: 48, qrSize: 14, backX: 14, backW: 57 },
+  'corporate-bold': { nameX: 30, nameW: 42, nameY: 10, upper: true, spacing: 0.3, detailsX: 30, detailsY: 31, detailsW: 33, qrSize: 13, backX: 30, backW: 47 }
+};
+
 
 // --- MISE EN PAGE DES MODÈLES ---
 // Chaque layout reçoit le contexte normalisé et retourne des nœuds imprimables.
 function designerLayout(ctx, variant) {
   const { W, H, s, config, colors, heading, body, name, title, company, lines, slogan } = ctx;
   const back = ctx.side === 'back';
-  const nodes = [rect('bg', 0, 0, W, H, colors.background)];
+  const bgFill = variant === 'luxury-gold' ? gradient(mix(colors.background, '#ffffff', 0.07), mix(colors.background, '#000000', 0.45), 135)
+    : variant === 'neon' ? gradient(colors.background, mix(colors.background, colors.secondary, 0.3), 120)
+    : variant === 'artistic' ? gradient('#ffffff', colors.background, 90)
+    : colors.background;
+  const nodes = [rect('bg', 0, 0, W, H, bgFill)];
 
   // Motifs décoratifs. Ils sont dessinés avant le texte et le QR.
   switch (variant) {
@@ -120,38 +196,69 @@ function designerLayout(ctx, variant) {
       break;
     case 'luxury-gold':
       nodes.push(rect('gold-frame', 2.5, 2.5, W - 5, H - 5, 'transparent', colors.primary));
-      nodes.push(rect('gold-accent', 5, 5, 1, H - 10, colors.primary));
+      nodes.push(rect('gold-frame-inner', 4.2, 4.2, W - 8.4, H - 8.4, 'transparent', mix(colors.primary, colors.background, 0.55)));
+      [[4.2, 4.2, 1, 1], [W - 4.2, 4.2, -1, 1], [4.2, H - 4.2, 1, -1], [W - 4.2, H - 4.2, -1, -1]].forEach(([cx, cy, dx, dy], i) => {
+        nodes.push(circle(`gold-dot-${i}`, cx, cy, 0.9, colors.primary));
+      });
+      if (!back) {
+        nodes.push(line('gold-rule-l', W / 2 - 15, 29.5, W / 2 - 3, 29.5, colors.primary, 0.3));
+        nodes.push(line('gold-rule-r', W / 2 + 3, 29.5, W / 2 + 15, 29.5, colors.primary, 0.3));
+        nodes.push(poly('gold-diamond', [[W / 2, 28], [W / 2 + 1.5, 29.5], [W / 2, 31], [W / 2 - 1.5, 29.5]], colors.primary));
+      } else {
+        nodes.push(poly('gold-diamond-b', [[W / 2, H * 0.5 - 1.5], [W / 2 + 1.5, H * 0.5], [W / 2, H * 0.5 + 1.5], [W / 2 - 1.5, H * 0.5]], colors.primary));
+      }
       break;
     case 'neon':
-      nodes.push(rect('neon-top', 0, 0, W, 2, colors.primary));
-      nodes.push(rect('neon-side', W - 3, 0, 3, H, colors.secondary));
-      for (let x = 8; x < W - 8; x += 9) nodes.push(line(`neon-grid-${x}`, x, 5, x, H - 5, '#183348', 0.12));
+      for (let x = 6; x < W; x += 6) nodes.push(line(`neon-gx-${x}`, x, 0, x, H, colors.primary, 0.1, 0.18));
+      for (let y = 6; y < H; y += 6) nodes.push(line(`neon-gy-${y}`, 0, y, W, y, colors.primary, 0.1, 0.18));
+      nodes.push(circle('neon-glow-a', W - 8, 6, 22, colors.secondary, { opacity: 0.16 }));
+      nodes.push(circle('neon-glow-b', 10, H - 4, 18, colors.primary, { opacity: 0.1 }));
+      nodes.push(poly('neon-frame', [[4, 9], [9, 4], [W - 4, 4], [W - 4, H - 9], [W - 9, H - 4], [4, H - 4]], 'none', { stroke: colors.primary, width: 0.4 }));
+      nodes.push(poly('neon-frame-glow', [[3.2, 9.4], [9.4, 3.2], [W - 3.2, 3.2], [W - 3.2, H - 9.4], [W - 9.4, H - 3.2], [3.2, H - 3.2]], 'none', { stroke: colors.primary, width: 1, opacity: 0.18 }));
+      nodes.push(poly('neon-tab-top', [[9, 4], [43, 4], [39, 10.5], [4, 10.5], [4, 9]], colors.primary));
+      nodes.push(poly('neon-tab-bottom', [[W - 40, H - 4], [W - 36, H - 9.5], [W - 4, H - 9.5], [W - 4, H - 4]], colors.secondary, { opacity: 0.9 }));
+      nodes.push(poly('neon-corner', [[W - 4, 4], [W - 11, 4], [W - 4, 11]], colors.secondary, { opacity: 0.8 }));
       break;
     case 'artistic':
-      nodes.push(rect('art-purple', -5, -7, W * 0.42, H * 0.48, colors.primary));
-      nodes.push(rect('art-pink', W * 0.27, H - 9, W * 0.42, 15, colors.secondary));
-      nodes.push(rect('art-orange', W - 17, 0, 17, H * 0.24, colors.accent));
+      nodes.push(curve('art-blob-a', `M0 0 L40 0 C43 9 33 16 23 20 C14 24 6 27 0 30 Z`, { fill: gradient(colors.primary, colors.secondary, 120), width: 0 }));
+      nodes.push(curve('art-blob-b', `M0 0 L26 0 C27 7 18 11 10 14 C5 16 2 18 0 19 Z`, { fill: colors.accent, opacity: 0.55, width: 0 }));
+      nodes.push(curve('art-wave', `M${W * 0.46} ${H + 1} C${W * 0.5} ${H - 9} ${W * 0.65} ${H - 11} ${W * 0.78} ${H - 7} C${W * 0.9} ${H - 4} ${W} ${H - 6} ${W} ${H - 6} L${W} ${H + 1} Z`, { fill: gradient(colors.secondary, colors.primary, 20), width: 0 }));
+      nodes.push(circle('art-sun', W - 9, 9, 11, colors.accent, { opacity: 0.95 }));
+      nodes.push(circle('art-sun-ring', W - 9, 9, 14, 'none', { stroke: colors.secondary, width: 0.25, opacity: 0.8 }));
+      nodes.push(curve('art-line', `M0 42 C16 33 30 50 52 38 S76 28 ${W} 32`, { stroke: '#d9a441', width: 0.25 }));
       break;
     case 'vintage':
       nodes.push(rect('vintage-frame', 3, 3, W - 6, H - 6, 'transparent', colors.primary));
-      nodes.push(line('vintage-rule', 7, 12, W - 7, 12, colors.secondary, 0.45));
-      nodes.push(line('vintage-bottom', 7, H - 9, W - 7, H - 9, colors.secondary, 0.45));
+      nodes.push(rect('vintage-frame-inner', 4.6, 4.6, W - 9.2, H - 9.2, 'transparent', colors.secondary));
+      { const rnd = seeded(42); for (let i = 0; i < 70; i += 1) nodes.push(circle(`paper-${i}`, rnd() * W, rnd() * H, 0.15 + rnd() * 0.3, colors.primary, { opacity: 0.07 })); }
+      [[7.5, 7.5], [W - 7.5, 7.5], [7.5, H - 7.5], [W - 7.5, H - 7.5]].forEach(([cx, cy], i) => nodes.push(circle(`vintage-orn-${i}`, cx, cy, 1, colors.primary)));
+      nodes.push(line('vintage-rule', 12, 12, W / 2 - 3, 12, colors.secondary, 0.35));
+      nodes.push(line('vintage-rule-r', W / 2 + 3, 12, W - 12, 12, colors.secondary, 0.35));
+      nodes.push(poly('vintage-diamond', [[W / 2, 10.3], [W / 2 + 1.7, 12], [W / 2, 13.7], [W / 2 - 1.7, 12]], colors.primary));
+      nodes.push(line('vintage-bottom', 12, H - 10, W - 12, H - 10, colors.secondary, 0.35));
       break;
     case 'nordic':
-      nodes.push(rect('nordic-band', 0, 0, 4, H, colors.primary));
-      nodes.push(line('nordic-rule', 8, H - 10, W - 8, H - 10, colors.secondary, 0.3));
+      nodes.push(rect('nordic-band', 0, 0, 2.5, H, colors.primary));
+      nodes.push(rect('nordic-band-soft', 2.5, 0, 1.2, H, colors.accent));
+      nodes.push(circle('nordic-sun', W - 13, 13, 7, colors.accent, { opacity: 0.8 }));
+      nodes.push(circle('nordic-sun-core', W - 13, 13, 3, colors.secondary, { opacity: 0.6 }));
+      nodes.push(line('nordic-rule', 12, 34.5, 30, 34.5, colors.secondary, 0.3));
       break;
     case 'botanical':
       nodes.push(rect('botanical-band', 0, 0, 5, H, colors.primary));
-      nodes.push(line('leaf-stem', W - 17, 5, W - 8, 16, colors.secondary, 0.55));
-      nodes.push(line('leaf-1', W - 16, 7, W - 21, 5, colors.secondary, 0.45));
-      nodes.push(line('leaf-2', W - 13, 10, W - 9, 7, colors.secondary, 0.45));
-      nodes.push(line('leaf-3', W - 11, 13, W - 15, 17, colors.secondary, 0.45));
+      nodes.push(circle('botanical-halo', W - 8, 8, 20, colors.accent, { opacity: 0.12 }));
+      nodes.push(curve('leaf-stem', `M${W - 3} 3 C${W - 11} 9 ${W - 17} 11 ${W - 26} 17`, { stroke: colors.primary, width: 0.4 }));
+      [[W - 7, 5.5, 9, 175, 2], [W - 11, 8, 9, 215, 2], [W - 14, 10, 9, 150, 2.2], [W - 18, 12.2, 9, 195, 2.2], [W - 22, 14.5, 8, 160, 2], [W - 26, 17, 8, 200, 2]].forEach(([cx, cy, len, deg, wid], i) => nodes.push(leaf(`leaf-${i}`, cx, cy, len, deg, wid, i % 2 ? colors.secondary : colors.primary, 0.85)));
+      nodes.push(curve('botanical-fern', `M7 ${H - 3} C9 ${H - 14} 12 ${H - 20} 11 ${H - 30}`, { stroke: colors.secondary, width: 0.3 }));
+      [[8, H - 8, 5, 300, 1.2], [9.5, H - 13, 5, 240, 1.2], [10.5, H - 18, 5, 300, 1.2], [11, H - 24, 4.5, 235, 1.1]].forEach(([cx, cy, len, deg, wid], i) => nodes.push(leaf(`fern-${i}`, cx, cy, len, deg, wid, colors.secondary, 0.7)));
       break;
     case 'corporate-bold':
-      nodes.push(rect('corp-sidebar', 0, 0, 8, H, colors.primary));
-      nodes.push(rect('corp-accent', 8, 0, 2, H, colors.secondary));
-      nodes.push(rect('corp-footer', 10, H - 3, W - 10, 3, colors.primary));
+      nodes.push(poly('cb-navy', [[0, 0], [W * 0.3, 0], [W * 0.18, H], [0, H]], colors.primary));
+      nodes.push(poly('cb-gray', [[W * 0.3, 0], [W * 0.345, 0], [W * 0.225, H], [W * 0.18, H]], '#e5e7eb'));
+      nodes.push(poly('cb-orange', [[W * 0.345, 0], [W * 0.365, 0], [W * 0.245, H], [W * 0.225, H]], colors.secondary));
+      nodes.push(poly('cb-top-right', [[W - 14, 0], [W, 0], [W, 14]], colors.secondary));
+      nodes.push(poly('cb-bottom-right', [[W, H], [W - 18, H], [W, H - 14]], colors.primary));
+      nodes.push(rect('cb-bar', W - 3, 22, 1.2, 11, colors.secondary));
       break;
     case 'editorial':
       nodes.push(rect('editorial-block', 0, 0, W * 0.27, H * 0.24, colors.primary));
@@ -160,32 +267,38 @@ function designerLayout(ctx, variant) {
       break;
   }
 
+  const P = FRONT_PARAMS[variant] || {};
   if (back) {
-    const logo = buildLogoNode(config, (W - 12) / 2, 5, 'back');
+    const bx = P.backX != null ? P.backX : 8;
+    const bw = P.backW != null ? P.backW : W - 16;
+    const logo = buildLogoNode(config, bx + (bw - 12) / 2, 5, 'back');
     if (logo) nodes.push(logo);
     nodes.push(textNode('slogan', {
-      x: 8, y: H * 0.32, w: W - 16, h: 12,
-      text: slogan || company || name, font: heading.pdfBold || heading.pdf,
+      x: bx, y: H * 0.32, w: bw, h: 12,
+      text: P.upper ? String(slogan || company || name).toUpperCase() : (slogan || company || name), spacing: P.spacing, font: heading.pdfBold || heading.pdf,
       cssFont: heading.css, size: variant === 'tech' ? 8 : 11,
       color: colors.text, align: 'center', bold: true
     }));
     if (company) nodes.push(textNode('back-company', {
-      x: 8, y: H * 0.53, w: W - 16, h: 7, text: company,
+      x: bx, y: H * 0.56, w: bw, h: 7, text: company,
       font: body.pdf, cssFont: body.css, size: 6.5,
       color: colors.secondary, align: 'center'
     }));
-    const qr = buildQrNode(config, (W - 16) / 2, H - 20, 16, 'back');
+    const qr = buildQrNode(config, bx + (bw - 16) / 2, H - 20, 16, 'back');
     if (qr) nodes.push(qr);
     return nodes;
   }
 
-  const contentX = variant === 'corporate' ? 28 : variant === 'corporate-bold' ? 13 : 8;
+  const contentX = P.nameX != null ? P.nameX : variant === 'corporate' ? 28 : variant === 'corporate-bold' ? 13 : 8;
   const rightPanel = ['modern'].includes(variant) ? 34 : 0;
-  const qrSize = variant === 'tech' ? 20 : 15;
-  const qrX = variant === 'creative' ? 7 : W - qrSize - 6;
-  const textW = Math.max(20, Math.min(W - contentX - qrSize - 12, qrX - contentX - 4));
-  const nameY = ['luxury', 'luxury-gold'].includes(variant) ? 14 : variant === 'tech' ? 11 : 7;
+  const qrSize = P.qrSize || (variant === 'tech' ? 20 : 15);
+  const qrX = P.qrX != null ? P.qrX : variant === 'creative' ? 7 : W - qrSize - 6;
+  const qrY = P.qrY != null ? P.qrY : H - qrSize - 5;
+  const textW = P.nameW || Math.max(20, Math.min(W - contentX - qrSize - 12, qrX - contentX - 4));
+  const nameY = P.nameY != null ? P.nameY : ['luxury', 'luxury-gold'].includes(variant) ? 14 : variant === 'tech' ? 11 : 7;
   const textColor = colors.text;
+  const align = P.align || config.alignment || 'left';
+  const up = (t, on) => (on ? String(t).toUpperCase() : t);
 
   if (variant === 'corporate') {
     nodes.push(textNode('company-side', {
@@ -201,36 +314,48 @@ function designerLayout(ctx, variant) {
     cssFont: heading.css, size: 6, color: colors.primary, align: 'left', bold: true
   }));
 
-  const logo = buildLogoNode(config, contentX, 5, 'front');
-  if (logo) nodes.push(logo);
+  if (variant === 'neon') nodes.push(textNode('neon-company', {
+    x: 7, y: 5.2, w: 32, h: 4, text: (company || 'COMPANY').toUpperCase(),
+    font: heading.pdfBold || heading.pdf, cssFont: heading.css, size: 5.5,
+    color: '#04111d', align: 'left', bold: true, spacing: 0.3
+  }));
+
+  if (variant === 'neon' && slogan) nodes.push(textNode('neon-slogan', {
+    x: W - 38, y: H - 8.6, w: 32, h: 4, text: slogan, font: body.pdf, cssFont: body.css,
+    size: 5, color: '#07111F', align: 'center'
+  }));
+
+  const logo = buildLogoNode(config, variant === 'luxury-gold' ? (W - 12) / 2 : contentX, variant === 'luxury-gold' ? 6 : 5, 'front');
+  if (logo && variant !== 'luxury-gold') nodes.push(logo);
 
   nodes.push(textNode('name', {
     x: contentX, y: nameY, w: textW - rightPanel, h: 10,
-    text: name || 'Your name', font: heading.pdfBold || heading.pdf,
+    text: up(name || 'Your name', P.upper), font: heading.pdfBold || heading.pdf,
     cssFont: heading.css, size: config.typeScale.name,
-    color: textColor, align: config.alignment || 'left', bold: true
+    color: variant === 'neon' ? colors.primary : textColor, align, bold: true, spacing: P.spacing
   }));
 
   if (title) nodes.push(textNode('title', {
-    x: contentX, y: nameY + 11, w: textW - rightPanel, h: 6,
-    text: title, font: body.pdf, cssFont: body.css,
-    size: config.typeScale.title, color: colors.secondary, align: config.alignment || 'left'
+    x: contentX, y: P.titleY != null ? P.titleY : nameY + 11, w: textW - rightPanel, h: 6,
+    text: up(title, P.titleUpper), font: body.pdf, cssFont: body.css,
+    size: config.typeScale.title, color: colors.secondary, align, spacing: P.titleSpacing
   }));
 
-  if (company && variant !== 'tech' && variant !== 'corporate') nodes.push(textNode('company', {
+  if (company && variant !== 'tech' && variant !== 'corporate' && !P.hideCompany && variant !== 'luxury-gold') nodes.push(textNode('company', {
     x: contentX, y: nameY + (title ? 18 : 11), w: textW - rightPanel, h: 6,
     text: company, font: body.pdf, cssFont: body.css,
-    size: config.typeScale.body, color: textColor, align: config.alignment || 'left'
+    size: config.typeScale.body, color: textColor, align
   }));
 
   nodes.push(textNode('details', {
-    x: contentX, y: Math.max(nameY + (title || company ? 22 : 14), H * 0.53),
-    w: textW - rightPanel, h: Math.max(8, H * 0.38),
+    x: P.detailsX != null ? P.detailsX : contentX,
+    y: P.detailsY != null ? P.detailsY : Math.max(nameY + (title || company ? 22 : 14), H * 0.53),
+    w: (P.detailsW || textW) - rightPanel, h: Math.max(8, H * 0.38),
     text: lines.join('\n'), font: body.pdf, cssFont: body.css,
-    size: config.typeScale.body, color: textColor, align: 'left', lines: true
+    size: config.typeScale.body, color: textColor, align: P.detailsAlign || 'left', lines: true
   }));
 
-  const qr = buildQrNode(config, qrX, H - qrSize - 5, qrSize, 'front');
+  const qr = buildQrNode(config, qrX, qrY, qrSize, 'front');
   if (qr) nodes.push(qr);
   return nodes;
 }
@@ -275,9 +400,28 @@ function buildSide(config, side, publicUrl) {
     publicUrl
   };
   const builder = LAYOUT_ENGINES[template.id] || LAYOUT_ENGINES.minimal;
-  let nodes = builder(ctx).filter(Boolean);
-  nodes = nodes.map((node) => applyOverride(node, config.elementOverrides));
-  nodes = nodes.map((node) => constrainToDocument(node, ctx.W, ctx.H));
+  
+let nodes = builder(ctx).filter(Boolean);
+
+nodes = nodes.map((node) => {
+  // Appliquer les positions enregistrées aux autres éléments.
+  if (node.type !== 'qr') {
+    return applyOverride(node, config.elementOverrides);
+  }
+
+  // Position uniforme du QR code : en bas à droite.
+  const qrSize = Number(node.w) > 0 ? Number(node.w) : 14;
+  const margin = 5;
+
+  return {
+    ...node,
+    x: ctx.W - qrSize - margin,
+    y: ctx.H - qrSize - margin
+  };
+});
+
+nodes = nodes.map((node) => constrainToDocument(node, ctx.W, ctx.H));
+
   return nodes;
 }
 
@@ -290,6 +434,30 @@ function buildLayout(rawConfig, publicUrl) {
 }
 
 // --- APERÇU CANVAS HTML5 ---
+// Résout un remplissage : couleur simple ou dégradé { type:'linear', angle, stops }
+function resolveFill(c, fill, bx, by, bw, bh) {
+  if (!fill || typeof fill === 'string') return fill;
+  const a = ((fill.angle || 0) * Math.PI) / 180;
+  const cx = bx + bw / 2; const cy = by + bh / 2;
+  const half = (Math.abs(Math.cos(a)) * bw + Math.abs(Math.sin(a)) * bh) / 2;
+  const g = c.createLinearGradient(cx - Math.cos(a) * half, cy - Math.sin(a) * half, cx + Math.cos(a) * half, cy + Math.sin(a) * half);
+  fill.stops.forEach(([o, col]) => g.addColorStop(o, col));
+  return g;
+}
+
+function paint(c, node, scale, bbox) {
+  const [bx, by, bw, bh] = bbox;
+  if (node.fill && node.fill !== 'none' && node.fill !== 'transparent') {
+    c.fillStyle = resolveFill(c, node.fill, bx, by, bw, bh);
+    c.fill();
+  }
+  if (node.stroke && node.width !== 0) {
+    c.strokeStyle = node.stroke;
+    c.lineWidth = (node.width || 0.1) * scale;
+    c.stroke();
+  }
+}
+
 function renderToCanvas(ctx2d, nodes, geometry, dpi = 300) {
   const scale = mmToPx(1, dpi);
   const widthPx = geometry.document.widthMm * scale;
@@ -301,19 +469,49 @@ function renderToCanvas(ctx2d, nodes, geometry, dpi = 300) {
     const y = (node.y || 0) * scale;
     const w = (node.w || 0) * scale;
     const h = (node.h || 0) * scale;
+    ctx2d.save();
+    if (node.opacity != null) ctx2d.globalAlpha = node.opacity;
 
     switch (node.type) {
       case 'rect':
-        if (node.fill && node.fill !== 'none') {
-          ctx2d.fillStyle = node.fill;
-          ctx2d.fillRect(x, y, w, h);
-        }
-        if (node.stroke) {
-          ctx2d.strokeStyle = node.stroke;
-          ctx2d.lineWidth = (node.width || 0.1) * scale;
-          ctx2d.strokeRect(x, y, w, h);
-        }
+        ctx2d.beginPath();
+        ctx2d.rect(x, y, w, h);
+        paint(ctx2d, node, scale, [x, y, w, h]);
         break;
+      case 'polygon': {
+        const pts = node.points.map(([px, py]) => [px * scale, py * scale]);
+        const xs = pts.map((p) => p[0]); const ys = pts.map((p) => p[1]);
+        ctx2d.beginPath();
+        pts.forEach(([px, py], i) => (i ? ctx2d.lineTo(px, py) : ctx2d.moveTo(px, py)));
+        ctx2d.closePath();
+        paint(ctx2d, node, scale, [Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)]);
+        break;
+      }
+      case 'circle': {
+        const r = node.r * scale;
+        ctx2d.beginPath();
+        ctx2d.arc(node.cx * scale, node.cy * scale, r, 0, Math.PI * 2);
+        paint(ctx2d, node, scale, [node.cx * scale - r, node.cy * scale - r, r * 2, r * 2]);
+        break;
+      }
+      case 'path': {
+        // Path2D est défini en mm : on met le contexte à l'échelle pour tracer
+        const p = new Path2D(node.d);
+        ctx2d.save();
+        ctx2d.scale(scale, scale);
+        if (node.fill && node.fill !== 'none') {
+          ctx2d.fillStyle = resolveFill(ctx2d, node.fill, 0, 0, geometry.document.widthMm, geometry.document.heightMm);
+          ctx2d.fill(p);
+        }
+        if (node.stroke && node.width !== 0) {
+          ctx2d.strokeStyle = node.stroke;
+          ctx2d.lineWidth = node.width || 0.1;
+          ctx2d.lineCap = 'round';
+          ctx2d.stroke(p);
+        }
+        ctx2d.restore();
+        break;
+      }
       case 'line':
         ctx2d.beginPath();
         ctx2d.moveTo(node.x1 * scale, node.y1 * scale);
@@ -327,6 +525,7 @@ function renderToCanvas(ctx2d, nodes, geometry, dpi = 300) {
         ctx2d.font = `${node.bold ? 'bold ' : ''}${(node.size || 6) * scale}px ${node.cssFont || 'sans-serif'}`;
         ctx2d.textAlign = node.align || 'left';
         ctx2d.textBaseline = 'top';
+        if (node.spacing && 'letterSpacing' in ctx2d) ctx2d.letterSpacing = `${node.spacing * scale}px`;
         const textX = node.align === 'center' ? x + w / 2 : node.align === 'right' ? x + w : x;
         if (node.lines) {
           const lineHeight = (node.size || 6) * scale * 1.2;
@@ -360,6 +559,7 @@ function renderToCanvas(ctx2d, nodes, geometry, dpi = 300) {
       default:
         break;
     }
+    ctx2d.restore();
   });
 }
 
