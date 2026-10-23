@@ -17,6 +17,7 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from 
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { arrayMove } from '@dnd-kit/sortable';
+import PrintTab from './printable/PrintTab';
 
 const API_ENDPOINT = '/api';
 const APP_VERSION = require('../package.json').version; // Automatically read from package.json
@@ -3702,7 +3703,7 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
 
         <div className="flex-1 p-6 space-y-8">
            <div className="flex p-1 bg-surface dark:bg-surface-dark rounded-input mb-6">
-              {['details', 'links', 'images', 'style', 'sharing', 'privacy'].map(tab => (
+              {['details', 'links', 'images', 'style', 'sharing', 'privacy', 'print'].map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 py-2 text-sm font-medium rounded-button capitalize transition-all ${activeTab === tab ? 'bg-card dark:bg-surface-dark shadow text-text-primary dark:text-text-primary-dark' : 'text-text-muted dark:text-text-muted-dark hover:text-text-primary dark:hover:text-text-primary-dark'}`}>{tab}</button>
               ))}
            </div>
@@ -3970,6 +3971,10 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                   />
                 )}
               </div>
+            )}
+
+            {activeTab === 'print' && (
+              <PrintTab data={data} slug={slug} csrfToken={csrfToken} />
             )}
 
             {activeTab === 'privacy' && (

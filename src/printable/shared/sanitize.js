@@ -1,10 +1,9 @@
-'use strict';
-
-const { DEFAULT_DPI, DEFAULT_FORMAT_ID, FORMATS, FONT_STACKS } = require('./spec');
-const templates = require('./templates');
+// src/printable/shared/sanitize.js
+import { DEFAULT_DPI, DEFAULT_FORMAT_ID, FORMATS, FONT_STACKS } from './spec.js';
+import { TEMPLATES } from './templates.js'; // Assurez-vous que templates.js exporte TEMPLATES
 
 const SECRET_KEYS = ['password', 'passwordHash', 'token', 'secret', 'apiKey', 'jwt', 'csrf'];
-const TEMPLATE_IDS = templates.TEMPLATES.map((item) => item.id);
+const TEMPLATE_IDS = TEMPLATES.map((item) => item.id);
 const FONT_IDS = Object.keys(FONT_STACKS);
 const ALIGNMENTS = ['left', 'center', 'right'];
 
@@ -59,8 +58,8 @@ function sanitizeOverrides(overrides) {
   return result;
 }
 
-function defaultConfig() {
-  const template = templates.getTemplate('minimal');
+export function defaultConfig() {
+  const template = TEMPLATES.find(t => t.id === 'minimal') || TEMPLATES[0];
   return {
     formatId: DEFAULT_FORMAT_ID,
     templateId: template.id,
@@ -70,30 +69,14 @@ function defaultConfig() {
     dpi: DEFAULT_DPI,
     qrOnBack: false,
     fields: {
-      firstName: '',
-      lastName: '',
-      title: '',
-      company: '',
-      phone: '',
-      email: '',
-      website: '',
-      address: '',
-      social: '',
-      extra: '',
-      slogan: ''
+      firstName: '', lastName: '', title: '', company: '',
+      phone: '', email: '', website: '', address: '',
+      social: '', extra: '', slogan: ''
     },
     visibility: {
-      title: true,
-      company: true,
-      phone: true,
-      email: true,
-      website: true,
-      address: true,
-      social: true,
-      extra: true,
-      slogan: true,
-      logo: true,
-      qr: true
+      title: true, company: true, phone: true, email: true,
+      website: true, address: true, social: true, extra: true,
+      slogan: true, logo: true, qr: true
     },
     colors: { ...template.colors },
     fonts: { ...template.fonts },
@@ -102,22 +85,17 @@ function defaultConfig() {
     logo: { url: '', x: null, y: null, w: 14, h: 14 },
     qr: { x: null, y: null, size: 18 },
     elementOverrides: {},
-    digitalCard: {
-      slug: '',
-      userId: '',
-      shortCode: '',
-      name: ''
-    }
+    digitalCard: { slug: '', userId: '', shortCode: '', name: '' }
   };
 }
 
-function sanitizeConfig(raw) {
+export function sanitizeConfig(raw) {
   const base = defaultConfig();
   const input = raw && typeof raw === 'object' ? { ...raw } : {};
   stripSecrets(input);
 
   const templateId = TEMPLATE_IDS.includes(input.templateId) ? input.templateId : base.templateId;
-  const template = templates.getTemplate(templateId);
+  const template = TEMPLATES.find(t => t.id === templateId) || TEMPLATES[0];
   const formatId = FORMATS[input.formatId] ? input.formatId : base.formatId;
   const headingFont = FONT_IDS.includes(input.fonts?.heading) ? input.fonts.heading : template.fonts.heading;
   const bodyFont = FONT_IDS.includes(input.fonts?.body) ? input.fonts.body : template.fonts.body;
@@ -193,9 +171,9 @@ function sanitizeConfig(raw) {
   };
 }
 
-function applyTemplatePreset(config, templateId) {
-  const template = templates.getTemplate(templateId);
-  const next = sanitizeConfig({
+export function applyTemplatePreset(config, templateId) {
+  const template = TEMPLATES.find(t => t.id === templateId) || TEMPLATES[0];
+  return sanitizeConfig({
     ...config,
     templateId: template.id,
     colors: { ...template.colors },
@@ -206,17 +184,8 @@ function applyTemplatePreset(config, templateId) {
     logo: { ...config.logo, x: null, y: null },
     qr: { ...config.qr, x: null, y: null }
   });
-  return next;
 }
 
-function resetStyles(config) {
+export function resetStyles(config) {
   return applyTemplatePreset(config, config.templateId);
 }
-
-module.exports = {
-  defaultConfig,
-  sanitizeConfig,
-  applyTemplatePreset,
-  resetStyles,
-  getTemplate: templates.getTemplate
-};

@@ -1,17 +1,17 @@
-'use strict';
+// src/printable/shared/spec.js
 
 /** Bleed on each side, in millimetres. */
-const BLEED_MM = 3;
+export const BLEED_MM = 3;
 /** Inner safety margin from the trim edge, in millimetres (within the 3–5 mm range). */
-const SAFETY_MM = 4;
+export const SAFETY_MM = 4;
 /** Extra page margin used only when crop marks are requested. */
-const CROP_MARK_MARGIN_MM = 8;
-const CROP_MARK_LENGTH_MM = 5;
-const CROP_MARK_OFFSET_MM = 2;
-const DEFAULT_DPI = 300;
-const DEFAULT_FORMAT_ID = 'na';
+export const CROP_MARK_MARGIN_MM = 8;
+export const CROP_MARK_LENGTH_MM = 5;
+export const CROP_MARK_OFFSET_MM = 2;
+export const DEFAULT_DPI = 300;
+export const DEFAULT_FORMAT_ID = 'na';
 
-const FORMATS = {
+export const FORMATS = {
   na: {
     id: 'na',
     label: 'Canada / United States (3.5 × 2 in)',
@@ -28,7 +28,7 @@ const FORMATS = {
   }
 };
 
-const FONT_STACKS = {
+export const FONT_STACKS = {
   sans: {
     id: 'sans',
     label: 'Sans (Helvetica)',
@@ -52,22 +52,22 @@ const FONT_STACKS = {
   }
 };
 
-function getFormat(formatId) {
+export function getFormat(formatId) {
   return FORMATS[formatId] || FORMATS[DEFAULT_FORMAT_ID];
 }
 
-function getFont(fontId) {
+export function getFont(fontId) {
   return FONT_STACKS[fontId] || FONT_STACKS.sans;
 }
 
-function withBleed(format) {
+export function withBleed(format) {
   return {
     widthMm: roundMm(format.trimWidthMm + BLEED_MM * 2),
     heightMm: roundMm(format.trimHeightMm + BLEED_MM * 2)
   };
 }
 
-function getGeometry(formatId) {
+export function getGeometry(formatId) {
   const format = getFormat(formatId);
   const bleed = withBleed(format);
   return {
@@ -93,19 +93,19 @@ function getGeometry(formatId) {
   };
 }
 
-function mmToPt(mm) {
+export function mmToPt(mm) {
   return (Number(mm) * 72) / 25.4;
 }
 
-function mmToPx(mm, dpi = DEFAULT_DPI) {
+export function mmToPx(mm, dpi = DEFAULT_DPI) {
   return Math.round((Number(mm) * dpi) / 25.4);
 }
 
-function roundMm(value) {
+export function roundMm(value) {
   return Math.round(Number(value) * 1000) / 1000;
 }
 
-function getExportPixelSize(formatId, { includeBleed = true, dpi = DEFAULT_DPI } = {}) {
+export function getExportPixelSize(formatId, { includeBleed = true, dpi = DEFAULT_DPI } = {}) {
   const format = getFormat(formatId);
   const widthMm = includeBleed ? format.trimWidthMm + BLEED_MM * 2 : format.trimWidthMm;
   const heightMm = includeBleed ? format.trimHeightMm + BLEED_MM * 2 : format.trimHeightMm;
@@ -118,7 +118,7 @@ function getExportPixelSize(formatId, { includeBleed = true, dpi = DEFAULT_DPI }
   };
 }
 
-function getPdfPageSizeMm(formatId, { cropMarks = false } = {}) {
+export function getPdfPageSizeMm(formatId, { cropMarks = false } = {}) {
   const bleed = withBleed(getFormat(formatId));
   if (!cropMarks) {
     return { widthMm: bleed.widthMm, heightMm: bleed.heightMm };
@@ -128,24 +128,3 @@ function getPdfPageSizeMm(formatId, { cropMarks = false } = {}) {
     heightMm: roundMm(bleed.heightMm + CROP_MARK_MARGIN_MM * 2)
   };
 }
-
-module.exports = {
-  BLEED_MM,
-  SAFETY_MM,
-  CROP_MARK_MARGIN_MM,
-  CROP_MARK_LENGTH_MM,
-  CROP_MARK_OFFSET_MM,
-  DEFAULT_DPI,
-  DEFAULT_FORMAT_ID,
-  FORMATS,
-  FONT_STACKS,
-  getFormat,
-  getFont,
-  withBleed,
-  getGeometry,
-  mmToPt,
-  mmToPx,
-  roundMm,
-  getExportPixelSize,
-  getPdfPageSizeMm
-};
