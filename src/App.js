@@ -214,10 +214,13 @@ const buildQrPayload = (shortCode, data) => {
   const email = safe(contact.email || '', 120);
   const phone = safe(contact.phone || '', 50);
 
-  // Use short code for QR URL (always use short code for simpler QR)
-  const cardUrl = typeof window !== 'undefined' && shortCode
-    ? `${window.location.origin}/${shortCode}`
-    : '';
+    // Prefer the user's website; otherwise use the public card URL
+  const website = safe(contact.website || '', 250);
+  const cardUrl = website
+    ? (/^https?:\/\//i.test(website) ? website : `https://${website}`)
+    : (typeof window !== 'undefined' && shortCode
+        ? `${window.location.origin}/${shortCode}`
+        : '');
 
   // Build vCard 3.0 format (minimal for QR scanning reliability)
   let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
@@ -2967,7 +2970,12 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
     };
   }, [privacy.blockRobots]);
 
-  // Fetch QR code when modal opens; also cache rich payload for offline use
+  // Reset the simple QR when the saved website changes
+  useEffect(() => {
+    setQrSimpleDataUrl('');
+  }, [contact.website]);
+
+ // Fetch QR code when modal opens; also cache rich payload for offline use
   useEffect(() => {
     if (!showQR) return;
 
@@ -3088,7 +3096,13 @@ END:VCARD`;
   const pathParts = typeof window !== 'undefined' ? window.location.pathname.substring(1).split('/').filter(p => p) : [];
   const isShortCodeRoute = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
   const shortCode = data._shortCode || (isShortCodeRoute ? pathParts[0] : null);
-  const shortUrl = shortCode ? `${window.location.origin}/${shortCode}` : '';
+  const websiteUrl = String(contact?.website || '').trim();
+
+const shortUrl = websiteUrl
+  ? (/^https?:\/\//i.test(websiteUrl)
+      ? websiteUrl
+      : `https://${websiteUrl}`)
+  : (shortCode ? `${window.location.origin}/${shortCode}` : '');
   const cardName = `${personal.firstName || ''} ${personal.lastName || ''}`.trim();
   const company = personal.company || '';
 

@@ -1547,30 +1547,86 @@ app.get('/api/admin/logs', requireAuth, apiLimiter, (req, res, next) => {
   try { res.json({ logs: logLines.slice(-100), totalLines: logLines.length }); } catch (err) { next(err); }
 });
 
+
 app.get('/api/qr/:identifier', publicReadLimiter, [param('identifier').trim().matches(/^[a-zA-Z0-9-]+$/)], handleValidationErrors, async (req, res, next) => {
   try {
     const identifier = req.params.identifier;
     const baseUrl = req.protocol + '://' + req.get('host');
     const isShortCode = /^[a-zA-Z0-9]{7}$/.test(identifier);
-    let cardUrl;
+
+    const generateQr = async (row) => {
+      if (!row || !row.short_code) {
+        return res.status(404).json({ error: 'Card not found' });
+      }
+
+      // Default: public card URL
+      let targetUrl = `${baseUrl}/${row.short_code}`;
+
+      // Prefer the website saved in the user's card
+      try {
+        const cardData = JSON.parse(row.data || '{}');
+        const website = typeof cardData.contact?.website === 'string'
+          ? cardData.contact.website.trim()
+          : '';
+
+        if (website) {
+          const candidate = /^https?:\/\//i.test(website)
+            ? website
+            : `https://${website}`;
+
+          const parsedUrl = new URL(candidate);
+
+          if (
+            (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') &&
+            parsedUrl.hostname.includes('.')
+          ) {
+            targetUrl = parsedUrl.toString();
+          }
+        }
+      } catch (err) {
+        // Keep the public card URL if the website is invalid
+      }
+
+      try {
+        const qrDataUrl = await QRCode.toDataURL(targetUrl, {
+          errorCorrectionLevel: 'M',
+          type: 'image/png',
+          width: 200,
+          margin: 1
+        });
+
+        return res.json({ qrCode: qrDataUrl });
+      } catch (qrErr) {
+        return next(qrErr);
+      }
+    };
+
     if (isShortCode) {
-      cardUrl = `${baseUrl}/${identifier}`;
-      const qrDataUrl = await QRCode.toDataURL(cardUrl, { errorCorrectionLevel: 'M', type: 'image/png', width: 200, margin: 1 });
-      res.json({ qrCode: qrDataUrl });
+      db.get(
+        'SELECT short_code, data FROM cards WHERE short_code = ? LIMIT 1',
+        [identifier],
+        (err, row) => {
+          if (err) return next(err);
+          generateQr(row).catch(next);
+        }
+      );
     } else {
       const slug = identifier.toLowerCase();
-      db.get("SELECT short_code FROM cards WHERE slug = ? LIMIT 1", [slug], async (err, row) => {
-        if (err) return next(err);
-        if (!row || !row.short_code) return res.status(404).json({ error: "Card not found" });
-        cardUrl = `${baseUrl}/${row.short_code}`;
-        try {
-          const qrDataUrl = await QRCode.toDataURL(cardUrl, { errorCorrectionLevel: 'M', type: 'image/png', width: 200, margin: 1 });
-          res.json({ qrCode: qrDataUrl });
-        } catch (qrErr) { next(qrErr); }
-      });
+
+      db.get(
+        'SELECT short_code, data FROM cards WHERE slug = ? LIMIT 1',
+        [slug],
+        (err, row) => {
+          if (err) return next(err);
+          generateQr(row).catch(next);
+        }
+      );
     }
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
+
 
 app.post('/api/qr/:identifier', publicReadLimiter, [param('identifier').trim().matches(/^[a-zA-Z0-9-]+$/), body('payload').optional().isString().isLength({ max: 5000 })], handleValidationErrors, async (req, res, next) => {
   try {

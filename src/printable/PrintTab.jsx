@@ -130,7 +130,11 @@ export default function PrintTab({ data, slug, csrfToken }) {
   const [status, setStatus] = useState(null);
   const canvasWrapRef = useRef(null);
 
-  const publicUrl = `${window.location.origin}/${(data && data._shortCode) || slug || ''}`;
+  const website = String(data?.contact?.website || '').trim();
+
+const publicUrl = website
+  ? (/^https?:\/\//i.test(website) ? website : `https://${website}`)
+  : `${window.location.origin}/${(data && data._shortCode) || slug || ''}`;
 
   useEffect(() => {
     let cancelled = false;
