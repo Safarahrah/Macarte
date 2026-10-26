@@ -315,8 +315,10 @@ app.use((req, res, next) => {
 });
 
 const cspDirectives = {
-  defaultSrc: ["'self'"], imgSrc: ["'self'", "data:", "https:"], styleSrc: ["'self'", "'unsafe-inline'"],
-  fontSrc: ["'self'", "data:"],
+  defaultSrc: ["'self'"], imgSrc: ["'self'", "data:", "https:"],
+  // Inter / Poppins are loaded from Google Fonts by public/index.html.
+  styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
   connectSrc: NODE_ENV === 'development' ? ["'self'", "http://127.0.0.1:7243", "http://localhost:7243", "https://api.github.com"] : ["'self'", "https://api.github.com"]
 };
 

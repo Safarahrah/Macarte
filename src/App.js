@@ -18,6 +18,9 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { arrayMove } from '@dnd-kit/sortable';
 import PrintTab from './printable/PrintTab';
+import HomePage from './pages/HomePage';
+import TemplatesPage from './pages/TemplatesPage';
+import CardSvgPreview, { sampleConfig } from './marketing/CardSvgPreview';
 
 const API_ENDPOINT = '/api';
 const APP_VERSION = require('../package.json').version; // Automatically read from package.json
@@ -34,6 +37,7 @@ function isReservedFrontendPath(pathname) {
     pathname.startsWith('/users') ||
     pathname.startsWith('/cards') ||
     pathname.startsWith('/invite') ||
+    pathname.startsWith('/templates') ||
     pathname === '/'
   );
 }
@@ -107,10 +111,13 @@ function PasswordStrength({ password }) {
   );
 }
 
+// Static demo config used by the auth side panel (module level: built once).
+const AUTH_DEMO_CONFIG = sampleConfig('minimal');
+
 function AuthShell({ title, subtitle, children, footer }) {
   return (
     <div className="min-h-screen flex bg-main dark:bg-main-dark">
-      <div className="hidden lg:flex w-[44%] auth-panel text-white p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex w-[44%] auth-panel text-white p-12 flex-col justify-between gap-8 relative overflow-hidden">
         <MacarteMark className="[&_span:last-child]:text-white" />
         <div className="relative z-10 max-w-sm">
           <p className="text-xs uppercase tracking-[0.2em] text-teal-100/80 mb-3">Carte de visite digitale</p>
@@ -118,6 +125,11 @@ function AuthShell({ title, subtitle, children, footer }) {
           <p className="text-teal-50/80 text-sm leading-relaxed">
             Créez votre carte Macarte, partagez-la par QR code et restez joignable même hors ligne.
           </p>
+        </div>
+        <div className="relative z-10 max-w-[20rem] -rotate-2">
+          <div className="rounded-2xl overflow-hidden bg-white shadow-floating ring-1 ring-white/25">
+            <CardSvgPreview config={AUTH_DEMO_CONFIG} publicUrl="https://macarte.app/demo" />
+          </div>
         </div>
         <p className="text-xs text-teal-100/60">Partage instantané · PWA · QR</p>
       </div>
@@ -1085,6 +1097,22 @@ const [settings, setSettings] = useState({
         // Check if demo mode is active (from status response or isDemoMode state)
         const demoModeActive = status?.demoMode || isDemoMode;
 
+        // Public marketing homepage at "/". First-run setup is still honoured,
+        // but configured installs now show the landing page instead of a hard
+        // redirect to the dashboard.
+        if (path === '/' && !demoModeActive) {
+          if (status === null || !status.setupComplete || status.userCount === 0) {
+            navigate('/setup', { replace: true });
+            document.title = 'Initial Setup';
+          } else {
+            // Refresh auth state so the header can offer the dashboard link.
+            checkAuth().catch(() => {});
+            setView('home');
+            document.title = `${APP_NAME} — Cartes de visite avec QR code`;
+          }
+          return;
+        }
+
         if (demoModeActive) {
           // Demo mode: skip setup, go directly to auth check
           if (path === '/' || path === '/admin') {
@@ -1980,6 +2008,15 @@ const [settings, setSettings] = useState({
   // All admin views are consolidated here to avoid duplication
   const renderAdminViews = () => (
     <>
+      {view === 'home' && (
+        <HomePage
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          isAuthenticated={isAuthenticated}
+          appVersion={APP_VERSION}
+          githubUrl={GITHUB_URL}
+        />
+      )}
       {view === 'loading' && (
         <>
           <div className="h-screen flex items-center justify-center text-text-muted-subtle dark:text-text-muted-dark bg-main dark:bg-main-dark bg-main-texture">Loading...</div>
@@ -2077,24 +2114,45 @@ const [settings, setSettings] = useState({
           >
             {forgotMode ? (
               <form onSubmit={handleForgotPassword} className="space-y-4">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Votre email" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" autoFocus required />
-                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
-                {forgotMessage && <div className="text-sm text-success-text dark:text-success-text-dark">{forgotMessage}</div>}
-                <button type="submit" className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors">Envoyer le lien</button>
+                <div>
+                  <label htmlFor="forgot-email" className="ui-label">Adresse email</label>
+                  <input id="forgot-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" autoComplete="email" className="ui-input" autoFocus required />
+                </div>
+                {error && (
+                  <div className="flex items-start gap-2 rounded-input bg-error-bg dark:bg-error-bg-dark text-error-text dark:text-error-text-dark text-sm px-3 py-2.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{error}
+                  </div>
+                )}
+                {forgotMessage && (
+                  <div className="rounded-input bg-success-bg dark:bg-success-bg-dark text-success-text dark:text-success-text-dark text-sm px-3 py-2.5">{forgotMessage}</div>
+                )}
+                <button type="submit" className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">Envoyer le lien</button>
               </form>
             ) : (
               <form onSubmit={handleLogin} className="space-y-4">
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" autoComplete="email" className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark" autoFocus />
-                <PasswordField
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Mot de passe"
-                  autoComplete="current-password"
-                  show={showPassword}
-                  onToggle={() => setShowPassword(!showPassword)}
-                />
-                {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
-                <button type="submit" disabled={isLoggingIn} className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50">
+                <div>
+                  <label htmlFor="login-email" className="ui-label">Email</label>
+                  <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" autoComplete="email" className="ui-input" autoFocus required />
+                </div>
+                <div>
+                  <label htmlFor="login-password" className="ui-label">Mot de passe</label>
+                  <PasswordField
+                    id="login-password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    show={showPassword}
+                    onToggle={() => setShowPassword(!showPassword)}
+                  />
+                </div>
+                {error && (
+                  <div className="flex items-start gap-2 rounded-input bg-error-bg dark:bg-error-bg-dark text-error-text dark:text-error-text-dark text-sm px-3 py-2.5">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{error}
+                  </div>
+                )}
+                <button type="submit" disabled={isLoggingIn} className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">
+                  {isLoggingIn && <RefreshCw className="w-4 h-4 animate-spin" />}
                   {isLoggingIn ? 'Connexion…' : 'Se connecter'}
                 </button>
               </form>
@@ -2118,32 +2176,35 @@ const [settings, setSettings] = useState({
           >
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Nom de l’organisation</label>
+                <label htmlFor="reg-org" className="ui-label">Nom de l’organisation</label>
                 <input
+                  id="reg-org"
                   type="text"
                   value={setupData.organisationName}
                   onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
                   placeholder="Studio, équipe ou votre nom"
-                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  className="ui-input"
                   required
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Email</label>
+                <label htmlFor="reg-email" className="ui-label">Email</label>
                 <input
+                  id="reg-email"
                   type="email"
                   value={setupData.adminEmail}
                   onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })}
                   placeholder="vous@exemple.com"
                   autoComplete="email"
-                  className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
+                  className="ui-input"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Mot de passe</label>
+                <label htmlFor="reg-password" className="ui-label">Mot de passe</label>
                 <PasswordField
+                  id="reg-password"
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
                   placeholder="8 caractères, lettre + chiffre"
@@ -2154,8 +2215,9 @@ const [settings, setSettings] = useState({
                 <div className="mt-2"><PasswordStrength password={setupData.adminPassword} /></div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Confirmer le mot de passe</label>
+                <label htmlFor="reg-password-confirm" className="ui-label">Confirmer le mot de passe</label>
                 <PasswordField
+                  id="reg-password-confirm"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="Répétez le mot de passe"
@@ -2164,11 +2226,15 @@ const [settings, setSettings] = useState({
                   onToggle={() => setShowPassword(!showPassword)}
                 />
               </div>
-              {error && <div className="flex items-center gap-2 text-error-text dark:text-error-text-dark text-sm"><AlertCircle className="w-4 h-4 shrink-0" />{error}</div>}
+              {error && (
+                <div className="flex items-start gap-2 rounded-input bg-error-bg dark:bg-error-bg-dark text-error-text dark:text-error-text-dark text-sm px-3 py-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />{error}
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={isSettingUp}
-                className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                 {isSettingUp ? 'Création du compte…' : 'Créer mon compte'}
@@ -2615,6 +2681,18 @@ const [settings, setSettings] = useState({
     </>
   );
 
+  // Public template gallery, mounted directly on the /templates route so it is
+  // rendered regardless of the internal `view` state machine.
+  const renderTemplatesPage = () => (
+    <TemplatesPage
+      darkMode={darkMode}
+      toggleDarkMode={toggleDarkMode}
+      isAuthenticated={isAuthenticated}
+      appVersion={APP_VERSION}
+      githubUrl={GITHUB_URL}
+    />
+  );
+
   return (
     <>
       <DemoModeBanner />
@@ -2628,6 +2706,7 @@ const [settings, setSettings] = useState({
         <Route path="/settings" element={renderAdminViews()} />
         <Route path="/users" element={renderAdminViews()} />
         <Route path="/cards" element={renderAdminViews()} />
+        <Route path="/templates" element={renderTemplatesPage()} />
         <Route path="/" element={renderAdminViews()} />
         {/* Invitation acceptance route - must come before public card routes */}
         <Route path="/invite/:token" element={

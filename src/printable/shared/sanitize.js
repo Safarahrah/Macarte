@@ -46,7 +46,7 @@ function stripSecrets(input) {
 function sanitizeOverrides(overrides) {
   const result = {};
   if (!overrides || typeof overrides !== 'object') return result;
-  Object.keys(overrides).slice(0, 40).forEach((id) => {
+  Object.keys(overrides).slice(0, 60).forEach((id) => {
     const item = overrides[id] || {};
     result[clip(id, 40)] = {
       x: num(item.x, undefined, -20, 200),
@@ -56,6 +56,33 @@ function sanitizeOverrides(overrides) {
     };
   });
   return result;
+}
+
+const CUSTOM_ELEMENT_TYPES = ['text', 'image'];
+
+// User-added layers rendered on top of the template (free text, extra image).
+function sanitizeCustomElements(list) {
+  if (!Array.isArray(list)) return [];
+  return list.slice(0, 20).map((el, index) => {
+    const type = CUSTOM_ELEMENT_TYPES.includes(el && el.type) ? el.type : 'text';
+    return {
+      id: clip(el && el.id, 40) || `el-${index + 1}`,
+      type,
+      text: clip(el && el.text, 240),
+      src: clip(el && el.src, 500),
+      x: num(el && el.x, 8, -20, 200),
+      y: num(el && el.y, 8, -20, 200),
+      w: num(el && el.w, type === 'image' ? 20 : 45, 4, 120),
+      h: num(el && el.h, type === 'image' ? 20 : 9, 4, 80),
+      size: num(el && el.size, 7, 4, 30),
+      color: hexColor(el && el.color, '#111111'),
+      font: FONT_IDS.includes(el && el.font) ? el.font : 'inter',
+      align: ALIGNMENTS.includes(el && el.align) ? el.align : 'left',
+      bold: bool(el && el.bold, false),
+      italic: bool(el && el.italic, false),
+      spacing: num(el && el.spacing, 0, -2, 4)
+    };
+  });
 }
 
 export function defaultConfig() {
@@ -84,6 +111,8 @@ export function defaultConfig() {
     alignment: template.alignment,
     logo: { url: '', x: null, y: null, w: 14, h: 14 },
     qr: { x: null, y: null, size: 18 },
+    background: { url: '' },
+    customElements: [],
     elementOverrides: {},
     digitalCard: { slug: '', userId: '', shortCode: '', name: '' }
   };
@@ -161,6 +190,8 @@ export function sanitizeConfig(raw) {
       y: input.qr?.y == null ? null : num(input.qr.y, 8, 0, 80),
       size: num(input.qr?.size, 18, 14, 36)
     },
+    background: { url: clip(input.background?.url, 500) },
+    customElements: sanitizeCustomElements(input.customElements),
     elementOverrides: sanitizeOverrides(input.elementOverrides),
     digitalCard: {
       slug: clip(input.digitalCard?.slug, 50).toLowerCase(),
@@ -182,7 +213,9 @@ export function applyTemplatePreset(config, templateId) {
     alignment: template.alignment,
     elementOverrides: {},
     logo: { ...config.logo, x: null, y: null },
-    qr: { ...config.qr, x: null, y: null }
+    qr: { ...config.qr, x: null, y: null },
+    // Keep the imported artwork only when the custom preset is active.
+    background: template.id === 'custom' ? config.background : { url: '' }
   });
 }
 

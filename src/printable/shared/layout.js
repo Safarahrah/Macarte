@@ -154,7 +154,16 @@ const FRONT_PARAMS = {
   vintage: { nameX: 9, nameW: 50, nameY: 15, detailsX: 9, detailsY: 37, detailsW: 50, qrSize: 14, backX: 10, backW: 65 },
   nordic: { nameX: 12, nameW: 50, nameY: 12, detailsX: 12, detailsY: 37, detailsW: 48, qrSize: 14, backX: 14, backW: 57 },
   botanical: { nameX: 13, nameW: 45, nameY: 10, detailsX: 13, detailsY: 33, detailsW: 48, qrSize: 14, backX: 14, backW: 57 },
-  'corporate-bold': { nameX: 30, nameW: 42, nameY: 10, upper: true, spacing: 0.3, detailsX: 30, detailsY: 31, detailsW: 33, qrSize: 13, backX: 30, backW: 47 }
+  'corporate-bold': { nameX: 30, nameW: 42, nameY: 10, upper: true, spacing: 0.3, detailsX: 30, detailsY: 31, detailsW: 33, qrSize: 13, backX: 30, backW: 47 },
+  'minimal-ink': { nameX: 16, nameW: 48, nameY: 16, titleUpper: true, titleSpacing: 0.3, detailsX: 16, detailsY: 36, detailsW: 44, qrSize: 14, backX: 16, backW: 53 },
+  'modern-gradient': { nameX: 9, nameW: 48, nameY: 13, detailsX: 9, detailsY: 36, detailsW: 46, qrSize: 15, backX: 12, backW: 61 },
+  'corporate-executive': { nameX: 10, nameW: 49, nameY: 17, titleUpper: true, spacing: 0.2, detailsX: 10, detailsY: 36, detailsW: 46, qrSize: 15, backX: 12, backW: 61 },
+  'luxury-noir': { nameX: 13, nameW: 45, nameY: 15, upper: true, spacing: 0.5, titleUpper: true, titleSpacing: 0.4, detailsX: 13, detailsY: 36, detailsW: 45, qrSize: 14, backX: 15, backW: 55 },
+  'creative-pop': { nameX: 12, nameW: 46, nameY: 22, detailsX: 12, detailsY: 37, detailsW: 44, qrSize: 15, backX: 14, backW: 57 },
+  'healthcare-clean': { nameX: 13, nameW: 45, nameY: 16, detailsX: 13, detailsY: 36, detailsW: 44, qrSize: 15, backX: 14, backW: 57 },
+  'healthcare-soft': { nameX: 12, nameW: 46, nameY: 15, detailsX: 12, detailsY: 36, detailsW: 45, qrSize: 15, backX: 14, backW: 57 },
+  'tech-circuit': { nameX: 10, nameW: 50, nameY: 13, titleUpper: true, detailsX: 10, detailsY: 34, detailsW: 47, qrSize: 16, hideCompany: true, backX: 12, backW: 61 },
+  custom: { nameX: 9, nameW: 46, nameY: 35, detailsX: 9, detailsY: 41, detailsW: 44, detailsAlign: 'left', qrSize: 15, backX: 12, backW: 61 }
 };
 
 
@@ -166,8 +175,17 @@ function designerLayout(ctx, variant) {
   const bgFill = variant === 'luxury-gold' ? gradient(mix(colors.background, '#ffffff', 0.07), mix(colors.background, '#000000', 0.45), 135)
     : variant === 'neon' ? gradient(colors.background, mix(colors.background, colors.secondary, 0.3), 120)
     : variant === 'artistic' ? gradient('#ffffff', colors.background, 90)
+    : variant === 'modern-gradient' ? gradient(colors.background, mix(colors.background, colors.secondary, 0.55), 125)
+    : variant === 'luxury-noir' ? gradient(mix(colors.background, '#ffffff', 0.06), colors.background, 135)
     : colors.background;
   const nodes = [rect('bg', 0, 0, W, H, bgFill)];
+
+  // Imported artwork ("Importer ma carte") is used as a full-bleed background
+  // layer, right above the base fill and below every editable element.
+  const backgroundUrl = config.background && config.background.url;
+  if (backgroundUrl) {
+    nodes.push({ id: 'bg-image', type: 'image', src: backgroundUrl, x: 0, y: 0, w: W, h: H, fit: 'cover', locked: true });
+  }
 
   // Motifs décoratifs. Ils sont dessinés avant le texte et le QR.
   switch (variant) {
@@ -264,6 +282,58 @@ function designerLayout(ctx, variant) {
       nodes.push(rect('editorial-block', 0, 0, W * 0.27, H * 0.24, colors.primary));
       nodes.push(rect('editorial-corner', W - 5, H * 0.55, 5, H * 0.45, colors.accent));
       nodes.push(line('editorial-rule', 8, H * 0.48, W - 8, H * 0.48, colors.secondary, 0.3));
+      break;
+    case 'minimal-ink':
+      nodes.push(rect('ink-rule', 9.5, 9, 1.4, H - 18, colors.primary));
+      nodes.push(rect('ink-accent', W - 34, H - 11.5, 25, 1.4, colors.secondary));
+      break;
+    case 'modern-gradient':
+      nodes.push(circle('mg-blob-a', W - 5, 5, 25, colors.accent, { opacity: 0.28 }));
+      nodes.push(circle('mg-blob-b', 13, H - 3, 19, colors.secondary, { opacity: 0.22 }));
+      nodes.push(rect('mg-spine', 0, 0, 2.6, H, colors.secondary));
+      break;
+    case 'corporate-executive':
+      nodes.push(rect('exec-band', 0, 0, W, 11, colors.primary));
+      nodes.push(rect('exec-hairline', 0, 11, W, 0.9, colors.secondary));
+      nodes.push(rect('exec-accent', 10, H - 10, 20, 1, colors.secondary));
+      break;
+    case 'luxury-noir':
+      nodes.push(rect('noir-frame', 3, 3, W - 6, H - 6, 'none', colors.secondary));
+      nodes.push(line('noir-rule', 13, 12.5, 31, 12.5, colors.primary, 0.3));
+      nodes.push(poly('noir-diamond', [[W - 13, 11.5], [W - 11.5, 13], [W - 13, 14.5], [W - 14.5, 13]], colors.primary));
+      break;
+    case 'creative-pop':
+      nodes.push(poly('pop-corner', [[0, 0], [W * 0.3, 0], [0, H * 0.34]], colors.primary));
+      nodes.push(rect('pop-stripe', 0, H - 9, W * 0.46, 4.5, colors.secondary));
+      nodes.push(circle('pop-dot-a', W - 10, 9, 5, colors.accent, { opacity: 0.9 }));
+      nodes.push(circle('pop-dot-b', W - 16, 14, 2.4, colors.primary, { opacity: 0.85 }));
+      break;
+    case 'healthcare-clean':
+      nodes.push(rect('hc-band', 0, 0, 4.5, H, colors.primary));
+      nodes.push(rect('hc-cross-v', W - 16, 10, 2.4, 7.5, colors.accent));
+      nodes.push(rect('hc-cross-h', W - 18.2, 12.5, 6.2, 2.4, colors.accent));
+      nodes.push(circle('hc-halo', 11, H - 7, 14, colors.secondary, { opacity: 0.14 }));
+      break;
+    case 'healthcare-soft':
+      nodes.push(circle('hs-blob-a', W - 3, 3, 21, colors.accent, { opacity: 0.35 }));
+      nodes.push(circle('hs-blob-b', 9, H - 2, 15, colors.secondary, { opacity: 0.5 }));
+      nodes.push(rect('hs-accent', 12, 9, 13, 1.4, colors.primary));
+      break;
+    case 'tech-circuit': {
+      nodes.push(rect('cir-spine', 0, 0, 3, H, colors.primary));
+      const rnd = seeded(7);
+      for (let i = 0; i < 22; i += 1) {
+        const gx = 6 + Math.round((rnd() * (W - 12)) / 6) * 6;
+        const gy = 4 + Math.round((rnd() * (H - 8)) / 6) * 6;
+        const len = 6 + Math.round(rnd() * 2) * 6;
+        if (rnd() > 0.5) nodes.push(line(`cir-h-${i}`, gx, gy, Math.min(W, gx + len), gy, colors.primary, 0.15, 0.45));
+        else nodes.push(line(`cir-v-${i}`, gx, gy, gx, Math.min(H, gy + len), colors.primary, 0.15, 0.45));
+        nodes.push(circle(`cir-n-${i}`, gx, gy, 0.55, colors.primary, { opacity: 0.7 }));
+      }
+      break;
+    }
+    case 'custom':
+      // No decoration: the imported artwork is the whole background.
       break;
   }
 
@@ -374,7 +444,16 @@ const LAYOUT_ENGINES = {
   nordic: (ctx) => designerLayout(ctx, 'nordic'),
   botanical: (ctx) => designerLayout(ctx, 'botanical'),
   'corporate-bold': (ctx) => designerLayout(ctx, 'corporate-bold'),
-  editorial: (ctx) => designerLayout(ctx, 'editorial')
+  editorial: (ctx) => designerLayout(ctx, 'editorial'),
+  'minimal-ink': (ctx) => designerLayout(ctx, 'minimal-ink'),
+  'modern-gradient': (ctx) => designerLayout(ctx, 'modern-gradient'),
+  'corporate-executive': (ctx) => designerLayout(ctx, 'corporate-executive'),
+  'luxury-noir': (ctx) => designerLayout(ctx, 'luxury-noir'),
+  'creative-pop': (ctx) => designerLayout(ctx, 'creative-pop'),
+  'healthcare-clean': (ctx) => designerLayout(ctx, 'healthcare-clean'),
+  'healthcare-soft': (ctx) => designerLayout(ctx, 'healthcare-soft'),
+  'tech-circuit': (ctx) => designerLayout(ctx, 'tech-circuit'),
+  custom: (ctx) => designerLayout(ctx, 'custom')
 };
 
 // --- CONSTRUCTION DU RECTO ET DU VERSO ---
@@ -403,21 +482,60 @@ function buildSide(config, side, publicUrl) {
   
 let nodes = builder(ctx).filter(Boolean);
 
+// Éléments ajoutés par l'utilisateur (texte libre, image) — dessinés par-dessus.
+const extras = Array.isArray(config.customElements) ? config.customElements : [];
+extras.forEach((el) => {
+  if (el.type === 'image' && el.src) {
+    nodes.push({ id: el.id, type: 'image', src: el.src, x: el.x, y: el.y, w: el.w, h: el.h, fit: el.fit, selectable: true });
+  } else if (el.type === 'text' && typeof el.text === 'string') {
+    const font = getFont(el.font);
+    nodes.push(textNode(el.id, {
+      x: el.x, y: el.y, w: el.w, h: el.h,
+      text: el.text,
+      font: el.bold ? (font.pdfBold || font.pdf) : font.pdf,
+      cssFont: font.css,
+      size: el.size, color: el.color, align: el.align,
+      bold: el.bold, italic: el.italic, spacing: el.spacing,
+      lines: true
+    }));
+  }
+});
+
 nodes = nodes.map((node) => {
   // Appliquer les positions enregistrées aux autres éléments.
   if (node.type !== 'qr') {
     return applyOverride(node, config.elementOverrides);
   }
 
-  // Position uniforme du QR code : en bas à droite.
-  const qrSize = Number(node.w) > 0 ? Number(node.w) : 14;
+  // Le QR reste carré. La taille vient de config.qr.size (ou de la valeur du
+  // modèle), la position de config.qr.x/y, puis des déplacements manuels.
+  const qrSize = Number(config.qr?.size) > 0
+    ? Number(config.qr.size)
+    : (Number(node.w) > 0 ? Number(node.w) : 14);
   const margin = 5;
+  const hasX = config.qr?.x != null && config.qr.x !== '' && Number.isFinite(Number(config.qr.x));
+  const hasY = config.qr?.y != null && config.qr.y !== '' && Number.isFinite(Number(config.qr.y));
 
-  return {
+  let placed = {
     ...node,
-    x: ctx.W - qrSize - margin,
-    y: ctx.H - qrSize - margin
+    w: qrSize,
+    h: qrSize,
+    x: hasX ? Number(config.qr.x) : ctx.W - qrSize - margin,
+    y: hasY ? Number(config.qr.y) : ctx.H - qrSize - margin
   };
+
+  const override = config.elementOverrides?.[node.id];
+  if (override) {
+    placed = {
+      ...placed,
+      x: Number.isFinite(override.x) ? override.x : placed.x,
+      y: Number.isFinite(override.y) ? override.y : placed.y,
+      w: Number.isFinite(override.w) ? override.w : placed.w,
+      h: Number.isFinite(override.w) ? override.w : placed.h
+    };
+  }
+
+  return placed;
 });
 
 nodes = nodes.map((node) => constrainToDocument(node, ctx.W, ctx.H));

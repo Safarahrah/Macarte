@@ -1,5 +1,6 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useId, useMemo, useRef, useState } from 'react';
 import { buildLayout } from './shared/layout';
+import { collectGradients, GradientDefs, renderNode } from './shared/renderSvg';
 import QrMark from './QrMark';
 
 function mm(value) {
@@ -9,6 +10,7 @@ function mm(value) {
 export default function PrintableCardCanvas({
   config,
   publicUrl,
+  qrValue,
   side = 'front',
   showGuides = true,
   selectedId,
@@ -16,9 +18,12 @@ export default function PrintableCardCanvas({
   onMove,
   zoom = 1
 }) {
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9]/g, '');
   const layout = useMemo(() => buildLayout(config, publicUrl), [config, publicUrl]);
   const geo = layout.geometry;
   const nodes = layout.sides[side] || [];
+  const { defs, map } = collectGradients(nodes, uid);
   const wrapRef = useRef(null);
   const [drag, setDrag] = useState(null);
 
@@ -30,9 +35,12 @@ export default function PrintableCardCanvas({
     const svg = wrapRef.current;
     if (!svg) return { x: 0, y: 0 };
     const box = svg.getBoundingClientRect();
+    // Use the rendered width so dragging stays accurate when the SVG is
+    // scaled down (e.g. `max-w-full` on mobile) instead of the base width.
+    const mmPerPx = box.width > 0 ? geo.document.widthMm / box.width : 1 / scale;
     return {
-      x: (clientX - box.left) / scale,
-      y: (clientY - box.top) / scale
+      x: (clientX - box.left) * mmPerPx,
+      y: (clientY - box.top) * mmPerPx
     };
   };
 
@@ -60,6 +68,9 @@ export default function PrintableCardCanvas({
 
   const endDrag = () => setDrag(null);
 
+  const qrUrl = qrValue || publicUrl;
+  const renderQr = (node) => <QrMark url={qrUrl} x={node.x} y={node.y} size={node.w} />;
+
   return (
     <svg
       ref={wrapRef}
@@ -74,85 +85,30 @@ export default function PrintableCardCanvas({
       onPointerLeave={endDrag}
       onClick={() => onSelect?.(null)}
     >
-      {nodes.map((node) => {
-        if (node.type === 'rect') {
-          return (
-            <rect
-              key={node.id}
-              x={node.x}
-              y={node.y}
-              width={node.w}
-              height={node.h}
-              fill={node.fill && node.fill !== 'none' ? node.fill : 'transparent'}
-              stroke={node.stroke || 'none'}
-              strokeWidth={node.width || 0}
-            />
-          );
-        }
-        if (node.type === 'line') {
-          return (
-            <line
-              key={node.id}
-              x1={node.x1}
-              y1={node.y1}
-              x2={node.x2}
-              y2={node.y2}
-              stroke={node.stroke}
-              strokeWidth={node.width || 0.35}
-            />
-          );
-        }
-        if (node.type === 'text') {
-          const anchor = node.align === 'center' ? 'middle' : node.align === 'right' ? 'end' : 'start';
-          const x = node.align === 'center' ? node.x + node.w / 2 : node.align === 'right' ? node.x + node.w : node.x;
-          const fontSize = (node.size || 8) * 0.352777;
-          const lines = String(node.text || '').split('\n');
-          return (
-            <g
-              key={node.id}
-              onPointerDown={(event) => handlePointerDown(event, node)}
-              className={node.selectable ? 'cursor-move' : undefined}
-            >
-              {selectedId === node.id && (
-                <rect x={node.x} y={node.y} width={node.w} height={node.h} fill="none" stroke="#2563eb" strokeDasharray="1 1" strokeWidth="0.25" />
-              )}
-              <text
-                x={x}
-                y={node.y + fontSize}
-                fontFamily={node.cssFont}
-                fontSize={fontSize}
-                fontWeight={node.bold ? 700 : 400}
-                fill={node.color}
-                textAnchor={anchor}
-              >
-                {lines.map((line, index) => (
-                  <tspan key={index} x={x} dy={index === 0 ? 0 : fontSize * 1.25}>{line}</tspan>
-                ))}
-              </text>
-            </g>
-          );
-        }
-        if (node.type === 'qr') {
-          return (
-            <g key={node.id} onPointerDown={(event) => handlePointerDown(event, node)} className="cursor-move">
-              <QrMark url={publicUrl} x={node.x} y={node.y} size={node.w} />
-              {selectedId === node.id && (
-                <rect x={node.x} y={node.y} width={node.w} height={node.h} fill="none" stroke="#2563eb" strokeDasharray="1 1" strokeWidth="0.25" />
-              )}
-            </g>
-          );
-        }
-        if (node.type === 'image') {
-          return (
-            <g key={node.id} onPointerDown={(event) => handlePointerDown(event, node)} className="cursor-move">
-              <image href={node.src} x={node.x} y={node.y} width={node.w} height={node.h} preserveAspectRatio="xMidYMid meet" />
-              {selectedId === node.id && (
-                <rect x={node.x} y={node.y} width={node.w} height={node.h} fill="none" stroke="#2563eb" strokeDasharray="1 1" strokeWidth="0.25" />
-              )}
-            </g>
-          );
-        }
-        return null;
+      <defs>
+        <GradientDefs defs={defs} />
+      </defs>
+      {nodes.map((node, index) => {
+        const content = renderNode(node, index, map, renderQr);
+        if (!content) return null;
+        if (!node.selectable || !onMove) return content;
+        return (
+          <g key={node.id} onPointerDown={(event) => handlePointerDown(event, node)} className="cursor-move">
+            {content}
+            {selectedId === node.id && (
+              <rect
+                x={node.x}
+                y={node.y}
+                width={node.w}
+                height={node.h}
+                fill="none"
+                stroke="#2563eb"
+                strokeDasharray="1 1"
+                strokeWidth="0.25"
+              />
+            )}
+          </g>
+        );
       })}
       {showGuides && (
         <g pointerEvents="none">

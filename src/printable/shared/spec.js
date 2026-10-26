@@ -28,6 +28,9 @@ export const FORMATS = {
   }
 };
 
+// Font stacks used by the printable designer.
+// `css` is used on screen (physical preview); `pdf` maps to a standard PDF font
+// because exports rely on core PDF fonts (Helvetica / Times / Courier).
 export const FONT_STACKS = {
   sans: {
     id: 'sans',
@@ -49,6 +52,41 @@ export const FONT_STACKS = {
     css: '"Courier New", Courier, monospace',
     pdf: 'Courier',
     pdfBold: 'Courier-Bold'
+  },
+  inter: {
+    id: 'inter',
+    label: 'Inter',
+    css: 'Inter, "Helvetica Neue", Helvetica, Arial, sans-serif',
+    pdf: 'Helvetica',
+    pdfBold: 'Helvetica-Bold'
+  },
+  poppins: {
+    id: 'poppins',
+    label: 'Poppins',
+    css: 'Poppins, Inter, Helvetica, Arial, sans-serif',
+    pdf: 'Helvetica',
+    pdfBold: 'Helvetica-Bold'
+  },
+  montserrat: {
+    id: 'montserrat',
+    label: 'Montserrat',
+    css: 'Montserrat, Inter, Helvetica, Arial, sans-serif',
+    pdf: 'Helvetica',
+    pdfBold: 'Helvetica-Bold'
+  },
+  roboto: {
+    id: 'roboto',
+    label: 'Roboto',
+    css: 'Roboto, Inter, Helvetica, Arial, sans-serif',
+    pdf: 'Helvetica',
+    pdfBold: 'Helvetica-Bold'
+  },
+  lato: {
+    id: 'lato',
+    label: 'Lato',
+    css: 'Lato, Inter, Helvetica, Arial, sans-serif',
+    pdf: 'Helvetica',
+    pdfBold: 'Helvetica-Bold'
   }
 };
 
