@@ -50,16 +50,19 @@ export default function QrMark({
   y = 0, 
   size, 
   className = '',
-  onTestClick = null 
+  onTestClick = null,
+  isPaid = true
 }) {
   const [hasError, setHasError] = useState(false);
   
+  const qrUrl = isPaid ? url : 'https://macarte.com/unlock';
+
   const matrix = useMemo(() => {
-    const result = getQrMatrix(url);
-    if (!result && url) setHasError(true);
+    const result = getQrMatrix(qrUrl);
+    if (!result && qrUrl) setHasError(true);
     else setHasError(false);
     return result;
-  }, [url]);
+  }, [qrUrl]);
 
   // Affichage d'état d'erreur élégant
   if (hasError || !matrix || !size) {

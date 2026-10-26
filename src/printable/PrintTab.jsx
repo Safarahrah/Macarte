@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenter, AlignLeft, AlignRight, Bold, Check, Download, FileText, Image as ImageIcon,
-  Italic, Layers, Loader2, Move, Palette, Plus, QrCode, Search, Settings2, Trash2, Type, Upload, X
+  Italic, Layers, Loader2, Lock, Move, Palette, Plus, QrCode, Search, Settings2, Trash2, Type, Upload, X
 } from 'lucide-react';
 import PrintableCardCanvas from './PrintableCardCanvas';
 import CardSvgPreview from '../marketing/CardSvgPreview';
@@ -220,10 +220,15 @@ export default function PrintTab({ data, slug, csrfToken }) {
   const [designName, setDesignName] = useState('');
   const [importBusy, setImportBusy] = useState(false);
   const [importError, setImportError] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('unpaid');
+  const [price, setPrice] = useState(null);
+  const [printableCardId, setPrintableCardId] = useState(null);
   const canvasWrapRef = useRef(null);
   const importInputRef = useRef(null);
   const elementImageRef = useRef(null);
   const elementTargetRef = useRef(null);
+
+  const isPaid = paymentStatus === 'paid';
 
   const website = String(data?.contact?.website || '').trim();
   const shortCode = (data && data._shortCode) || '';
@@ -268,6 +273,9 @@ export default function PrintTab({ data, slug, csrfToken }) {
         if (res.ok) {
           const row = await res.json();
           setConfig(sanitizeConfig(row.config));
+          setPaymentStatus(row.payment_status || 'unpaid');
+          setPrice(row.price);
+          setPrintableCardId(row.id);
         } else {
           setConfig(initialConfig(data, slug));
         }
@@ -357,7 +365,11 @@ export default function PrintTab({ data, slug, csrfToken }) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
         body: JSON.stringify({ cardSlug: slug, config: payload })
       });
-      if (res.ok) setStatus({ ok: true, text: 'Mise en page enregistrée.' });
+      if (res.ok) {
+        const row = await res.json();
+        setPrintableCardId(row.id);
+        setStatus({ ok: true, text: 'Mise en page enregistrée.' });
+      }
       else if (res.status === 404) setStatus({ ok: false, text: 'Enregistrez d’abord la carte digitale.' });
       else if (res.status === 403) setStatus({ ok: false, text: 'Session expirée. Rechargez la page.' });
       else setStatus({ ok: false, text: 'Enregistrement impossible.' });
@@ -506,6 +518,10 @@ export default function PrintTab({ data, slug, csrfToken }) {
   };
 
   const downloadPng = async () => {
+    if (!isPaid) {
+      setStatus({ ok: false, text: 'Veuillez débloquer votre carte pour exporter en HD.' });
+      return;
+    }
     const svgEl = canvasWrapRef.current && canvasWrapRef.current.querySelector('svg');
     if (!svgEl) return;
     setBusy(true);
@@ -533,6 +549,10 @@ export default function PrintTab({ data, slug, csrfToken }) {
   };
 
   const exportFile = async (format) => {
+    if (!isPaid) {
+      setStatus({ ok: false, text: 'Veuillez débloquer votre carte pour exporter en HD.' });
+      return;
+    }
     setBusy(true);
     setStatus(null);
     try {
@@ -571,6 +591,30 @@ export default function PrintTab({ data, slug, csrfToken }) {
     }
   };
 
+  const handleUnlock = async () => {
+    if (!printableCardId) {
+      await saveLayout();
+    }
+    setBusy(true);
+    try {
+      const token = await ensureCsrf();
+      const res = await fetch(`${API}/printable-cards/${printableCardId}/checkout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token }
+      });
+      const session = await res.json();
+      if (session.url) {
+        window.location.href = session.url;
+      } else {
+        throw new Error(session.error || 'Erreur lors de la création de la session Stripe');
+      }
+    } catch (e) {
+      setStatus({ ok: false, text: e.message });
+      setBusy(false);
+    }
+  };
+
   const selectedElement = (config.customElements || []).find((el) => el.id === selectedId) || null;
   const qrSize = Number(config.qr?.size) || 14;
   const qrTooSmall = qrValidation.valid && qrSize < (qrValidation.recommendedMinSizeMm || 10);
@@ -579,7 +623,7 @@ export default function PrintTab({ data, slug, csrfToken }) {
     <div className="space-y-5">
       {/* ---------------- PREVIEW ---------------- */}
       <div className="space-y-3">
-        <div ref={canvasWrapRef} className="overflow-x-auto rounded-card bg-surface dark:bg-surface-dark p-3 ring-1 ring-border-subtle dark:ring-border-dark">
+        <div ref={canvasWrapRef} className="overflow-x-auto rounded-card bg-surface dark:bg-surface-dark p-3 ring-1 ring-border-subtle dark:ring-border-dark relative group">
           <PrintableCardCanvas
             config={config}
             publicUrl={publicUrl}
@@ -589,7 +633,16 @@ export default function PrintTab({ data, slug, csrfToken }) {
             selectedId={selectedId}
             onSelect={setSelectedId}
             onMove={handleMove}
+            isPaid={isPaid}
           />
+          {!isPaid && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/5 pointer-events-none">
+              <div className="bg-white/90 dark:bg-black/80 px-4 py-2 rounded-full shadow-lg border border-border dark:border-border-dark flex items-center gap-2">
+                <Lock className="w-4 h-4 text-action dark:text-action-dark" />
+                <span className="text-xs font-semibold text-text-primary dark:text-text-primary-dark">Aperçu protégé</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -1119,16 +1172,22 @@ export default function PrintTab({ data, slug, csrfToken }) {
 
       {/* ---------------- ACTIONS ---------------- */}
       <div className="flex flex-wrap items-center gap-3">
+        {!isPaid && (
+          <button type="button" disabled={busy} onClick={handleUnlock} className="ui-btn bg-action dark:bg-action-dark text-white dark:text-[#04211d] hover:bg-action-hover dark:hover:bg-action-hover-dark">
+            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+            Débloquer ma carte — {price ? `${price}€` : 'Chargement...'}
+          </button>
+        )}
         <button type="button" disabled={busy} onClick={saveLayout} className="ui-btn ui-btn-primary">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Enregistrer la mise en page
         </button>
-        <button type="button" disabled={busy} onClick={downloadPng} className="ui-btn ui-btn-secondary">
+        <button type="button" disabled={busy || !isPaid} onClick={downloadPng} className={`ui-btn ui-btn-secondary ${!isPaid ? 'opacity-50 cursor-not-allowed' : ''}`}>
           <Download className="w-4 h-4" /> PNG {activeSide === 'back' ? 'verso' : 'recto'} ({px.widthPx} × {px.heightPx} px)
         </button>
-        <button type="button" disabled={busy} onClick={() => exportFile('pdf')} className="ui-btn ui-btn-secondary">
+        <button type="button" disabled={busy || !isPaid} onClick={() => exportFile('pdf')} className={`ui-btn ui-btn-secondary ${!isPaid ? 'opacity-50 cursor-not-allowed' : ''}`}>
           <FileText className="w-4 h-4" /> PDF
         </button>
-        <button type="button" disabled={busy} onClick={() => exportFile('jpg')} className="ui-btn ui-btn-secondary">
+        <button type="button" disabled={busy || !isPaid} onClick={() => exportFile('jpg')} className={`ui-btn ui-btn-secondary ${!isPaid ? 'opacity-50 cursor-not-allowed' : ''}`}>
           <FileText className="w-4 h-4" /> JPG
         </button>
         {status && (
@@ -1137,6 +1196,16 @@ export default function PrintTab({ data, slug, csrfToken }) {
           </span>
         )}
       </div>
+      {!isPaid && (
+        <div className="rounded-container bg-action/5 border border-action/20 p-4">
+          <h4 className="text-sm font-semibold text-action dark:text-action-dark flex items-center gap-2">
+            <Lock className="w-4 h-4" /> Votre carte est prête 🎉
+          </h4>
+          <p className="mt-1 text-xs text-text-secondary dark:text-text-secondary-dark">
+            Débloquez votre carte professionnelle pour retirer le filigrane, activer le QR Code et accéder aux exports Haute Résolution (PNG HD, PDF, Impression).
+          </p>
+        </div>
+      )}
     </div>
   );
 }

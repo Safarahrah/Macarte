@@ -331,17 +331,181 @@ app.use((req, res, next) => {
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin && NODE_ENV === 'development') return callback(null, true);
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) callback(null, true);
-    else callback(new Error('Not allowed by CORS'));
+    // Autoriser les requêtes sans Origin en développement.
+    if (!origin && NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+
+    // Autoriser les origines configurées et les requêtes sans Origin.
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true, methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+  credentials: true,
+  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-CSRF-Token'
+  ]
 }));
 
+// =========================================================
+// STRIPE WEBHOOK
+// IMPORTANT : doit être placé AVANT express.json()
+// =========================================================
+
+app.post(
+  '/api/stripe-webhook',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const signature = req.headers['stripe-signature'];
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const stripe = require('./lib/stripe');
+
+    // Vérifier la configuration Stripe.
+    if (!endpointSecret || !process.env.STRIPE_SECRET_KEY) {
+      console.error(
+        '[STRIPE] STRIPE_WEBHOOK_SECRET ou STRIPE_SECRET_KEY est manquant.'
+      );
+
+      return res.status(500).send('Configuration Stripe manquante.');
+    }
+
+    if (!signature) {
+      console.error('[STRIPE] Signature absente de la requête.');
+
+      return res.status(400).send('Signature Stripe manquante.');
+    }
+
+    let event;
+
+    // Vérifier la signature à partir du corps brut.
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        endpointSecret
+      );
+    } catch (err) {
+      console.error(
+        '[STRIPE] Échec de vérification de la signature :',
+        err.message
+      );
+
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    log(`[STRIPE] Événement reçu : ${event.type}`);
+
+    // Traiter les sessions Checkout terminées ou les paiements asynchrones réussis.
+    if (
+      event.type === 'checkout.session.completed' ||
+      event.type === 'checkout.session.async_payment_succeeded'
+    ) {
+      const session = event.data.object;
+
+      // Extraire l'ID de la carte printable.
+      const printableCardId =
+        session.client_reference_id ||
+        session.metadata?.printableCardId;
+
+      // Extraire l'ID du paiement (payment_intent).
+      const paymentIntentId =
+        typeof session.payment_intent === 'string'
+          ? session.payment_intent
+          : session.payment_intent?.id || null;
+
+      if (!printableCardId) {
+        log(
+          '[STRIPE] Aucun printableCardId trouvé dans la session Checkout. Événement ignoré.',
+          { sessionId: session.id }
+        );
+
+        // On retourne 200 pour éviter que Stripe ne renvoie sans cesse l'événement.
+        return res.status(200).json({
+          received: true,
+          warning: 'Missing printableCardId'
+        });
+      }
+
+      // NE marquer comme payé QUE si le statut du paiement est effectivement 'paid'.
+      if (session.payment_status !== 'paid') {
+        log(
+          `[STRIPE] Session ${session.id} reçue mais non payée (status: ${session.payment_status}). En attente...`
+        );
+        return res.status(200).json({ received: true, status: session.payment_status });
+      }
+
+      log(
+        `[STRIPE] Paiement confirmé pour la carte : ${printableCardId} (Intent: ${paymentIntentId})`
+      );
+
+      try {
+        // Vérifier si la carte existe et n'est pas déjà payée.
+        const card = await dbGet(
+          'SELECT id, payment_status FROM printable_cards WHERE id = ?',
+          [printableCardId]
+        );
+
+        if (!card) {
+          console.error(
+            `[STRIPE] Carte introuvable en base : ${printableCardId}`
+          );
+          // On retourne 200 car l'événement est valide techniquement, mais la donnée n'existe pas chez nous.
+          return res.status(200).json({
+            received: true,
+            error: 'Card not found'
+          });
+        }
+
+        if (card.payment_status === 'paid') {
+          log(`[STRIPE] La carte ${printableCardId} est déjà marquée comme payée.`);
+          return res.status(200).json({ received: true, already_paid: true });
+        }
+
+        // Mettre à jour le statut.
+        await dbRun(
+          `UPDATE printable_cards
+           SET payment_status = 'paid',
+               stripe_payment_intent_id = ?,
+               paid_at = CURRENT_TIMESTAMP,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE id = ?`,
+          [paymentIntentId, printableCardId]
+        );
+
+        log(`[STRIPE] Carte mise à jour avec succès : ${printableCardId}`);
+      } catch (dbErr) {
+        console.error(
+          '[STRIPE] Erreur de mise à jour de la base de données :',
+          dbErr.message
+        );
+
+        // En cas d'erreur DB réelle, on retourne 500 pour que Stripe retente.
+        return res.status(500).json({
+          received: false,
+          error: 'Database error'
+        });
+      }
+    }
+
+    // Accuser réception des événements valides non concernés aussi.
+    return res.status(200).json({ received: true });
+  }
+);
+
+// =========================================================
+// FIN DU STRIPE WEBHOOK
+// =========================================================
+
+// Ces middlewares doivent rester APRÈS le webhook Stripe.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: 'Too many login attempts, please try again later.', standardHeaders: true, legacyHeaders: false });
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false });

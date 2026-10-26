@@ -29,8 +29,9 @@ module.exports = (db) => {
       if (!SLUG_RE.test(cardSlug)) return res.status(400).json({ error: 'Invalid slug' });
 
       const row = await dbGet(
-        `SELECT pc.* FROM printable_cards pc
+        `SELECT pc.*, u.organisation_id FROM printable_cards pc
          JOIN cards c ON c.slug = pc.digital_card_slug AND c.user_id = pc.digital_card_user_id
+         JOIN users u ON u.id = pc.user_id
          WHERE pc.digital_card_slug = ? AND pc.user_id = ?
          ORDER BY pc.updated_at DESC
          LIMIT 1`,
@@ -38,7 +39,11 @@ module.exports = (db) => {
       );
       if (!row) return res.status(404).json({ error: 'Printable card not found or access denied' });
 
-      res.json({ ...row, config: JSON.parse(row.config) });
+           res.json({
+        ...row,
+        config: JSON.parse(row.config),
+        price: process.env.STRIPE_PRICE_AMOUNT || '9.99'
+      });
     } catch (err) {
       console.error('[PRINTABLE] GET error:', err);
       res.status(500).json({ error: 'Server error' });
@@ -90,7 +95,7 @@ module.exports = (db) => {
         );
       }
 
-      res.json({ id, cardSlug, config: sanitizedConfig });
+res.json({ id, cardSlug, config: sanitizedConfig });
     } catch (err) {
       console.error('[PRINTABLE] POST error:', err);
       res.status(500).json({ error: 'Save failed' });
