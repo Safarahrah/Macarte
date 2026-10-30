@@ -4,12 +4,12 @@ import DOMPurify from 'dompurify';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import flags from 'country-flag-icons/react/3x2';
-import { 
-  Camera, Upload, Save, Share2, Phone, Mail, Globe, 
-  Linkedin, Twitter, Instagram, Github, Edit3, Eye, 
+import {
+  Camera, Upload, Save, Share2, Phone, Mail, Globe,
+  Linkedin, Twitter, Instagram, Github, Edit3, Eye,
   X, Check, User, MapPin, Briefcase, Lock, LogIn, AlertCircle, EyeOff,
   Plus, Trash2, ArrowLeft, Users, ExternalLink, RefreshCw,
-  Download, FileText, Calendar, Video, Music, ShoppingCart, 
+  Download, FileText, Calendar, Video, Music, ShoppingCart,
   Link as LinkIcon, Youtube, Facebook, MessageCircle, Sun, Moon,
   ChevronUp, ChevronDown, GripVertical, Settings
 } from 'lucide-react';
@@ -106,7 +106,7 @@ function PasswordStrength({ password }) {
           />
         ))}
       </div>
-      <p className="text-xs text-text-muted dark:text-text-muted-dark">{label} — 8 caractères min., une lettre et un chiffre</p>
+      <p className="text-xs text-text-muted dark:text-text-muted-dark">{label} â€” 8 caractÃ¨res min., une lettre et un chiffre</p>
     </div>
   );
 }
@@ -123,7 +123,7 @@ function AuthShell({ title, subtitle, children, footer }) {
           <p className="text-xs uppercase tracking-[0.2em] text-teal-100/80 mb-3">Carte de visite digitale</p>
           <h2 className="text-4xl font-semibold leading-tight mb-4">Une carte. Tous vos liens.</h2>
           <p className="text-teal-50/80 text-sm leading-relaxed">
-            Créez votre carte Macarte, partagez-la par QR code et restez joignable même hors ligne.
+            CrÃ©ez votre carte Macarte, partagez-la par QR code et restez joignable mÃªme hors ligne.
           </p>
         </div>
         <div className="relative z-10 max-w-[20rem] -rotate-2">
@@ -131,7 +131,7 @@ function AuthShell({ title, subtitle, children, footer }) {
             <CardSvgPreview config={AUTH_DEMO_CONFIG} publicUrl="https://macarte.app/demo" />
           </div>
         </div>
-        <p className="text-xs text-teal-100/60">Partage instantané · PWA · QR</p>
+        <p className="text-xs text-teal-100/60">Partage instantanÃ© Â· PWA Â· QR</p>
       </div>
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div className="bg-card dark:bg-card-dark max-w-md w-full rounded-page shadow-xl p-8 border border-border-subtle dark:border-border-dark">
@@ -184,10 +184,10 @@ const applyThemeCssVars = (variant) => {
   const root = document.documentElement;
   const theme = THEME_FILES[variant] || swiishTheme;
   const colors = theme.colors || {};
-  
+
   // Helper to convert camelCase to kebab-case
   const toKebabCase = (str) => str.replace(/([A-Z])/g, (match) => '-' + match).toLowerCase();
-  
+
   // Set all color CSS variables from theme
   Object.keys(colors).forEach((colorKey) => {
     const colorValue = colors[colorKey];
@@ -197,7 +197,7 @@ const applyThemeCssVars = (variant) => {
       root.style.setProperty(`${cssVarName}-dark`, colorValue.dark);
     }
   });
-  
+
   // Set texture variables
   const textures = theme.textures?.main || {};
   root.style.setProperty('--texture-main-light', textures.light ? `url(${textures.light})` : 'none');
@@ -218,7 +218,7 @@ const buildQrPayload = (shortCode, data) => {
   const { personal = {}, contact = {} } = data || {};
 
   const safe = (v, maxLen = 120) => sanitizeText(v || '').substring(0, maxLen);
-  
+
   const firstName = safe(personal.firstName || '', 40);
   const lastName = safe(personal.lastName || '', 40);
   const fullName = `${firstName} ${lastName}`.trim();
@@ -236,28 +236,28 @@ const buildQrPayload = (shortCode, data) => {
 
   // Build vCard 3.0 format (minimal for QR scanning reliability)
   let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
-  
+
   if (fullName) {
     vcard += `FN:${fullName}\n`;
     vcard += `N:${lastName};${firstName};;;\n`;
   }
-  
+
   if (company) {
     vcard += `ORG:${company}\n`;
   }
-  
+
   if (email) {
     vcard += `EMAIL;TYPE=WORK:${email}\n`;
   }
-  
+
   if (phone) {
     vcard += `TEL;TYPE=CELL:${phone}\n`;
   }
-  
+
   if (cardUrl) {
     vcard += `URL:${cardUrl}\n`;
   }
-  
+
   vcard += 'END:VCARD';
 
   return vcard;
@@ -297,7 +297,7 @@ const sanitizeText = (text) => {
 // Helper function to sanitize HTML content (for bio)
 const sanitizeHTML = (html) => {
   if (!html) return '';
-  return DOMPurify.sanitize(html, { 
+  return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u'],
     ALLOWED_ATTR: []
   });
@@ -454,24 +454,24 @@ const getTailwindColorHex = (colorName, shade = 600) => {
 const darkenHex = (hex, percent) => {
   // Remove # if present
   hex = hex.replace('#', '');
-  
+
   // Convert to RGB
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  
+
   // Darken by percent
   const factor = 1 - (percent / 100);
   const newR = Math.max(0, Math.floor(r * factor));
   const newG = Math.max(0, Math.floor(g * factor));
   const newB = Math.max(0, Math.floor(b * factor));
-  
+
   // Convert back to hex
   const toHex = (n) => {
     const hex = n.toString(16);
     return hex.length === 1 ? '0' + hex : hex;
   };
-  
+
   return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
 };
 
@@ -517,8 +517,8 @@ function Modal({ isOpen, onClose, type = 'info', title, message, onConfirm, conf
 
   return (
     <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={onClose}>
-      <div 
-        className="bg-card dark:bg-card-dark rounded-card shadow-2xl max-w-sm w-full p-6 animate-in fade-in duration-200" 
+      <div
+        className="bg-card dark:bg-card-dark rounded-card shadow-2xl max-w-sm w-full p-6 animate-in fade-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className={`w-12 h-12 rounded-full ${style.bgColor} flex items-center justify-center mx-auto mb-4`}>
@@ -570,15 +570,15 @@ function VersionBadge() {
   const [isOutdated, setIsOutdated] = useState(false);
   const [isAhead, setIsAhead] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  
+
   // Determine if we're on a non-release branch
   // Show branch name if it's not main, master, or a version tag pattern (e.g., v0.3.1)
-  const isReleaseBranch = !GIT_BRANCH || 
-    GIT_BRANCH === 'main' || 
-    GIT_BRANCH === 'master' || 
+  const isReleaseBranch = !GIT_BRANCH ||
+    GIT_BRANCH === 'main' ||
+    GIT_BRANCH === 'master' ||
     /^v?\d+\.\d+/.test(GIT_BRANCH) ||
     GIT_BRANCH === 'HEAD'; // Detached HEAD state (common in CI/Docker)
-  
+
   const showBranch = GIT_BRANCH && !isReleaseBranch;
 
   useEffect(() => {
@@ -590,12 +590,12 @@ function VersionBadge() {
             'Accept': 'application/vnd.github.v3+json'
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           const latestVersion = data.tag_name?.replace(/^v/, '') || data.tag_name; // Remove 'v' prefix if present
           const currentVersion = APP_VERSION;
-          
+
           // SemVer-compliant version comparison
           // Follows SemVer precedence rules: pre-release versions have lower precedence than stable versions
           const compareVersions = (v1, v2) => {
@@ -668,7 +668,7 @@ function VersionBadge() {
 
             return 0; // Pre-release identifiers are equal
           };
-          
+
           if (latestVersion) {
             const comparison = compareVersions(currentVersion, latestVersion);
             if (comparison < 0) {
@@ -690,10 +690,10 @@ function VersionBadge() {
   }, []);
 
   // Build the display string: "v0.3.1" or "v0.3.1 (feature-branch)"
-  const versionDisplay = showBranch 
+  const versionDisplay = showBranch
     ? `v${APP_VERSION} (${GIT_BRANCH})`
     : `v${APP_VERSION}`;
-  
+
   // Build the tooltip
   const tooltip = (!isOutdated && !isAhead && !showBranch)
     ? "You are on the latest release"
@@ -712,8 +712,8 @@ function VersionBadge() {
         className={`text-xs font-medium transition-all bg-card dark:bg-card-dark border-2 border-border dark:border-border-dark px-2 py-1 rounded shadow-sm hover:shadow-md ${
           showBranch
             ? 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:border-amber-300 dark:hover:border-amber-700'
-            : isOutdated 
-              ? 'text-error-text dark:text-error-text-dark hover:bg-error-bg dark:hover:bg-error-bg-dark hover:border-error-border dark:hover:border-error-border-dark' 
+            : isOutdated
+              ? 'text-error-text dark:text-error-text-dark hover:bg-error-bg dark:hover:bg-error-bg-dark hover:border-error-border dark:hover:border-error-border-dark'
               : isAhead
                 ? 'text-info-text dark:text-info-text-dark hover:bg-info-bg dark:hover:bg-info-bg-dark hover:border-info-border dark:hover:border-info-border-dark'
                 : 'text-text-primary dark:text-text-primary-dark hover:text-action dark:hover:text-action-dark hover:border-success-border dark:hover:border-success-border-dark'
@@ -738,7 +738,7 @@ export default function App() {
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
     const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(initialPath));
     return isPublicRoute ? 'public-loading' : 'loading';
-  }); 
+  });
   const [data, setData] = useState(() => getDefaultTemplate(null));
   const [currentSlug, setCurrentSlug] = useState('');
   const [isPublicLoading, setIsPublicLoading] = useState(false);
@@ -775,11 +775,11 @@ export default function App() {
   const [isSuccessSetup, setIsSuccessSetup] = useState(false);
   const [isSuccessCreateUser, setIsSuccessCreateUser] = useState(false);
   const [isSuccessInvite, setIsSuccessInvite] = useState(false);
-  
+
   // Demo mode state management
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [demoResetInterval, setDemoResetInterval] = useState(60);
-  
+
   // Dark mode state management
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem('darkMode');
@@ -871,7 +871,7 @@ export default function App() {
     return (
       <div className="sticky top-0 left-0 right-0 z-50 bg-amber-100 dark:bg-amber-900 border-b-2 border-amber-400 dark:border-amber-700 px-4 py-3 text-center">
         <div className="flex items-center justify-center gap-3">
-          <span className="text-2xl">🛠️</span>
+          <span className="text-2xl">ðŸ› ï¸</span>
           <span className="font-semibold text-amber-900 dark:text-amber-100">
             Demo Mode
           </span>
@@ -943,7 +943,7 @@ const [settings, setSettings] = useState({
       'Content-Type': 'application/json',
       ...options.headers
     };
-    
+
     if (csrfToken && (options.method === 'POST' || options.method === 'DELETE')) {
       headers['X-CSRF-Token'] = csrfToken;
     }
@@ -954,7 +954,7 @@ const [settings, setSettings] = useState({
       credentials: 'include'
     });
   };
-  
+
   // Check setup status
   const checkSetupStatus = async () => {
     try {
@@ -985,7 +985,7 @@ const [settings, setSettings] = useState({
         fetchCsrfToken();
         checkAuth().then((authResult) => {
           if (authResult.isAuthenticated) {
-            // After auth check, load the card data — but skip if handleEdit is already
+            // After auth check, load the card data â€” but skip if handleEdit is already
             // in progress (e.g. triggered by the admin clicking the Edit button, which
             // navigates here and would otherwise cause a second fetch without userId)
             if (!editInProgressRef.current) {
@@ -1002,7 +1002,7 @@ const [settings, setSettings] = useState({
       }
       return;
     }
-    
+
     // Skip public card route handling here - PublicCardRoute component handles it
     // This prevents duplicate fetches
     // Public routes: /:orgSlug/:cardSlug or /:slug (short code or legacy)
@@ -1010,7 +1010,7 @@ const [settings, setSettings] = useState({
     const isShortCode = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
     const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(path));
-    
+
     if (isPublicRoute) {
       // Don't interfere with public card routes - let PublicCardRoute handle it
       // Only set initial state if view is still 'loading' (first render)
@@ -1022,7 +1022,7 @@ const [settings, setSettings] = useState({
       }
       return;
     }
-    
+
     // Set view based on route
     if (path === '/setup') {
       // Check if setup is already complete - if so, redirect to login
@@ -1034,12 +1034,12 @@ const [settings, setSettings] = useState({
         } else {
           // Setup not complete, show wizard
           setView('setup-wizard');
-          document.title = `Configuration · ${APP_NAME}`;
+          document.title = `Configuration Â· ${APP_NAME}`;
         }
       }).catch(() => {
         // If check fails, show wizard anyway
         setView('setup-wizard');
-        document.title = `Configuration · ${APP_NAME}`;
+        document.title = `Configuration Â· ${APP_NAME}`;
       });
       return;
     } else if (path === '/login') {
@@ -1053,12 +1053,12 @@ const [settings, setSettings] = useState({
         } else {
           // Not authenticated, show login page
           setView('admin-login');
-          document.title = `Connexion · ${APP_NAME}`;
+          document.title = `Connexion Â· ${APP_NAME}`;
         }
       }).catch(() => {
         // Not authenticated, show login page
         setView('admin-login');
-        document.title = `Connexion · ${APP_NAME}`;
+        document.title = `Connexion Â· ${APP_NAME}`;
       });
     } else if (path === '/register') {
       setView('loading');
@@ -1068,11 +1068,11 @@ const [settings, setSettings] = useState({
           navigate('/people', { replace: true });
         } else {
           setView('admin-register');
-          document.title = `Inscription · ${APP_NAME}`;
+          document.title = `Inscription Â· ${APP_NAME}`;
         }
       }).catch(() => {
         setView('admin-register');
-        document.title = `Inscription · ${APP_NAME}`;
+        document.title = `Inscription Â· ${APP_NAME}`;
       });
     } else if (path === '/settings') {
       setView('admin-settings');
@@ -1108,7 +1108,7 @@ const [settings, setSettings] = useState({
             // Refresh auth state so the header can offer the dashboard link.
             checkAuth().catch(() => {});
             setView('home');
-            document.title = `${APP_NAME} — Cartes de visite avec QR code`;
+            document.title = `${APP_NAME} â€” Cartes de visite avec QR code`;
           }
           return;
         }
@@ -1207,7 +1207,7 @@ const [settings, setSettings] = useState({
         setUserRole(userData.role);
         setCurrentUserId(userData.id);
         setCurrentUserEmail(userData.email);
-        
+
         // Fetch cards
         const res = await apiCall(`${API_ENDPOINT}/admin/cards`);
         if (res.ok) {
@@ -1219,7 +1219,7 @@ const [settings, setSettings] = useState({
           } else {
             fetchSettings();
           }
-          
+
           return { isAuthenticated: true, userData, cardList: list };
         } else {
           setIsAuthenticated(false);
@@ -1248,14 +1248,14 @@ const [settings, setSettings] = useState({
       if (res.ok) {
         const json = await res.json();
         const defaultTemplate = getDefaultTemplate(settings);
-        setData({ 
-          ...defaultTemplate, 
-          ...json, 
+        setData({
+          ...defaultTemplate,
+          ...json,
           links: json.links || [],
           privacy: json.privacy || defaultTemplate.privacy
         });
         setView('public-card');
-        document.title = json.personal?.name ? `${json.personal.name} · ${APP_NAME}` : APP_NAME;
+        document.title = json.personal?.name ? `${json.personal.name} Â· ${APP_NAME}` : APP_NAME;
       } else {
         setError('Card not found');
         setView('404');
@@ -1281,11 +1281,11 @@ const [settings, setSettings] = useState({
         // Fetch settings for the organization that owns this card
         const orgSlug = cardData._orgSlug || 'default';
         await fetchPublicSettings(orgSlug);
-        
+
         const defaultTemplate = getDefaultTemplate(settings);
-        const mergedData = { 
-          ...defaultTemplate, 
-          ...cardData, 
+        const mergedData = {
+          ...defaultTemplate,
+          ...cardData,
           links: cardData.links || [],
           privacy: cardData.privacy || defaultTemplate.privacy,
           _shortCode: cardData._shortCode // Preserve short code from backend
@@ -1321,9 +1321,9 @@ const [settings, setSettings] = useState({
       if (res.ok) {
         const cardData = await res.json();
         const defaultTemplate = getDefaultTemplate(settings);
-        const mergedData = { 
-          ...defaultTemplate, 
-          ...cardData, 
+        const mergedData = {
+          ...defaultTemplate,
+          ...cardData,
           links: cardData.links || [],
           privacy: cardData.privacy || defaultTemplate.privacy,
           _shortCode: cardData._shortCode // Preserve short code from backend
@@ -1356,11 +1356,11 @@ const [settings, setSettings] = useState({
     if (!colors || !Array.isArray(colors)) return [];
     return colors.map(color => {
       let hexBase, baseColor, colorType;
-      
+
       // Determine if this is a standard color (has Tailwind gradient or baseColor) or custom hex
       const hasValidTailwindGradient = color.gradient && typeof color.gradient === 'string' && color.gradient.startsWith('from-');
       const hasHexBase = color.hexBase && typeof color.hexBase === 'string' && color.hexBase.startsWith('#');
-      
+
       if (hasValidTailwindGradient) {
         // Convert from Tailwind gradient to hex
         const extracted = extractBaseColorFromGradient(color.gradient);
@@ -1398,17 +1398,17 @@ const [settings, setSettings] = useState({
         hexBase = getTailwindColorHex(baseColor, 600);
         colorType = color.colorType === 'custom' ? 'custom' : 'standard';
       }
-      
+
       // Always auto-generate complementary secondary color
       const complementaryColor = baseColor ? getComplementaryColor(baseColor) : null;
       const hexSecondary = color.hexSecondary || (complementaryColor ? getTailwindColorHex(complementaryColor, 600) : hexBase);
-      
+
       // Generate all inline styles
       const gradientStyle = `linear-gradient(135deg, ${hexBase}, ${hexSecondary})`;
       const buttonStyle = hexBase;
       const linkStyle = hexBase;
       const textStyle = hexBase;
-      
+
       // Build clean hex-only color object
       return {
         name: color.name,
@@ -1451,17 +1451,17 @@ const [settings, setSettings] = useState({
       if (res.ok) {
         const settingsData = await res.json();
         const mergedVariant = settingsData.theme_variant || 'swiish';
-        
+
         // Match admin pattern: create new object from API response
         // This ensures React sees it as a new object and triggers re-renders
         const merged = {
           default_organisation: settingsData.default_organisation || 'My Organisation',
           theme_variant: mergedVariant,
-          theme_colors: (settingsData.theme_colors && Array.isArray(settingsData.theme_colors)) 
+          theme_colors: (settingsData.theme_colors && Array.isArray(settingsData.theme_colors))
             ? initializeColorDataForSettings(settingsData.theme_colors)
             : THEME_PRESETS.swiish
         };
-        
+
         // Set state and apply theme immediately (same pattern as fetchSettings)
         setSettings(merged);
         applyThemeCssVars(mergedVariant);
@@ -1476,11 +1476,11 @@ const [settings, setSettings] = useState({
   // Group cards by user (userId or userEmail as fallback)
   const groupCardsByUser = (cards) => {
     const userMap = new Map();
-    
+
     cards.forEach(card => {
       // Use userId as primary key, fallback to userEmail if userId not available
       const userKey = card.userId || card.userEmail || 'unknown';
-      
+
       if (!userMap.has(userKey)) {
         userMap.set(userKey, {
           userId: card.userId || null,
@@ -1490,11 +1490,11 @@ const [settings, setSettings] = useState({
           cards: []
         });
       }
-      
+
       // Add card to user's cards array (even if slug is null, it represents a user without cards)
       userMap.get(userKey).cards.push(card);
     });
-    
+
     // Convert map to array and sort by user creation date (newest first)
     return Array.from(userMap.values()).sort((a, b) => {
       if (!a.userCreatedAt && !b.userCreatedAt) return 0;
@@ -1555,8 +1555,8 @@ const [settings, setSettings] = useState({
         const errorData = await res.json().catch(() => ({}));
         setError(errorData.error || 'Email ou mot de passe incorrect');
       }
-    } catch (e) { 
-      setError('La connexion a échoué. Réessayez.'); 
+    } catch (e) {
+      setError('La connexion a Ã©chouÃ©. RÃ©essayez.');
     } finally {
       setIsLoggingIn(false);
     }
@@ -1578,12 +1578,12 @@ const [settings, setSettings] = useState({
         body: JSON.stringify({ email: email.toLowerCase().trim() })
       });
       if (res.ok) {
-        setForgotMessage('Si un compte existe, un lien de réinitialisation a été envoyé.');
+        setForgotMessage('Si un compte existe, un lien de rÃ©initialisation a Ã©tÃ© envoyÃ©.');
       } else {
-        setError('Impossible d’envoyer le lien pour le moment.');
+        setError('Impossible dâ€™envoyer le lien pour le moment.');
       }
     } catch (e) {
-      setError('Impossible d’envoyer le lien pour le moment.');
+      setError('Impossible dâ€™envoyer le lien pour le moment.');
     }
   };
 
@@ -1599,7 +1599,7 @@ const [settings, setSettings] = useState({
       return;
     }
     if (registerPassword.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setError('Le mot de passe doit contenir au moins 8 caractÃ¨res');
       return;
     }
     if (!/[A-Za-z]/.test(registerPassword) || !/\d/.test(registerPassword)) {
@@ -1636,7 +1636,7 @@ const [settings, setSettings] = useState({
         setError(errorData.error || 'Inscription impossible');
       }
     } catch (e) {
-      setError('Inscription impossible. Réessayez.');
+      setError('Inscription impossible. RÃ©essayez.');
     } finally {
       setIsSettingUp(false);
     }
@@ -1727,7 +1727,7 @@ const [settings, setSettings] = useState({
     }
     setCreateCardModal({ isOpen: false, slug: '', userId: null });
     setCurrentSlug(slug);
-    setData(getDefaultTemplate(settings)); 
+    setData(getDefaultTemplate(settings));
     setView('admin-editor');
     // Navigate to editor route, just like handleEdit does
     navigate(`/people/edit/${slug}`);
@@ -1754,7 +1754,7 @@ const [settings, setSettings] = useState({
         method: 'POST',
         body: JSON.stringify(newUser)
       });
-      
+
       if (res.ok) {
         setIsSuccessCreateUser(true);
         setTimeout(() => setIsSuccessCreateUser(false), 2000);
@@ -1879,8 +1879,8 @@ const [settings, setSettings] = useState({
       if (res.ok) {
         const json = await res.json();
         const defaultTemplate = getDefaultTemplate(settings);
-        setData({ 
-          ...defaultTemplate, 
+        setData({
+          ...defaultTemplate,
           ...json,
           // Enforce default_organisation from organization settings
           personal: {
@@ -1982,7 +1982,7 @@ const [settings, setSettings] = useState({
     if (email && cardList.length > 0) {
       // Only check against actual cards (those with slugs) - this excludes user entries without cards
       // Also exclude the current card being edited
-      const duplicates = cardList.filter(c => 
+      const duplicates = cardList.filter(c =>
         c.slug && // Must be an actual card
         c.email && // Must have a contact email
         c.email === email && // Must match the email being saved
@@ -2036,10 +2036,10 @@ const [settings, setSettings] = useState({
         <>
           <AuthShell
             title="Configuration initiale"
-            subtitle="Créez votre organisation et le premier compte administrateur Macarte."
+            subtitle="CrÃ©ez votre organisation et le premier compte administrateur Macarte."
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                Déjà configuré ?{' '}
+                DÃ©jÃ  configurÃ© ?{' '}
                 <button type="button" onClick={() => navigate('/login')} className="font-medium text-action dark:text-action-dark">Se connecter</button>
               </p>
             }
@@ -2073,7 +2073,7 @@ const [settings, setSettings] = useState({
                 <PasswordField
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractères min."
+                  placeholder="8 caractÃ¨res min."
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2087,7 +2087,7 @@ const [settings, setSettings] = useState({
                 className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSettingUp ? 'Configuration…' : 'Terminer'}
+                {isSettingUp ? 'Configurationâ€¦' : 'Terminer'}
               </button>
             </form>
           </AuthShell>
@@ -2099,15 +2099,15 @@ const [settings, setSettings] = useState({
         <>
           <AuthShell
             title="Connexion"
-            subtitle="Accédez à votre espace Macarte."
+            subtitle="AccÃ©dez Ã  votre espace Macarte."
             footer={
               <div className="mt-6 space-y-3 text-center text-sm">
                 <button type="button" onClick={() => { setForgotMode(!forgotMode); setError(''); setForgotMessage(''); }} className="text-text-muted dark:text-text-muted-dark hover:text-text-primary">
-                  Mot de passe oublié ?
+                  Mot de passe oubliÃ© ?
                 </button>
                 <p className="text-text-muted dark:text-text-muted-dark">
                   Nouveau sur Macarte ?{' '}
-                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">Créer un compte</button>
+                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">CrÃ©er un compte</button>
                 </p>
               </div>
             }
@@ -2140,7 +2140,7 @@ const [settings, setSettings] = useState({
                     id="login-password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     autoComplete="current-password"
                     show={showPassword}
                     onToggle={() => setShowPassword(!showPassword)}
@@ -2153,7 +2153,7 @@ const [settings, setSettings] = useState({
                 )}
                 <button type="submit" disabled={isLoggingIn} className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">
                   {isLoggingIn && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  {isLoggingIn ? 'Connexion…' : 'Se connecter'}
+                  {isLoggingIn ? 'Connexionâ€¦' : 'Se connecter'}
                 </button>
               </form>
             )}
@@ -2165,24 +2165,24 @@ const [settings, setSettings] = useState({
       {view === 'admin-register' && (
         <>
           <AuthShell
-            title="Créer un compte"
-            subtitle="Inscrivez-vous pour créer votre organisation et vos cartes Macarte."
+            title="CrÃ©er un compte"
+            subtitle="Inscrivez-vous pour crÃ©er votre organisation et vos cartes Macarte."
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                Vous avez déjà un compte ?{' '}
+                Vous avez dÃ©jÃ  un compte ?{' '}
                 <button type="button" onClick={() => { setError(''); navigate('/login'); }} className="font-medium text-action dark:text-action-dark">Se connecter</button>
               </p>
             }
           >
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label htmlFor="reg-org" className="ui-label">Nom de l’organisation</label>
+                <label htmlFor="reg-org" className="ui-label">Nom de lâ€™organisation</label>
                 <input
                   id="reg-org"
                   type="text"
                   value={setupData.organisationName}
                   onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
-                  placeholder="Studio, équipe ou votre nom"
+                  placeholder="Studio, Ã©quipe ou votre nom"
                   className="ui-input"
                   required
                   autoFocus
@@ -2207,7 +2207,7 @@ const [settings, setSettings] = useState({
                   id="reg-password"
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractères, lettre + chiffre"
+                  placeholder="8 caractÃ¨res, lettre + chiffre"
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2220,7 +2220,7 @@ const [settings, setSettings] = useState({
                   id="reg-password-confirm"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Répétez le mot de passe"
+                  placeholder="RÃ©pÃ©tez le mot de passe"
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2237,7 +2237,7 @@ const [settings, setSettings] = useState({
                 className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {isSettingUp ? 'Création du compte…' : 'Créer mon compte'}
+                {isSettingUp ? 'CrÃ©ation du compteâ€¦' : 'CrÃ©er mon compte'}
               </button>
             </form>
           </AuthShell>
@@ -2247,61 +2247,61 @@ const [settings, setSettings] = useState({
       )}
       {view === 'admin-dashboard' && (
         <>
-          <div className="min-h-screen bg-main dark:bg-main-dark bg-main-texture p-6 md:p-12 flex flex-col">
-          <div className="max-w-6xl mx-auto flex-1 w-full">
+          <div className="min-h-screen bg-main dark:bg-main-dark p-6 md:p-10 flex flex-col">
+          <div className="max-w-7xl mx-auto flex-1 w-full">
             {/* UPDATED HEADER: flex-wrap + gap adjustments for mobile */}
-            <div className="flex flex-wrap justify-between items-center mb-8 gap-4 relative z-10">
+            <div className="flex flex-wrap justify-between items-start md:items-center mb-10 gap-4 relative z-10">
                <div>
-                 <h1 className="text-2xl md:text-3xl font-bold text-text-primary dark:text-text-primary-dark">People</h1>
-                 <p className="text-sm md:text-base text-text-muted dark:text-text-muted-dark">Manage your people</p>
+                 <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-text-primary dark:text-text-primary-dark">People</h1>
+                 <p className="text-sm md:text-base text-text-muted dark:text-text-muted-dark mt-1">Manage your organisation's digital cards</p>
                </div>
-               <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
-                 <button onClick={toggleDarkMode} className="px-3 py-2 md:px-4 md:py-3 rounded-full font-medium text-text-muted dark:text-text-muted-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-colors whitespace-nowrap flex items-center gap-2 text-sm md:text-base">
+               <div className="flex flex-wrap gap-2 md:gap-2.5 w-full md:w-auto">
+                 <button onClick={toggleDarkMode} className="px-3 py-2 rounded-lg font-medium text-text-muted dark:text-text-muted-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-all whitespace-nowrap flex items-center gap-2 text-sm shadow-sm">
                    {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                  </button>
-                 <button onClick={handleLogout} className="px-3 py-2 md:px-4 md:py-3 rounded-full font-medium text-text-muted dark:text-text-muted-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-colors whitespace-nowrap text-sm md:text-base">Logout</button>
+                 <button onClick={handleLogout} className="px-3 py-2 rounded-lg font-medium text-text-muted dark:text-text-muted-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-all whitespace-nowrap text-sm shadow-sm">Logout</button>
                  {userRole === 'owner' && (
-                   <button onClick={() => navigate('/settings')} className="px-3 py-2 md:px-4 md:py-3 rounded-full font-medium text-text-secondary dark:text-text-secondary-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-colors whitespace-nowrap flex items-center gap-2 text-sm md:text-base">
+                   <button onClick={() => navigate('/settings')} className="px-3 py-2 rounded-lg font-medium text-text-secondary dark:text-text-secondary-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-all whitespace-nowrap flex items-center gap-2 text-sm shadow-sm">
                      <Settings className="w-4 h-4" /> <span className="hidden sm:inline">Organisation</span><span className="sm:hidden">Org</span>
                    </button>
                  )}
                  {userRole === 'owner' && (
-                   <button onClick={() => navigate('/users')} className="px-3 py-2 md:px-4 md:py-3 rounded-full font-medium text-text-secondary dark:text-text-secondary-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-colors whitespace-nowrap flex items-center gap-2 text-sm md:text-base">
+                   <button onClick={() => navigate('/users')} className="px-3 py-2 rounded-lg font-medium text-text-secondary dark:text-text-secondary-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-all whitespace-nowrap flex items-center gap-2 text-sm shadow-sm">
                      <Users className="w-4 h-4" /> Users
                    </button>
                  )}
-                 <button onClick={handleCreateNew} className="bg-action dark:bg-action-dark text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-bold flex items-center gap-2 hover:bg-action-hover dark:hover:bg-action-hover-dark transition-all whitespace-nowrap text-sm md:text-base">
-                   <Plus className="w-4 h-4 md:w-5 md:h-5" /> New Person
+                 <button onClick={handleCreateNew} className="bg-action dark:bg-action-dark text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-action-hover dark:hover:bg-action-hover-dark transition-all whitespace-nowrap text-sm shadow-sm">
+                   <Plus className="w-4 h-4" /> New Person
                  </button>
                </div>
             </div>
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
+            <div className="columns-1 md:columns-2 xl:columns-3 gap-5">
               {groupCardsByUser(cardList).map(user => {
                 // Filter out entries without slugs (these represent users without cards)
                 const userCards = user.cards.filter(c => c.slug);
                 const userKey = user.userId || user.userEmail || 'unknown';
-                
+
                 return (
-                  <div key={userKey} className="bg-card dark:bg-card-dark rounded-card shadow-sm border border-border-subtle dark:border-border-dark hover:shadow-md transition-shadow flex flex-col p-[15px] h-fit break-inside-avoid mb-6">
+                  <div key={userKey} className="bg-card dark:bg-card-dark rounded-xl shadow-card border border-border dark:border-border-dark hover:shadow-lifted transition-all duration-200 flex flex-col p-5 h-fit break-inside-avoid mb-5">
                     {/* User Info Box (top) - only shown for owners */}
                     {userRole === 'owner' && user.userEmail && (
-                      <div className="w-full mb-[15px]">
-                        <div className="bg-surface dark:bg-surface-dark/50 rounded-t-container rounded-b-badge p-5 text-xs border border-border dark:border-border-dark min-h-[130px]">
-                          <div className="text-text-secondary dark:text-text-muted-dark truncate mb-2 font-medium">{user.userEmail}</div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${
-                              user.userRole === 'owner' 
-                                ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' 
-                                : 'bg-surface dark:bg-surface-dark text-text-primary dark:text-text-secondary-dark'
-                            }`}>
-                              {user.userRole === 'owner' ? 'Owner' : 'Member'}
-                            </span>
-                            {user.userCreatedAt && (
-                              <span className="text-text-muted dark:text-text-muted-dark text-[10px]">
-                                {new Date(user.userCreatedAt).toLocaleDateString()}
+                        <div className="w-full mb-4">
+                          <div className="bg-surface dark:bg-surface-dark rounded-lg p-4 text-xs border border-border dark:border-border-dark">
+                            <div className="text-text-secondary dark:text-text-muted-dark truncate mb-2 font-medium">{user.userEmail}</div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                user.userRole === 'owner'
+  ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300'
+                                  : 'bg-surface dark:bg-surface-dark text-text-primary dark:text-text-secondary-dark'
+                              }`}>
+                                {user.userRole === 'owner' ? 'Owner' : 'Member'}
                               </span>
-                            )}
-                          </div>
+                              {user.userCreatedAt && (
+                                <span className="text-text-muted dark:text-text-muted-dark text-[11px]">
+                                  {new Date(user.userCreatedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           {user.userId && user.userId !== currentUserId && (
                             <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border dark:border-border-dark">
                               {editingUserId === user.userId ? (
@@ -2347,16 +2347,16 @@ const [settings, setSettings] = useState({
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Cards for this user - stacked vertically */}
-                    <div className="w-full space-y-[15px]">
+                    <div className="w-full space-y-4">
                       {userCards.length > 0 ? (
                         <>
                           {userCards.map(card => (
-                            <div key={card.slug} className="bg-surface dark:bg-surface-dark/50 rounded-badge p-5 border border-border dark:border-border-dark" style={{ aspectRatio: '1.586 / 1' }}>
+                            <div key={card.slug} className="bg-surface dark:bg-surface-dark/60 rounded-lg p-4 border border-border dark:border-border-dark hover:border-border-subtle dark:hover:border-border-subtle-dark transition-all" style={{ aspectRatio: '1.586 / 1' }}>
                               <div className="w-full h-full flex flex-col">
                                 <div className="flex-1 flex flex-row items-start gap-3 mb-3 relative">
-                                  <div className="w-20 h-20 rounded-full bg-surface dark:bg-surface-dark overflow-hidden border-thick border-border-subtle dark:border-border-dark flex-shrink-0">
+                                  <div className="w-16 h-16 rounded-full bg-surface dark:bg-surface-dark overflow-hidden border border-border-subtle dark:border-border-dark flex-shrink-0">
                                     {card.avatar ? <img src={card.avatar} className="w-full h-full object-cover" alt="avatar" /> : <User className="w-full h-full p-5 text-text-muted-subtle dark:text-text-muted-dark" />}
                                   </div>
                                    <button onClick={(e) => { e.stopPropagation(); handleDelete(card.slug, card.userId); }} className="absolute top-0 right-0 p-2 text-text-muted-subtle dark:text-text-muted-dark hover:text-error-text dark:hover:text-error-text-dark hover:bg-error-bg dark:hover:bg-error-bg-dark rounded-full transition-colors">
@@ -2384,29 +2384,29 @@ const [settings, setSettings] = useState({
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-center gap-2 w-full mt-auto">
-                                  <a 
-                                    href={card.shortCode ? `/${card.shortCode}` : (card.orgSlug && card.slug ? `/${card.orgSlug}/${card.slug}` : `/${card.slug}`)} 
-                                    target="_blank" 
-                                    rel="noreferrer" 
-                                    className="flex-1 py-2 text-xs font-medium text-confirm-text dark:text-confirm-text-dark bg-confirm dark:bg-confirm-dark rounded-button hover:bg-confirm-hover dark:hover:bg-confirm-hover-dark flex items-center justify-center gap-1"
+                                  <a
+                                    href={card.shortCode ? `/${card.shortCode}` : (card.orgSlug && card.slug ? `/${card.orgSlug}/${card.slug}` : `/${card.slug}`)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex-1 py-2 text-sm font-medium text-text-primary dark:text-text-primary-dark bg-card dark:bg-card-dark rounded-lg hover:bg-surface dark:hover:bg-surface-dark border border-border dark:border-border-dark transition-all flex items-center justify-center gap-1.5"
                                   >
-                                    <ExternalLink className="w-3 h-3"/> View
+                                    <ExternalLink className="w-3.5 h-3.5"/> View
                                   </a>
-                                   <button onClick={() => handleEdit(card.slug, card.userId)} className="flex-1 py-2 text-xs font-medium text-confirm-text dark:text-confirm-text-dark bg-confirm dark:bg-confirm-dark rounded-button hover:bg-confirm-hover dark:hover:bg-confirm-hover-dark flex items-center justify-center gap-1"><Edit3 className="w-3 h-3"/> Edit</button>
+                                   <button onClick={() => handleEdit(card.slug, card.userId)} className="flex-1 py-2 text-sm font-medium text-white bg-action dark:bg-action-dark rounded-lg hover:bg-action-hover dark:hover:bg-action-hover-dark transition-all flex items-center justify-center gap-1.5"><Edit3 className="w-3.5 h-3.5"/> Edit</button>
                                 </div>
                               </div>
                             </div>
                           ))}
                           {/* Create Card button at bottom of card list */}
-                          <div className="bg-surface dark:bg-surface-dark/30 rounded-t-badge rounded-b-container border-thick border-dashed border-border dark:border-border-dark p-[15px] flex items-center justify-center">
-                            <button onClick={() => setCreateCardModal({ isOpen: true, slug: '', userId: user.userId || user.userEmail })} className="px-4 py-2 text-sm font-medium text-white bg-action dark:bg-action-dark rounded-button hover:bg-action-hover dark:hover:bg-action-hover-dark flex items-center justify-center gap-2"><Plus className="w-4 h-4"/> Create Card</button>
+                          <div className="bg-surface/50 dark:bg-surface-dark/40 rounded-lg border border-dashed border-border dark:border-border-dark p-4 flex items-center justify-center">
+                            <button onClick={() => setCreateCardModal({ isOpen: true, slug: '', userId: user.userId || user.userEmail })} className="px-4 py-2 text-sm font-medium text-white bg-action dark:bg-action-dark rounded-lg hover:bg-action-hover dark:hover:bg-action-hover-dark flex items-center justify-center gap-2 transition-all"><Plus className="w-4 h-4"/> Create Card</button>
                           </div>
                         </>
                       ) : (
                         /* No cards - show Create Card button in place */
-                        <div className="bg-surface dark:bg-surface-dark/50 rounded-t-badge rounded-b-container p-5 border border-border dark:border-border-dark" style={{ aspectRatio: '1.586 / 1' }}>
-                          <div className="w-full h-full bg-surface dark:bg-surface-dark/30 rounded-t-badge rounded-b-badge border-thick border-dashed border-border dark:border-border-dark flex flex-col items-center justify-center">
-                            <button onClick={() => setCreateCardModal({ isOpen: true, slug: '', userId: user.userId || user.userEmail })} className="px-4 py-3 text-sm font-medium text-white bg-action dark:bg-action-dark rounded-button hover:bg-action-hover dark:hover:bg-action-hover-dark flex items-center justify-center gap-2"><Plus className="w-4 h-4"/> Create Card</button>
+                        <div className="bg-surface dark:bg-surface-dark/50 rounded-lg p-4 border border-border dark:border-border-dark" style={{ aspectRatio: '1.586 / 1' }}>
+                          <div className="w-full h-full bg-surface/60 dark:bg-surface-dark/40 rounded-lg border border-dashed border-border dark:border-border-dark flex flex-col items-center justify-center">
+                            <button onClick={() => setCreateCardModal({ isOpen: true, slug: '', userId: user.userId || user.userEmail })} className="px-4 py-2 text-sm font-medium text-white bg-action dark:bg-action-dark rounded-lg hover:bg-action-hover dark:hover:bg-action-hover-dark flex items-center justify-center gap-2 transition-all"><Plus className="w-4 h-4"/> Create Card</button>
                           </div>
                         </div>
                       )}
@@ -2415,7 +2415,7 @@ const [settings, setSettings] = useState({
                 );
               })}
               {cardList.length === 0 && (
-                 <div className="col-span-full py-20 text-center text-text-muted-subtle dark:text-text-muted-dark bg-card dark:bg-card-dark rounded-card border-thick border-dashed border-border dark:border-border-dark">
+                 <div className="col-span-full py-16 text-center text-text-muted dark:text-text-muted-dark bg-card dark:bg-card-dark rounded-xl border border-dashed border-border dark:border-border-dark">
                    No people yet. Click "New Person" to start.
                  </div>
               )}
@@ -2611,11 +2611,11 @@ const [settings, setSettings] = useState({
               </button>
             </div>
           </div>
-          <Modal 
-            isOpen={createCardModal.isOpen} 
-            onClose={handleCreateCardCancel} 
-            type="info" 
-            title="Create New Card" 
+          <Modal
+            isOpen={createCardModal.isOpen}
+            onClose={handleCreateCardCancel}
+            type="info"
+            title="Create New Card"
             message="Enter a user URL for the new card (e.g., 'sarah'):"
             inputLabel="User URL"
             inputPlaceholder="sarah"
@@ -2630,10 +2630,10 @@ const [settings, setSettings] = useState({
       )}
       {view === 'admin-editor' && (
         <>
-          <EditorView 
-            data={data} 
-            setData={setData} 
-            onBack={() => { navigate('/people'); fetchCardList(); }} 
+          <EditorView
+            data={data}
+            setData={setData}
+            onBack={() => { navigate('/people'); fetchCardList(); }}
             onSave={handleSave}
             slug={currentSlug}
             settings={settings}
@@ -2718,7 +2718,7 @@ const [settings, setSettings] = useState({
         } />
         {/* Public card routes - org-scoped must come before single slug */}
         <Route path="/:orgSlug/:cardSlug" element={
-          <PublicCardRoute 
+          <PublicCardRoute
             view={view}
             isPublicLoading={isPublicLoading}
             error={error}
@@ -2734,7 +2734,7 @@ const [settings, setSettings] = useState({
         } />
         {/* Public card route - matches short code or legacy slug */}
         <Route path="/:slug" element={
-          <PublicCardRoute 
+          <PublicCardRoute
             view={view}
             isPublicLoading={isPublicLoading}
             error={error}
@@ -2758,11 +2758,11 @@ const [settings, setSettings] = useState({
 function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMode, toggleDarkMode, showAlert, fetchCardByOrgAndSlug, fetchCardByShortCode, fetchPublicCard }) {
   const params = useParams();
   const location = useLocation();
-  
-  
+
+
   // Track the last fetched pathname to prevent duplicate fetches
   const lastFetchedPathRef = useRef(null);
-  
+
   // Apply app theme variant class to body for CSS overrides (swiish|minimal|custom)
   // This ensures the theme is applied to public cards the same way as admin views
   useEffect(() => {
@@ -2771,25 +2771,25 @@ function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMod
     document.body.classList.add(`theme-${variant}`);
     applyThemeCssVars(variant);
   }, [settings]);
-  
+
   // Fetch the card when the route changes
   useEffect(() => {
     const path = location.pathname;
-    
+
     // Single guard: skip if we've already fetched for this exact pathname
     if (lastFetchedPathRef.current === path) {
       return;
     }
-    
+
     // Parse route to determine fetch strategy
     const pathParts = path.substring(1).split('/').filter(p => p);
     const isShortCode = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
     const isLegacy = pathParts.length === 1 && !isShortCode;
-    
+
     // Mark this path as being fetched BEFORE calling fetch (prevents race conditions)
     lastFetchedPathRef.current = path;
-    
+
     // Fetch based on route type
     if (isShortCode && fetchCardByShortCode) {
       fetchCardByShortCode(pathParts[0]);
@@ -2803,11 +2803,11 @@ function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMod
       lastFetchedPathRef.current = null;
     }
   }, [location.pathname, fetchCardByOrgAndSlug, fetchCardByShortCode, fetchPublicCard]);
-  
+
   // Show loading state while fetching card
   const pathParts = location.pathname.substring(1).split('/').filter(p => p);
   const hasPublicRouteParams = params.slug || params.cardSlug || params.orgSlug || pathParts.length > 0;
-  
+
   if (isPublicLoading || ((view === 'loading' || view === 'public-loading') && hasPublicRouteParams)) {
     return (
       <div className="min-h-screen bg-main dark:bg-main-dark bg-main-texture flex justify-center items-center">
@@ -2815,7 +2815,7 @@ function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMod
       </div>
     );
   }
-  
+
   // Show 404 if card not found
   if (view === '404') {
     return (
@@ -2827,7 +2827,7 @@ function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMod
       </div>
     );
   }
-  
+
   // Show card when loaded
   if (view === 'public-card' && data && data.personal) {
   return (
@@ -2846,7 +2846,7 @@ function PublicCardRoute({ view, isPublicLoading, error, data, settings, darkMod
       </div>
     );
   }
-  
+
   // Default: show loading (shouldn't reach here, but safety net)
   return (
     <div className="min-h-screen bg-main dark:bg-main-dark bg-main-texture flex justify_center items-center">
@@ -2876,7 +2876,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
   const [showSendOptions, setShowSendOptions] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isPwaInstalled, setIsPwaInstalled] = useState(false);
-  
+
   // Lead capture deep links, using the card owner's contact details
   const ownerPhone = contact.phone || '';
   const ownerEmail = contact.email || '';
@@ -2914,7 +2914,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
     if (!value) return '';
     return btoa(value);
   };
-  
+
   const deobfuscateContact = (obfuscated) => {
     if (!obfuscated) return '';
     try {
@@ -2923,7 +2923,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
       return '';
     }
   };
-  
+
   // Apply app theme variant class to body for CSS overrides (swiish|minimal|custom)
   // This ensures the theme is applied when CardDisplay renders (both in editor preview and public view)
   useEffect(() => {
@@ -2940,7 +2940,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
       setShowSendOptions(false);
     }
   }, [showSendDetailsBlock, showSendOptions]);
-  
+
   // UPDATED: Set Title
   useEffect(() => {
     const firstName = sanitizeText(personal.firstName || '');
@@ -3039,7 +3039,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
         metaRobots.remove();
       }
     }
-    
+
     // Cleanup on unmount
     return () => {
       const metaRobots = document.querySelector('meta[name="robots"]');
@@ -3064,15 +3064,15 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
     const pathParts = typeof window !== 'undefined' ? window.location.pathname.substring(1).split('/').filter(p => p) : [];
     const isShortCodeRoute = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const shortCode = data._shortCode || (isShortCodeRoute ? pathParts[0] : null);
-    
+
     // For QR generation, always use short code if available, otherwise fallback to slug
     const qrIdentifier = shortCode || (pathParts.length > 0 ? pathParts[pathParts.length - 1] : '');
-    
+
     const payload = buildQrPayload(shortCode, { personal, contact, social, images, theme });
     // Always cache latest rich payload for offline use
     saveQrPayloadToStorage(payload);
 
-    // Online check – if offline, try to use cached payload instead of hitting API
+    // Online check â€“ if offline, try to use cached payload instead of hitting API
     const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
     if (!isOnline) {
@@ -3147,7 +3147,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
     const email = sanitizeText(contact.email || '');
     const website = sanitizeText(contact.website || '');
     const bio = sanitizeText(personal.bio || '');
-    
+
     const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${firstName} ${lastName}
@@ -3327,7 +3327,7 @@ const shortUrl = websiteUrl
                   // Check if app is already installed
                   const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                                       window.navigator.standalone === true;
-                  
+
                   if (isStandalone) {
                     if (typeof showAlert === 'function') {
                       showAlert(
@@ -3341,9 +3341,9 @@ const shortUrl = websiteUrl
                     // Provide manual installation instructions
                     const userAgent = navigator.userAgent.toLowerCase();
                     let instructions = 'To install this app:\n\n';
-                    
+
                     if (userAgent.includes('chrome') || userAgent.includes('edge')) {
-                      instructions += 'Chrome/Edge: Click the three dots menu (⋮) in the address bar, then select "Install app" or "Add to Home Screen".';
+                      instructions += 'Chrome/Edge: Click the three dots menu (â‹®) in the address bar, then select "Install app" or "Add to Home Screen".';
                     } else if (userAgent.includes('firefox')) {
                       instructions += 'Firefox: Click the menu button, then select "Install" or "Add to Home Screen".';
                     } else if (userAgent.includes('safari')) {
@@ -3351,9 +3351,9 @@ const shortUrl = websiteUrl
                     } else {
                       instructions += 'Open your browser menu and look for "Install app" or "Add to Home Screen" option.';
                     }
-                    
+
                     instructions += '\n\nNote: The install button may not be available if the app doesn\'t meet PWA requirements (service worker, valid manifest, etc.).';
-                    
+
                     if (typeof showAlert === 'function') {
                       showAlert(
                         instructions,
@@ -3407,15 +3407,15 @@ const shortUrl = websiteUrl
           {(() => {
             const requireInteraction = privacy.requireInteraction ?? true;
             const shouldShowVCF = !requireInteraction || contactRevealed;
-            
+
             // Only show VCF button if interaction is not required OR contact has been revealed
             if (shouldShowVCF) {
               const color = settings?.theme_colors?.find(c => c.name === theme.color);
               if (color?.buttonStyle) {
                 const hoverColor = darkenHex(color.buttonStyle, 10);
                 return (
-                  <button 
-                    onClick={generateVCard} 
+                  <button
+                    onClick={generateVCard}
                     className="col-span-2 flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-white shadow-lg transition-all active:scale-[0.98]"
                     style={{ backgroundColor: color.buttonStyle }}
                     onMouseEnter={(e) => {
@@ -3430,8 +3430,8 @@ const shortUrl = websiteUrl
                 );
               }
               return (
-                <button 
-                  onClick={generateVCard} 
+                <button
+                  onClick={generateVCard}
                   className="col-span-2 flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-white shadow-lg transition-transform active:scale-[0.98]"
                   style={{ backgroundColor: getButtonColor(theme.color, settings) }}
                 >
@@ -3446,7 +3446,7 @@ const shortUrl = websiteUrl
             const useObfuscation = privacy.clientSideObfuscation ?? false;
             const hasEmail = contact.email;
             const hasPhone = contact.phone;
-            
+
             // If interaction required and not yet revealed, show reveal button
             if (requireInteraction && !contactRevealed && (hasEmail || hasPhone)) {
               return (
@@ -3458,15 +3458,15 @@ const shortUrl = websiteUrl
                 </button>
               );
             }
-            
+
             // Get actual contact values
             const emailValue = hasEmail ? contact.email : '';
             const phoneValue = hasPhone ? contact.phone : '';
-            
+
             // If obfuscation is enabled, store obfuscated values in data attributes
             const emailData = useObfuscation && emailValue ? obfuscateContact(emailValue) : '';
             const phoneData = useObfuscation && phoneValue ? obfuscateContact(phoneValue) : '';
-            
+
             return (
               <>
                 {hasEmail && (
@@ -3566,14 +3566,14 @@ const shortUrl = websiteUrl
               const color = settings?.theme_colors?.find(c => c.name === theme.color);
               if (color?.linkStyle) {
                 return (
-                  <a 
+                  <a
                     key={link.id}
-                    href={link.url} 
-                    target="_blank" 
+                    href={link.url}
+                    target="_blank"
                     rel="noreferrer"
                     className="flex items-center p-4 rounded-input border transition-all active:scale-[0.99]"
-                    style={{ 
-                      color: color.linkStyle, 
+                    style={{
+                      color: color.linkStyle,
                       backgroundColor: color.linkStyle + '15',
                       borderColor: color.linkStyle + '30'
                     }}
@@ -3601,10 +3601,10 @@ const shortUrl = websiteUrl
                 );
               }
               return (
-                <a 
-                  key={link.id} 
-                  href={link.url} 
-                  target="_blank" 
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
                   rel="noreferrer"
                   className="flex items-center p-4 rounded-input border transition-all active:scale-[0.99] dark:border-border-dark"
                   style={{ color: getLinkColor(theme.color, settings) }}
@@ -3668,7 +3668,7 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
       activationConstraint: { distance: 5 }
     })
   );
-  
+
   const handleInputChange = (section, field, value) => {
     setData(prev => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
   };
@@ -3810,11 +3810,11 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark">Organisation</label>
                     <div className="relative">
-                      <input 
-                        type="text" 
-                        value={settings?.default_organisation || data.personal.company || ''} 
+                      <input
+                        type="text"
+                        value={settings?.default_organisation || data.personal.company || ''}
                         disabled
-                        className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-text-secondary dark:text-text-muted-dark cursor-not-allowed" 
+                        className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-text-secondary dark:text-text-muted-dark cursor-not-allowed"
                         placeholder="Organisation Name"
                       />
                       <div className="absolute inset-0 flex items-center justify-end pr-3 pointer-events-none">
@@ -3940,16 +3940,16 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                                     >
                                       <LinkGlyph link={link} />
                                     </label>
-                                    <input 
-                                      type="text" 
+                                    <input
+                                      type="text"
                                       placeholder="Link Title (e.g. Download CV)"
                                       value={link.title}
                                       onChange={(e) => updateLink(link.id, 'title', e.target.value)}
                                       className="flex-1 bg-card dark:bg-surface-dark border border-border dark:border-border-dark text-text-primary dark:text-text-primary-dark rounded-input px-3 py-2 text-sm focus:outline-none focus:border-action dark:focus:border-action-dark"
                                     />
                                   </div>
-                                  <input 
-                                    type="text" 
+                                  <input
+                                    type="text"
                                     placeholder="https://..."
                                     value={link.url}
                                     onChange={(e) => updateLink(link.id, 'url', e.target.value)}
@@ -3971,7 +3971,7 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                                       <Upload className="w-4 h-4" />
                                     </label>
                                     {Object.keys(ICON_MAP).map(iconKey => (
-                                      <button 
+                                      <button
                                         key={iconKey}
                                         type="button"
                                         onClick={() => updateLink(link.id, { icon: iconKey, iconUrl: '' })}
@@ -4024,8 +4024,8 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                    <LockedOption message="Your organisation has disabled theme colour customisation. Your card will use the default theme colour.">
                      <div className="flex flex-wrap gap-4">
                        {(settings?.theme_colors || []).map(color => (
-                         <div 
-                          key={color.name} 
+                         <div
+                          key={color.name}
                           className={`w-12 h-12 rounded-full relative ${data.theme.color === color.name ? 'ring-4 ring-slate-200 scale-110' : ''}`}
                           style={{ background: color.gradientStyle || 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                         >
@@ -4037,9 +4037,9 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
                  ) : (
                    <div className="flex flex-wrap gap-4">
                      {(settings?.theme_colors || []).map(color => (
-                       <button 
-                        key={color.name} 
-                        onClick={() => handleInputChange('theme', 'color', color.name)} 
+                       <button
+                        key={color.name}
+                        onClick={() => handleInputChange('theme', 'color', color.name)}
                         className={`w-12 h-12 rounded-full relative hover:scale-110 ${data.theme.color === color.name ? 'ring-4 ring-slate-200 scale-110' : ''}`}
                         style={{ background: color.gradientStyle || 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                       >
@@ -4125,7 +4125,7 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
             )}
         </div>
       </div>
-      
+
       <div className="hidden lg:flex w-1/2 bg-border-subtle dark:bg-card-dark items-center justify-center p-10 relative">
           <div className="w-[375px] h-[750px] bg-card dark:bg-main-dark rounded-[3rem] shadow-2xl border-device border-text-primary dark:border-border-dark overflow-hidden relative">
             <CardDisplay data={data} settings={settings} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
@@ -4314,8 +4314,8 @@ function ColorSelector({ selectedColor, onSelect, label, showAuto = false, autoL
           <button
             onClick={() => onSelect(null)}
             className={`w-10 h-10 rounded-full border-thick flex flex-col items-center justify-center text-[10px] font-medium transition-all ${
-              selectedColor === null 
-                ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-200 dark:ring-indigo-800' 
+              selectedColor === null
+                ? 'border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-200 dark:ring-indigo-800'
                 : 'border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-text-secondary dark:text-text-secondary-dark hover:border-border-dark dark:hover:border-border-dark'
             }`}
           >
@@ -4349,7 +4349,7 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
-  
+
   const [newUser, setNewUser] = useState({ email: '', password: '', role: 'member' });
   const [newInvitation, setNewInvitation] = useState({ email: '', role: 'member' });
   const [isSaving, setIsSaving] = useState(false);
@@ -4419,7 +4419,7 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
         method: 'POST',
         body: JSON.stringify(newUser)
       });
-      
+
       if (res.ok) {
         setIsSuccess(true);
         setTimeout(() => setIsSuccess(false), 2000);
@@ -4596,34 +4596,34 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
   }
 
   return (
-    <div className="min-h-screen bg-main dark:bg-main-dark bg-main-texture flex flex-col">
-      <div className="w-full bg-card dark:bg-card-dark border-b border-border dark:border-border-dark">
-        <div className="p-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-surface dark:hover:bg-surface-dark rounded-full text-text-muted dark:text-text-muted-dark">
-              <ArrowLeft className="w-5 h-5"/>
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-text-primary dark:text-text-primary-dark">User Management</h1>
-              <p className="text-sm text-text-secondary dark:text-text-muted-dark">Manage users and invitations for your organisation</p>
+      <div className="min-h-screen bg-main dark:bg-main-dark flex flex-col">
+        <div className="w-full bg-card dark:bg-card-dark border-b border-border dark:border-border-dark">
+          <div className="p-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button onClick={onBack} className="p-2 hover:bg-surface dark:hover:bg-surface-dark rounded-lg text-text-muted dark:text-text-muted-dark transition-colors">
+                <ArrowLeft className="w-5 h-5"/>
+              </button>
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight text-text-primary dark:text-text-primary-dark">User Management</h1>
+                <p className="text-sm text-text-secondary dark:text-text-muted-dark">Manage users and invitations for your organisation</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="px-4 py-2 bg-action dark:bg-action-dark text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-action-hover dark:hover:bg-action-hover-dark transition-all shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Invite User
+              </button>
+              <button
+                onClick={() => setShowCreateUserModal(true)}
+                className="px-4 py-2 bg-card dark:bg-card-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-surface dark:hover:bg-surface-dark transition-all shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Create User
+              </button>
             </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowInviteModal(true)}
-              className="px-4 py-2 bg-action dark:bg-action-dark text-white rounded-full text-sm font-bold flex items-center gap-2 hover:bg-action-hover dark:hover:bg-action-hover-dark"
-            >
-              <Plus className="w-4 h-4" /> Invite User
-            </button>
-            <button
-              onClick={() => setShowCreateUserModal(true)}
-              className="px-4 py-2 bg-confirm dark:bg-confirm-dark text-confirm-text dark:text-confirm-text-dark rounded-full text-sm font-bold flex items-center gap-2 hover:bg-confirm-hover dark:hover:bg-confirm-hover-dark"
-            >
-              <Plus className="w-4 h-4" /> Create User
-            </button>
-          </div>
         </div>
-      </div>
 
       <div className="flex-1 p-6 max-w-6xl mx-auto w-full">
         {isLoading ? (
@@ -4632,9 +4632,9 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-card dark:bg-card-dark rounded-input shadow-sm border border-border dark:border-border-dark overflow-hidden">
+            <div className="bg-card dark:bg-card-dark rounded-xl shadow-card border border-border dark:border-border-dark overflow-hidden">
               <div className="p-6 border-b border-border dark:border-border-dark">
-                <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">Organisation Users</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-text-primary dark:text-text-primary-dark">Organisation Users</h2>
                 <p className="text-sm text-text-secondary dark:text-text-muted-dark mt-1">Users currently in your organisation</p>
               </div>
               <div className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -4719,9 +4719,9 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
             </div>
 
             {/* Pending Invitations Section */}
-            <div className="bg-card dark:bg-card-dark rounded-input shadow-sm border border-border dark:border-border-dark overflow-hidden">
+            <div className="bg-card dark:bg-card-dark rounded-xl shadow-card border border-border dark:border-border-dark overflow-hidden">
               <div className="p-6 border-b border-border dark:border-border-dark">
-                <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">Pending Invitations</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-text-primary dark:text-text-primary-dark">Pending Invitations</h2>
                 <p className="text-sm text-text-secondary dark:text-text-muted-dark mt-1">Invitations sent but not yet accepted</p>
               </div>
               <div className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -4766,7 +4766,7 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
                               {inv.invited_by_email && (
                                 <span className="text-xs">invited by {inv.invited_by_email}</span>
                               )}
-                              <span className="text-xs">• {new Date(inv.created_at).toLocaleDateString()}</span>
+                              <span className="text-xs">â€¢ {new Date(inv.created_at).toLocaleDateString()}</span>
                             </div>
                           </div>
                         </div>
@@ -4995,7 +4995,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
     }
 
     if (password.length < 8) {
-      setPasswordError('Le mot de passe doit contenir au moins 8 caractères');
+      setPasswordError('Le mot de passe doit contenir au moins 8 caractÃ¨res');
       return false;
     }
 
@@ -5057,12 +5057,12 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
 
   if (error || !invitation) {
     return (
-      <AuthShell title="Invitation invalide" subtitle={error || 'Ce lien n’est plus valable.'}>
+      <AuthShell title="Invitation invalide" subtitle={error || 'Ce lien nâ€™est plus valable.'}>
         <button
           onClick={() => navigate('/login')}
           className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark"
         >
-          Aller à la connexion
+          Aller Ã  la connexion
         </button>
       </AuthShell>
     );
@@ -5071,7 +5071,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
   return (
     <AuthShell
       title={`Rejoindre ${invitation.organisationName}`}
-      subtitle={`Vous êtes invité·e en tant que ${invitation.role}. Choisissez un mot de passe pour créer votre compte Macarte.`}
+      subtitle={`Vous Ãªtes invitÃ©Â·e en tant que ${invitation.role}. Choisissez un mot de passe pour crÃ©er votre compte Macarte.`}
     >
       <form onSubmit={handleAcceptInvitation} className="space-y-4">
         <div>
@@ -5092,7 +5092,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
               setPassword(e.target.value);
               setPasswordError(null);
             }}
-            placeholder="8 caractères, lettre + chiffre"
+            placeholder="8 caractÃ¨res, lettre + chiffre"
             autoComplete="new-password"
             className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
           />
@@ -5107,7 +5107,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
               setConfirmPassword(e.target.value);
               setPasswordError(null);
             }}
-            placeholder="Répétez le mot de passe"
+            placeholder="RÃ©pÃ©tez le mot de passe"
             autoComplete="new-password"
             className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
           />
@@ -5123,7 +5123,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
           className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {isSubmitting ? 'Création du compte…' : 'Créer mon compte'}
+          {isSubmitting ? 'CrÃ©ation du compteâ€¦' : 'CrÃ©er mon compte'}
         </button>
       </form>
     </AuthShell>
@@ -5135,11 +5135,11 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
   const initializeColorData = (colors) => {
     return colors.map(color => {
       let hexBase, baseColor, colorType;
-      
+
       // Determine if this is a standard color (has Tailwind gradient or baseColor) or custom hex
       const hasValidTailwindGradient = color.gradient && typeof color.gradient === 'string' && color.gradient.startsWith('from-');
       const hasHexBase = color.hexBase && typeof color.hexBase === 'string' && color.hexBase.startsWith('#');
-      
+
       if (hasValidTailwindGradient) {
         // Convert from Tailwind gradient to hex
         const extracted = extractBaseColorFromGradient(color.gradient);
@@ -5177,17 +5177,17 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
         hexBase = getTailwindColorHex(baseColor, 600);
         colorType = color.colorType === 'custom' ? 'custom' : 'standard';
       }
-      
+
       // Always auto-generate complementary secondary color
       const complementaryColor = baseColor ? getComplementaryColor(baseColor) : null;
       const hexSecondary = color.hexSecondary || (complementaryColor ? getTailwindColorHex(complementaryColor, 600) : hexBase);
-      
+
       // Generate all inline styles
       const gradientStyle = `linear-gradient(135deg, ${hexBase}, ${hexSecondary})`;
       const buttonStyle = hexBase;
       const linkStyle = hexBase;
       const textStyle = hexBase;
-      
+
       // Build clean hex-only color object
       return {
         name: color.name,
@@ -5316,7 +5316,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
     const hexBase = getTailwindColorHex(baseColor, 600);
     const complementary = getComplementaryColor(baseColor);
     const hexSecondary = getTailwindColorHex(complementary, 600);
-    
+
     const newColor = {
       name: `color${localSettings.theme_colors.length + 1}`,
       colorType: 'standard',
@@ -5345,7 +5345,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
         if (idx === colorIndex) {
           const updatedColor = { ...c, [field]: value };
           const currentColorType = updatedColor.colorType || c.colorType || 'standard';
-          
+
           // Handle colorType changes
           if (field === 'colorType') {
             if (value === 'standard' && !updatedColor.baseColor) {
@@ -5357,12 +5357,12 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               updatedColor.baseColor = null;
             }
           }
-          
+
           // For standard colors: when baseColor changes, update hexBase
           if (currentColorType === 'standard' && field === 'baseColor') {
             updatedColor.hexBase = getTailwindColorHex(value, 600);
           }
-          
+
           // For custom colors: when hexBase changes, ensure colorType is custom
           if (field === 'hexBase') {
             if (currentColorType !== 'custom') {
@@ -5370,11 +5370,11 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               updatedColor.baseColor = null;
             }
           }
-          
+
           // Handle hexBase
           let hexBase = updatedColor.hexBase || c.hexBase;
           let baseColor = updatedColor.baseColor || c.baseColor;
-          
+
           // If hexBase is missing, generate it
           if (!hexBase) {
             if (baseColor) {
@@ -5385,10 +5385,10 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               updatedColor.hexBase = hexBase;
             }
           }
-          
+
           // Handle hexSecondary
           let hexSecondary;
-          
+
           if (currentColorType === 'standard') {
             // Standard colors always use auto-complementary
             const complementaryColor = baseColor ? getComplementaryColor(baseColor) : null;
@@ -5423,7 +5423,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
             hexSecondary = updatedColor.hexSecondary || c.hexSecondary || hexBase;
             updatedColor.hexSecondary = hexSecondary;
           }
-          
+
           // Always regenerate inline styles when relevant fields change
           if (field === 'baseColor' || field === 'colorType' || field === 'hexBase' || field === 'hexSecondary') {
             const finalHexSecondary = hexSecondary || hexBase;
@@ -5432,7 +5432,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
             updatedColor.linkStyle = hexBase;
             updatedColor.textStyle = hexBase;
           }
-          
+
           return updatedColor;
         }
         return c;
@@ -5482,8 +5482,8 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               <h1 className="text-xl font-bold text-text-primary dark:text-text-primary-dark">Organisation Settings</h1>
             </div>
           </div>
-          <button 
-            onClick={handleSave} 
+          <button
+            onClick={handleSave}
             disabled={isSaving}
             className="px-5 py-2 bg-confirm dark:bg-confirm-dark text-confirm-text dark:text-confirm-text-dark rounded-full text-sm font-bold flex items-center gap-2 hover:bg-confirm-hover dark:hover:bg-confirm-hover-dark transition-colors disabled:opacity-50"
           >
@@ -5516,7 +5516,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                   <ChevronDown className="w-5 h-5 text-text-secondary dark:text-text-muted-dark" />
                 )}
               </button>
-              
+
               {isOrganisationNameOpen && (
                 <div className="mt-4 p-4 bg-surface dark:bg-card-dark/50 rounded-input">
                   <input
@@ -5548,7 +5548,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                   <ChevronDown className="w-5 h-5 text-text-secondary dark:text-text-muted-dark" />
                 )}
               </button>
-              
+
               {isCustomizationControlsOpen && (
                 <div className="mt-4 space-y-4">
                   {/* Theme Customization Group */}
@@ -5646,7 +5646,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               {isAppThemesOpen && (
                 <div className="mt-4 space-y-3">
                   {[
-                    { id: 'swiish', title: 'Macarte', desc: 'Thème Macarte avec couleurs et textures.' },
+                    { id: 'swiish', title: 'Macarte', desc: 'ThÃ¨me Macarte avec couleurs et textures.' },
                     { id: 'minimal', title: 'Minimal', desc: 'Black/white, few grays, no textures, border-only accents.' },
                   ].map(opt => (
                     <label
@@ -5689,11 +5689,11 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                   <ChevronDown className="w-5 h-5 text-text-secondary dark:text-text-muted-dark" />
                 )}
               </button>
-              
+
               {isThemeColorsOpen && (
                 <div className="mt-4 space-y-4">
                   <div className="flex justify-end">
-                      <button 
+                      <button
                         onClick={addColor}
                         className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-1 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-badge hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
                       >
@@ -5723,7 +5723,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                             </button>
                           </div>
                         </div>
-                        
+
                         <Input
                           label="Color Name"
                           value={color.name}
@@ -5811,7 +5811,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                         {/* Preview of generated gradient */}
                         <div>
                           <label className="text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2 block">Preview</label>
-                          <div 
+                          <div
                             className="w-full h-16 rounded-container overflow-hidden"
                             style={{ background: color.gradientStyle || 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                           />
@@ -5833,7 +5833,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                     ) : (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div 
+                          <div
                             className="w-12 h-12 rounded-full"
                             style={{ background: color.gradientStyle || 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                           />
@@ -5878,25 +5878,25 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                 const previewColor = editingColorIndex !== null && localSettings.theme_colors?.[editingColorIndex]
                   ? localSettings.theme_colors[editingColorIndex]
                   : localSettings.theme_colors?.[0];
-                
+
                 return (
                   <div className="space-y-3">
                     {/* Text example */}
                     <div>
                       <div className="text-xs text-text-muted dark:text-text-muted-dark mb-1">Text</div>
-                      <div 
+                      <div
                         className="text-lg font-medium"
                         style={{ color: previewColor?.textStyle || '#4f46e5' }}
                       >
                         Example Text
                       </div>
                     </div>
-                    
+
                     {/* Link example */}
                     <div>
                       <div className="text-xs text-text-muted dark:text-text-muted-dark mb-1">Link</div>
-                      <a 
-                        href="#" 
+                      <a
+                        href="#"
                         className="inline-block px-4 py-2 rounded-input border border-border dark:border-border-dark transition-all hover:opacity-80"
                         style={{ color: previewColor?.linkStyle || '#4f46e5' }}
                         onClick={(e) => e.preventDefault()}
@@ -5904,22 +5904,22 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
                         Example Link
                       </a>
                     </div>
-                    
+
                     {/* Button example */}
                     <div>
                       <div className="text-xs text-text-muted dark:text-text-muted-dark mb-1">Button</div>
-                      <button 
+                      <button
                         className="px-4 py-2 rounded-full font-medium text-white shadow-md transition-transform active:scale-[0.98]"
                         style={{ backgroundColor: previewColor?.buttonStyle || '#4f46e5' }}
                       >
                         Example Button
                       </button>
                     </div>
-                    
+
                     {/* Gradient background example */}
                     <div>
                       <div className="text-xs text-text-muted dark:text-text-muted-dark mb-1">Gradient Background</div>
-                      <div 
+                      <div
                         className="w-full h-12 rounded-container overflow-hidden"
                         style={{ background: previewColor?.gradientStyle || 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
                       />

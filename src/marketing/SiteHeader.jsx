@@ -13,7 +13,7 @@ const NAV_LINKS = [
 export function BrandMark({ className = '' }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] bg-action dark:bg-action-dark text-white dark:text-[#04211d] font-display font-bold text-lg shadow-soft">
+      <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-action dark:bg-action-dark text-white dark:text-[#04211d] font-display font-bold text-lg shadow-soft">
         M
       </span>
       <span className="font-display text-lg font-bold tracking-tight text-text-primary dark:text-text-primary-dark">
@@ -42,6 +42,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
   const dashboardHref = '/people';
 
   return (
+
     <header
       className={`sticky top-0 z-40 transition-all duration-200 ${
         scrolled
@@ -49,6 +50,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           : 'bg-transparent border-b border-transparent'
       }`}
     >
+
       <div className="ui-container flex h-16 items-center justify-between gap-4">
         <Link to="/" className="shrink-0" aria-label="Macarte — accueil">
           <BrandMark />
@@ -59,7 +61,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
             <Link
               key={l.to}
               to={l.to}
-              className="px-3 py-2 text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark rounded-button transition-colors"
+              className="px-3 py-2 text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark rounded-md transition-colors"
             >
               {l.label}
             </Link>
@@ -105,7 +107,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
               <Link
                 key={l.to}
                 to={l.to}
-                className="px-3 py-2.5 rounded-button text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark"
+                className="px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark"
               >
                 {l.label}
               </Link>

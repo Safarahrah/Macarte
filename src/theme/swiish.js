@@ -1,274 +1,282 @@
-// Swiish Design Tokens
+
+ // Swiish Design Tokens
 // Centralized theme configuration - change values here to restyle the entire site
 // Only includes values actually used in the application
 
 const tailwindColors = require('tailwindcss/colors');
 
 module.exports = {
-  // Colors
+  // Colors - Premium Professional SaaS Palette
   colors: {
-    // Main backgrounds
+    // Main backgrounds - clean, elegant
     main: {
-      light: tailwindColors.stone[50],   // Main page background (light theme)
-      dark: tailwindColors.zinc[900],     // Main page background (dark theme)
+      light: '#f7f9fc',
+      dark: '#0b1026',
     },
-    
-    // Card backgrounds
+
+    // Card backgrounds - crisp, elevated
     card: {
-      light: tailwindColors.stone[200],       // Card backgrounds, modals (light theme)
-      dark: tailwindColors.zinc[800],     // Card backgrounds, modals (dark theme)
+      light: '#ffffff',
+      dark: '#151b2f',
     },
-    
+
     // Secondary card/surface backgrounds
     surface: {
-      light: tailwindColors.stone[300],   // Secondary backgrounds, setup/login pages (light theme)
-      dark: tailwindColors.zinc[700],     // Input fields, secondary cards (dark theme)
+      light: '#f8fafc',
+      dark: '#10162a',
     },
-    
-    // Primary action button
+
+    // Primary action - refined indigo/violet
     action: {
-      light: tailwindColors.teal[700],
-      dark: tailwindColors.teal[500],
+      light: '#4f46e5',
+      dark: '#6366f1',
     },
-    
+
     // Primary action button hover
     actionHover: {
-      light: tailwindColors.teal[600],
-      dark: tailwindColors.teal[400],
+      light: '#4338ca',
+      dark: '#4f46e5',
     },
-    
+
+    // Accent - vivid purple/magenta for highlights
+    accent: {
+      light: '#a855f6',
+      dark: '#d946ef',
+    },
+
+    // Accent hover
+    accentHover: {
+      light: '#c084fc',
+      dark: '#e9d8fd',
+    },
+
     // Primary text
     textPrimary: {
-      light: tailwindColors.zinc[800],   // Headings (light theme)
-      dark: tailwindColors.stone[100],    // Headings, primary text (dark theme)
+      light: '#0f172a',
+      dark: '#f8fafc',
     },
-    
+
     // Secondary text
     textSecondary: {
-      light: tailwindColors.zinc[700],   // Body text, buttons (light theme)
-      dark: tailwindColors.stone[300],    // Body text, buttons (dark theme)
+      light: '#475569',
+      dark: '#cbd5e1',
     },
-    
+
     // Muted text
     textMuted: {
-      light: tailwindColors.zinc[600],   // Secondary text, descriptions (light theme)
-      dark: tailwindColors.stone[300],    // Secondary text, descriptions (dark theme)
+      light: '#64748b',
+      dark: '#94a3b8',
     },
-    
+
     // Very muted text
     textMutedSubtle: {
-      light: tailwindColors.zinc[500],   // Muted text, placeholders (light theme)
-      dark: tailwindColors.zinc[500],    // Muted text (dark theme)
+      light: '#94a3b8',
+      dark: '#64748b',
     },
-    
+
     // Borders
     border: {
-      light: tailwindColors.stone[400],   // Default borders (light theme)
-      dark: tailwindColors.zinc[700],     // Default borders (dark theme)
+      light: '#e5e7eb',
+      dark: '#2a2f45',
     },
-    
+
     // Borders (subtle)
     borderSubtle: {
-      light: tailwindColors.stone[300],   // Subtle borders (light theme)
-      dark: tailwindColors.zinc[600],     // Subtle borders (dark theme)
+      light: '#f1f5f9',
+      dark: '#1f2540',
     },
-    
-    // Success
+
+    // Success - emerald for positive actions
     success: {
-      light: tailwindColors.emerald[600], // Success buttons (light theme)
-      dark: tailwindColors.emerald[500],  // Success buttons (dark theme)
+      light: '#10b981',
+      dark: '#059669',
     },
-    
+
     successHover: {
-      light: tailwindColors.emerald[700], // Success hover states (light theme)
-      dark: tailwindColors.emerald[600],  // Success hover states (dark theme)
+      light: '#34d399',
+      dark: '#10b981',
     },
-    
+
     successBg: {
-      light: tailwindColors.emerald[50],  // Success backgrounds (light theme)
-      dark: `rgba(6, 78, 59, 0.3)`,       // emerald-900 with opacity (dark theme)
+      light: '#ecfdf5',
+      dark: 'rgba(6, 78, 59, 0.3)',
     },
-    
+
     successText: {
-      light: tailwindColors.emerald[500], // Success text, icons (light theme)
-      dark: tailwindColors.emerald[400],   // Success icons (dark theme)
+      light: '#10b981',
+      dark: '#059669',
     },
-    
+
     successBorder: {
-      light: tailwindColors.emerald[200], // Success borders (light theme)
-      dark: tailwindColors.emerald[800],  // Success borders (dark theme)
+      light: '#d1fae5',
+      dark: '#065f46',
     },
-    
-    // Error/Destructive
+
+    // Error - rose for destructive actions
     error: {
-      light: tailwindColors.rose[600],    // Error buttons, destructive actions (light theme)
-      dark: tailwindColors.rose[500],     // Error buttons (dark theme)
+      light: '#f87171',
+      dark: '#ef4444',
     },
-    
+
     errorHover: {
-      light: tailwindColors.rose[700],    // Error hover states (light theme)
-      dark: tailwindColors.rose[600],      // Error hover states (dark theme)
+      light: '#fca5a5',
+      dark: '#f87171',
     },
-    
+
     errorBg: {
-      light: tailwindColors.rose[50],     // Error backgrounds (light theme)
-      dark: `rgba(136, 19, 55, 0.3)`,     // rose-900 with opacity (dark theme)
+      light: '#fff1f2',
+      dark: 'rgba(136, 19, 55, 0.3)',
     },
-    
+
     errorText: {
-      light: tailwindColors.rose[500],    // Error text, icons (light theme)
-      dark: tailwindColors.rose[400],     // Error icons (dark theme)
+      light: '#f87171',
+      dark: '#ef4444',
     },
-    
+
     errorBorder: {
-      light: tailwindColors.rose[200],    // Error borders (light theme)
-      dark: tailwindColors.rose[800],     // Error borders (dark theme)
+      light: '#fecaca',
+      dark: '#9f1239',
     },
-    
-    // Info
+
+    // Info - sky for informational
     info: {
-      light: tailwindColors.sky[900],    // Info buttons (light theme)
-      dark: tailwindColors.sky[900],     // Info buttons (dark theme)
+      light: '#6366f1',
+      dark: '#8b5cf6',
     },
-    
+
     infoHover: {
-      light: tailwindColors.sky[700],    // Info hover states (light theme)
-      dark: tailwindColors.sky[600],     // Info hover states (dark theme)
+      light: '#8b5cf6',
+      dark: '#a78bfa',
     },
-    
+
     infoBg: {
-      light: tailwindColors.sky[50],     // Info backgrounds (light theme)
-      dark: `rgba(30, 58, 138, 0.3)`,     // sky-900 with opacity (dark theme)
+      light: '#eef2ff',
+      dark: 'rgba(30, 58, 138, 0.3)',
     },
-    
+
     infoText: {
-      light: tailwindColors.sky[500],    // Info text, icons (light theme)
-      dark: tailwindColors.sky[400],      // Info icons (dark theme)
+      light: '#6366f1',
+      dark: '#8b5cf6',
     },
-    
+
     infoBorder: {
-      light: tailwindColors.sky[200],    // Info borders (light theme)
-      dark: tailwindColors.sky[800],     // Info borders (dark theme)
+      light: '#bfdbfe',
+      dark: '#6b46c1',
     },
-    
-    // Link colors
+
+    // Link colors - indigo for tech feel
     link: {
-      light: tailwindColors.indigo[600],  // Link text (light theme)
-      dark: tailwindColors.indigo[400],   // Link text (dark theme)
+      light: '#4f46e5',
+      dark: '#a5f3fc',
     },
-    
+
     linkBg: {
-      light: tailwindColors.indigo[50],   // Link backgrounds (light theme)
-      dark: `rgba(99, 102, 241, 0.3)`,   // indigo-500 with opacity (dark theme)
+      light: '#e4e6f1',
+      dark: '#1e293b',
     },
-    
+
     linkBorder: {
-      light: tailwindColors.indigo[100],  // Link borders (light theme)
-      dark: tailwindColors.indigo[800],    // Link borders (dark theme)
+      light: '#cbd5e1',
+      dark: '#334155',
     },
-    
+
     linkHover: {
-      light: tailwindColors.indigo[100],  // Link hover backgrounds (light theme)
-      dark: tailwindColors.indigo[800],   // Link hover (dark theme)
+      light: '#e2e8f0',
+      dark: '#334155',
     },
-    
+
     // Input fields
     inputBg: {
-      light: tailwindColors.white,        // Input backgrounds (light theme)
-      dark: tailwindColors.zinc[700],     // Input backgrounds (dark theme)
+      light: '#ffffff',
+      dark: '#1e293b',
     },
-    
+
     inputBorder: {
-      light: tailwindColors.zinc[200],   // Input borders (light theme)
-      dark: tailwindColors.zinc[700],     // Input borders (dark theme)
+      light: '#cbd5e1',
+      dark: '#334155',
     },
-    
+
     inputText: {
-      light: tailwindColors.zinc[900],   // Input text (light theme)
-      dark: tailwindColors.zinc[100],    // Input text (dark theme)
+      light: '#1e293b',
+      dark: '#f1f5f9',
     },
-    
+
     // Focus ring
     focusRing: {
-      light: tailwindColors.zinc[600],    // indigo-600 with opacity (light theme)
-      dark: tailwindColors.white,   // indigo-400 with opacity (dark theme)
+      light: '#6366f1',
+      dark: '#818cf8',
     },
-    
+
     // Modal overlay
     overlay: {
-      light: `rgba(0, 0, 0, 0.6)`,        // Modal overlay (light theme)
-      dark: `rgba(0, 0, 0, 0.8)`,         // Modal overlay (dark theme)
+      light: 'rgba(15, 23, 42, 0.6)',
+      dark: 'rgba(2, 6, 23, 0.8)',
     },
-    
-    // Confirm/Neutral button
+
     confirm: {
-      light: tailwindColors.stone[400],   // Confirm button (light theme)
-      dark: tailwindColors.zinc[400],    // Confirm button (dark theme)
+      light: '#f8fafc',
+      dark: '#1f2540',
     },
-    
+
     confirmHover: {
-      light: tailwindColors.stone[500],   // Confirm hover (light theme)
-      dark: tailwindColors.zinc[200],    // Confirm hover (dark theme)
+      light: '#f1f5f9',
+      dark: '#262b4a',
     },
-    
+
     confirmText: {
-      light: tailwindColors.zinc[900],        // Confirm text (light theme)
-      dark: tailwindColors.zinc[900],    // Confirm text (dark theme)
+      light: '#0f172a',
+      dark: '#e5e7eb',
     },
-    
+
     confirmBg: {
-      light: tailwindColors.zinc[50],    // Confirm backgrounds (light theme)
-      dark: tailwindColors.zinc[700],    // Confirm backgrounds (dark theme)
+      light: '#ffffff',
+      dark: '#151b2f',
     },
-    
+
     confirmBorder: {
-      light: tailwindColors.zinc[200],   // Confirm borders (light theme)
-      dark: tailwindColors.zinc[600],    // Confirm borders (dark theme)
+      light: '#e5e7eb',
+      dark: '#2a2f45',
     },
   },
 
-  // Border Radius (corner radius)
-  // Used for: rounded-card, rounded-container, rounded-button, rounded-input, rounded-badge, rounded-full
+  // Border Radius (corner radius) - cleaner, more refined
   borderRadius: {
-    'card': '40px',        // Cards, modals (equivalent to rounded-2xl)
-    'container': '25px',   // Simple containers, info boxes (equivalent to rounded-lg)
-    'page': '1.5rem',      // Setup/login pages (equivalent to rounded-3xl)
-    'button': '9999px',    // Buttons (equivalent to rounded-full)
-    'input': '0.75rem',    // Input fields (equivalent to rounded-xl)
-    'badge': '6px',        // Badges, labels like "owner", "member" (small rounded corners)
-    'full': '9999px',      // Full circle (equivalent to rounded-full)
+    card: '0.875rem',
+    container: '1rem',
+    page: '1.25rem',
+    button: '0.625rem',
+    input: '0.625rem',
+    badge: '9999px',
+    full: '9999px',
   },
 
   // Border Width (thickness)
-  // Used for: border-default, border-thick, border-avatar, border-device
   borderWidth: {
-    'default': '1px',      // Default borders (standard border)
-    'thick': '2px',        // Thick borders (border-2)
-    'avatar': '6px',       // Avatar borders (border-[6px])
-    'device': '8px',       // Device preview borders (border-8)
+    default: '1px',
+    thick: '1px',
+    avatar: '3px',
+    device: '8px',
   },
 
   // Background Textures
-  // Set to empty string ('') to disable texture for that background
   // Paths are relative to public folder
   textures: {
     main: {
-      light: '/textures/sandTexture.jpg',  // Main background texture (light theme)
-      dark: '/textures/sandTexture.jpg',   // Main background texture (dark theme)
-      size: '1080px 1080px',                 // Texture tile size
-      blendLight: 'multiply',              // Blend mode for light theme
-      blendDark: 'overlay',                // Blend mode for dark theme
-      opacityLight: 0.07,                  // Texture opacity for light theme
-      opacityDark: 0.20,                   // Texture opacity for dark theme
+      light: '/textures/sandTexture.jpg',
+      dark: '/textures/sandTexture.jpg',
+      size: '1080px 1080px',
+      blendLight: 'multiply',
+      blendDark: 'overlay',
+      opacityLight: 0.07,
+      opacityDark: 0.20,
     },
     surface: {
-      light: '',  // Surface background texture (light theme) - empty = no texture
-      dark: '',   // Surface background texture (dark theme) - empty = no texture
+      light: '',
+      dark: '',
     },
     card: {
-      light: '',  // Card background texture (light theme) - empty = no texture
-      dark: '',   // Card background texture (dark theme) - empty = no texture
+      light: '',
+      dark: '',
     },
   },
 };
-

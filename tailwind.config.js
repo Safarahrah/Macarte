@@ -127,16 +127,17 @@ module.exports = {
       borderRadius: swiishTheme.borderRadius,
       // Border Width - semantic names for border thickness
       borderWidth: swiishTheme.borderWidth,
-      // Modern type system: Inter for UI, Poppins for display headings
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        display: ['Poppins', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       // Elevation scale for a subtle, premium SaaS feel
       boxShadow: {
-        soft: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',
-        lifted: '0 10px 30px -12px rgb(15 23 42 / 0.18)',
-        floating: '0 24px 60px -20px rgb(15 23 42 / 0.28)',
+        soft: '0 1px 1px 0 rgb(15 23 42 / 0.01), 0 1px 2px 0 rgb(15 23 42 / 0.02)',
+        card: '0 1px 2px 0 rgb(15 23 42 / 0.02), 0 4px 6px -1px rgb(15 23 42 / 0.03), 0 2px 4px -2px rgb(15 23 42 / 0.02)',
+        lifted: '0 10px 40px -12px rgb(15 23 42 / 0.16)',
+        floating: '0 30px 60px -20px rgb(15 23 42 / 0.24)',
+        subtle: '0 1px 3px 0 rgb(15 23 42 / 0.02)',
       },
     },
   },

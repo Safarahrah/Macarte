@@ -75,7 +75,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
   const primaryHref = isAuthenticated ? '/people' : '/register';
 
   return (
-    <div className="min-h-screen bg-main dark:bg-main-dark flex flex-col">
+    <div className="min-h-screen bg-main dark:bg-main-dark bg-main-texture flex flex-col">
       <SiteHeader darkMode={darkMode} toggleDarkMode={toggleDarkMode} isAuthenticated={isAuthenticated} />
 
       {/* ---------------- HERO ---------------- */}
@@ -87,7 +87,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
               <Sparkles className="w-3.5 h-3.5" /> Cartes de visite avec QR code
             </span>
             <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] leading-[1.08] font-bold text-text-primary dark:text-text-primary-dark">
-              Créez votre carte d’affaires professionnelle en quelques minutes.
+              Créez votre carte d'affaires professionnelle en quelques minutes.
             </h1>
             <p className="mt-5 text-lg text-text-muted dark:text-text-muted-dark leading-relaxed max-w-xl">
               Modèles modernes, éditeur intuitif, QR code scannable et export prêt à imprimer.
@@ -112,17 +112,17 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
           <div className="ui-fade-up ui-fade-up-2 relative">
             <div className="relative mx-auto max-w-md">
               <div className="ui-card p-4 shadow-floating rotate-[-1.5deg]">
-                <div className="rounded-[calc(var(--radius-card,1rem)-0.35rem)] overflow-hidden ring-1 ring-black/5">
+                <div className="rounded-md overflow-hidden ring-1 ring-black/5">
                   <CardSvgPreview config={heroFront} publicUrl="https://macarte.app/demo" />
                 </div>
               </div>
               <div className="ui-card p-4 shadow-floating mt-[-28%] ml-10 rotate-[2deg] hidden sm:block">
-                <div className="rounded-[calc(var(--radius-card,1rem)-0.35rem)] overflow-hidden ring-1 ring-black/5">
+                <div className="rounded-md overflow-hidden ring-1 ring-black/5">
                   <CardSvgPreview config={heroBack} publicUrl="https://macarte.app/demo" side="back" />
                 </div>
               </div>
               <div className="absolute -bottom-4 -left-4 ui-card px-4 py-3 shadow-lifted flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-action/10 text-action dark:text-action-dark">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-action/10 text-action dark:text-action-dark">
                   <QrCode className="w-4 h-4" />
                 </span>
                 <div className="leading-tight">
@@ -136,25 +136,25 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       </section>
 
       {/* ---------------- TEMPLATE SHOWCASE ---------------- */}
-      <section id="templates-showcase" className="py-16 md:py-20 bg-card dark:bg-card-dark border-y border-border-subtle dark:border-border-dark">
+      <section id="templates-showcase" className="py-16 md:py-20 border-y border-border-subtle dark:border-border-dark bg-card dark:bg-card-dark">
         <div className="ui-container">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
               <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Des modèles pensés pour être remarqués</h2>
-              <p className="mt-2 text-text-muted dark:text-text-muted-dark">Minimal, Corporate, Luxury, Creative, Healthcare, Technology… changez de style en un clic.</p>
+              <p className="mt-2 text-text-muted dark:text-text-muted-dark">Minimal, Corporate, Luxury, Creative, Healthcare, Technology — changez de style en un clic.</p>
             </div>
             <Link to="/templates" className="ui-btn ui-btn-secondary shrink-0">
               Tous les modèles <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {showcase.map(({ template, config }, i) => (
               <Link
                 key={template.id}
                 to="/templates"
                 className={`group ui-card overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lifted ui-fade-up ui-fade-up-${(i % 3) + 1}`}
               >
-                <div className="aspect-[1.586/1] overflow-hidden bg-white">
+                <div className="aspect-[1.586/1] overflow-hidden bg-white rounded-md">
                   <CardSvgPreview config={config} publicUrl="https://macarte.app/demo" />
                 </div>
                 <div className="p-4">
@@ -180,7 +180,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
                 <span className="absolute top-6 right-6 font-display text-4xl font-bold text-border-subtle dark:text-border-dark select-none">
                   0{i + 1}
                 </span>
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-action/10 text-action dark:text-action-dark">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-action/10 text-action dark:text-action-dark">
                   <s.icon className="w-5 h-5" />
                 </span>
                 <h3 className="mt-4 font-display text-lg font-semibold text-text-primary dark:text-text-primary-dark">{s.title}</h3>
@@ -192,16 +192,16 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       </section>
 
       {/* ---------------- FEATURES ---------------- */}
-      <section id="features" className="py-16 md:py-24 bg-card dark:bg-card-dark border-y border-border-subtle dark:border-border-dark">
+      <section id="features" className="py-16 md:py-24 border-y border-border-subtle dark:border-border-dark bg-card dark:bg-card-dark">
         <div className="ui-container">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Tout ce qu’il faut pour une carte impeccable</h2>
+            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Tout ce qu'il faut pour une carte impeccable</h2>
             <p className="mt-3 text-text-muted dark:text-text-muted-dark">Des outils simples, un rendu professionnel.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
               <div key={f.title} className="flex gap-4">
-                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-action/10 text-action dark:text-action-dark">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-action/10 text-action dark:text-action-dark">
                   <f.icon className="w-5 h-5" />
                 </span>
                 <div>
@@ -217,7 +217,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       {/* ---------------- FINAL CTA ---------------- */}
       <section className="py-16 md:py-24">
         <div className="ui-container">
-          <div className="relative overflow-hidden rounded-page bg-gradient-to-br from-teal-700 via-teal-600 to-cyan-600 px-6 py-14 sm:px-12 text-center text-white shadow-floating">
+          <div className="relative overflow-hidden rounded-md bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-500 px-6 py-14 sm:px-12 text-center text-white shadow-floating">
             <div className="absolute inset-0 opacity-20 ui-hero-grid" aria-hidden="true" />
             <div className="relative">
               <h2 className="font-display text-3xl sm:text-4xl font-bold">Prêt à créer votre carte ?</h2>

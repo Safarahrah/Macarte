@@ -1,13 +1,3 @@
-// src/pages/TemplatesPage.jsx
-// Public template gallery: search, category filters and a responsive grid.
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Crown, Search, Sparkles, LayoutGrid } from 'lucide-react';
-import SiteHeader from '../marketing/SiteHeader';
-import SiteFooter from '../marketing/SiteFooter';
-import CardSvgPreview, { sampleConfig } from '../marketing/CardSvgPreview';
-import { PUBLIC_TEMPLATES, getCategories, getCategoryLabel } from '../printable/shared/templates';
-
 export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticated, appVersion, githubUrl }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
@@ -118,13 +108,13 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
               </button>
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map((t, i) => (
                 <article
                   key={t.id}
                   className={`group ui-card overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-1 hover:shadow-lifted ui-fade-up ui-fade-up-${(i % 3) + 1}`}
                 >
-                  <div className="relative aspect-[1.586/1] overflow-hidden bg-white ring-1 ring-inset ring-black/5">
+                  <div className="relative aspect-[1.586/1] overflow-hidden bg-white rounded-md">
                     <CardSvgPreview config={configs.get(t.id)} publicUrl="https://macarte.app/demo" />
                     {t.isPremium && (
                       <span className="absolute top-3 right-3 ui-badge !bg-amber-100 !text-amber-800 !border-amber-200">
@@ -132,7 +122,7 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
                       </span>
                     )}
                   </div>
-                  <div className="p-5 flex flex-col flex-1">
+                  <div className="p-4 flex flex-col flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <h2 className="font-display font-semibold text-text-primary dark:text-text-primary-dark">
                         {t.name}
@@ -142,7 +132,7 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
                     <p className="mt-2 text-sm text-text-muted dark:text-text-muted-dark leading-relaxed flex-1">
                       {t.description}
                     </p>
-                    <Link to={primaryHref} className="ui-btn ui-btn-primary mt-4 ui-btn-block">
+                    <Link to={primaryHref} className="ui-btn ui-btn-primary mt-2 ui-btn-block">
                       Utiliser ce modèle <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
