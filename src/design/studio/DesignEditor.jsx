@@ -394,7 +394,7 @@ export default function DesignEditor({ mod, id }) {
       <header className="flex flex-wrap items-center gap-1 border-b border-border dark:border-border-dark bg-card dark:bg-card-dark px-2 py-1.5">
         <IconBtn icon="ArrowLeft" title="Retour à la bibliothèque" onClick={() => { if (!dirty || window.confirm('Quitter sans enregistrer les modifications ?')) navigate(`/studio/${mod.slug}`); }} />
         <IconBtn icon="PanelLeft" title="Outils" onClick={() => setLeftOpen((v) => !v)} active={leftOpen} />
-        <input value={title} onChange={(e) => setTitle(e.target.value)} className="min-w-0 max-w-[14rem] flex-1 rounded-md bg-transparent px-2 py-1 text-sm font-semibold hover:bg-surface focus:bg-surface dark:hover:bg-surface-dark focus:outline-none" aria-label="Nom du projet" data-testid="design-title" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} className="min-w-[8rem] max-w-[14rem] flex-1 rounded-md bg-transparent px-2 py-1 text-sm font-semibold hover:bg-surface focus:bg-surface dark:hover:bg-surface-dark focus:outline-none" aria-label="Nom du projet" data-testid="design-title" />
         <span className="hidden text-xs text-text-muted md:inline">{mod.label}{kind ? ` · ${kind.label}` : ''} · {round(doc.width, 1)} × {round(doc.height, 1)} {unitLabel}</span>
         <div className="mx-auto" />
         <IconBtn icon="Undo2" title="Annuler (Ctrl+Z)" onClick={undo} disabled={!history.canUndo} testId="undo" />
