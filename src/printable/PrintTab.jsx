@@ -203,7 +203,7 @@ function NumField({ label, value, onChange, step = 0.5, min = -20, max = 200, su
   );
 }
 
-export default function PrintTab({ data, slug, csrfToken }) {
+export default function PrintTab({ data, slug, csrfToken, initialDesignId = null }) {
   const [config, setConfig] = useState(null);
   const [side, setSide] = useState('front');
   const [showGuides, setShowGuides] = useState(true);
@@ -267,6 +267,22 @@ export default function PrintTab({ data, slug, csrfToken }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (initialDesignId) {
+        try {
+          const res = await fetch(`${API}/printable-cards/${initialDesignId}`, { credentials: 'include' });
+          if (cancelled) return;
+          if (res.ok) {
+            const row = await res.json();
+            setConfig(sanitizeConfig(row.config));
+            setActiveDesignId(row.id);
+            setDesignName(row.name || '');
+            setPaymentStatus(row.payment_status || 'unpaid');
+            setPrice(row.price);
+            setPrintableCardId(row.id);
+            return;
+          }
+        } catch (e) { /* fall back to the card layout below */ }
+      }
       try {
         const res = await fetch(`${API}/printable/${encodeURIComponent(slug || '')}`, { credentials: 'include' });
         if (cancelled) return;
@@ -284,7 +300,7 @@ export default function PrintTab({ data, slug, csrfToken }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [slug, data]);
+  }, [slug, data, initialDesignId]);
 
   // ---- personal designs ("Mes designs") ----
   const refreshDesigns = useCallback(async () => {

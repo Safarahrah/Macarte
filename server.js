@@ -19,6 +19,7 @@ const util = require('util');
 const { execSync } = require('child_process');
 const sharp = require('sharp');
 const { registerPrintableCardRoutes } = require('./lib/printable-card/routes');
+const { registerDesignRoutes } = require('./lib/designs/routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -307,6 +308,24 @@ const upload = multer({
     cb(null, true);
   }
 });
+
+// Verifies an uploaded file's real content type; deletes it when invalid.
+async function verifyUploadedImage(file) {
+  const { fileTypeFromFile } = await import('file-type');
+  const fileType = await fileTypeFromFile(file.path);
+  if (!fileType || !ALLOWED_MIME_TYPES.includes(fileType.mime)) {
+    try { await fs.promises.unlink(validateFilePath(file.path)); } catch (e) {}
+    return { error: 'Invalid file type. Only images are allowed.' };
+  }
+  const ext = path.extname(file.filename).toLowerCase();
+  const expectedExt = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+  const allowedExts = fileType.mime === 'image/jpeg' ? ['.jpg', '.jpeg'] : [expectedExt[fileType.mime]];
+  if (!allowedExts.includes(ext)) {
+    try { await fs.promises.unlink(validateFilePath(file.path)); } catch (e) {}
+    return { error: 'File extension does not match file type' };
+  }
+  return { fileType };
+}
 
 // --- MIDDLEWARE ---
 app.use((req, res, next) => {
@@ -680,6 +699,16 @@ registerPrintableCardRoutes(app, {
   UPLOADS_DIR
 });
 
+registerDesignRoutes(app, {
+  db,
+  requireAuth,
+  csrfProtection,
+  handleValidationErrors,
+  upload,
+  verifyUploadedImage,
+  UPLOADS_DIR
+});
+
 // --- API ROUTES ---
 app.get('/api/csrf-token', csrfProtection, (req, res) => res.json({ csrfToken: req.csrfToken() }));
 
@@ -838,18 +867,9 @@ app.post('/api/upload', requireAuth, uploadLimiter, csrfProtection, upload.singl
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const filePath = req.file.path;
-    const { fileTypeFromFile } = await import('file-type');
-    const fileType = await fileTypeFromFile(filePath);
-    if (!fileType || !ALLOWED_MIME_TYPES.includes(fileType.mime)) {
-      try { await fs.promises.unlink(validateFilePath(filePath)); } catch (e) {}
-      return res.status(400).json({ error: 'Invalid file type. Only images are allowed.' });
-    }
-    const ext = path.extname(req.file.filename).toLowerCase();
-    const expectedExt = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
-    if (expectedExt[fileType.mime] !== ext) {
-      try { await fs.promises.unlink(validateFilePath(filePath)); } catch (e) {}
-      return res.status(400).json({ error: 'File extension does not match file type' });
-    }
+    const check = await verifyUploadedImage(req.file);
+    if (check.error) return res.status(400).json({ error: check.error });
+    const fileType = check.fileType;
     if (req.body.purpose === 'link-icon') {
       const metadata = await sharp(filePath).metadata();
       const isAnimatedGif = fileType.mime === 'image/gif' && (metadata.pages || 1) > 1;

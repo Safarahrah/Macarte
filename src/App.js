@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import PhoneInput from 'react-phone-number-input';
@@ -11,7 +11,7 @@ import {
   Plus, Trash2, ArrowLeft, Users, ExternalLink, RefreshCw,
   Download, FileText, Calendar, Video, Music, ShoppingCart,
   Link as LinkIcon, Youtube, Facebook, MessageCircle, Sun, Moon,
-  ChevronUp, ChevronDown, GripVertical, Settings
+  ChevronUp, ChevronDown, GripVertical, Settings, LayoutGrid
 } from 'lucide-react';
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -27,6 +27,10 @@ const APP_VERSION = require('../package.json').version; // Automatically read fr
 const GITHUB_URL = 'https://github.com/MrCrin/swiish';
 const APP_NAME = 'Macarte';
 
+// Creative studio (dashboard + design editors) is code-split from the main bundle.
+const StudioDashboard = lazy(() => import('./design/studio/StudioApp').then((m) => ({ default: m.StudioDashboard })));
+const StudioModule = lazy(() => import('./design/studio/StudioApp').then((m) => ({ default: m.StudioModule })));
+
 function isReservedFrontendPath(pathname) {
   return (
     pathname.startsWith('/people') ||
@@ -38,8 +42,15 @@ function isReservedFrontendPath(pathname) {
     pathname.startsWith('/cards') ||
     pathname.startsWith('/invite') ||
     pathname.startsWith('/templates') ||
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/studio') ||
     pathname === '/'
   );
+}
+
+// Creative studio routes render their own components (see design/studio).
+function isStudioPath(pathname) {
+  return pathname === '/dashboard' || pathname.startsWith('/dashboard/') || pathname.startsWith('/studio');
 }
 
 function getPasswordStrength(password) {
@@ -106,7 +117,7 @@ function PasswordStrength({ password }) {
           />
         ))}
       </div>
-      <p className="text-xs text-text-muted dark:text-text-muted-dark">{label} â€” 8 caractÃ¨res min., une lettre et un chiffre</p>
+      <p className="text-xs text-text-muted dark:text-text-muted-dark">{label} — 8 caractères min., une lettre et un chiffre</p>
     </div>
   );
 }
@@ -123,7 +134,7 @@ function AuthShell({ title, subtitle, children, footer }) {
           <p className="text-xs uppercase tracking-[0.2em] text-teal-100/80 mb-3">Carte de visite digitale</p>
           <h2 className="text-4xl font-semibold leading-tight mb-4">Une carte. Tous vos liens.</h2>
           <p className="text-teal-50/80 text-sm leading-relaxed">
-            CrÃ©ez votre carte Macarte, partagez-la par QR code et restez joignable mÃªme hors ligne.
+            Créez votre carte Macarte, partagez-la par QR code et restez joignable même hors ligne.
           </p>
         </div>
         <div className="relative z-10 max-w-[20rem] -rotate-2">
@@ -131,7 +142,7 @@ function AuthShell({ title, subtitle, children, footer }) {
             <CardSvgPreview config={AUTH_DEMO_CONFIG} publicUrl="https://macarte.app/demo" />
           </div>
         </div>
-        <p className="text-xs text-teal-100/60">Partage instantanÃ© Â· PWA Â· QR</p>
+        <p className="text-xs text-teal-100/60">Partage instantané · PWA · QR</p>
       </div>
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div className="bg-card dark:bg-card-dark max-w-md w-full rounded-page shadow-xl p-8 border border-border-subtle dark:border-border-dark">
@@ -736,7 +747,7 @@ export default function App() {
     const pathParts = initialPath.substring(1).split('/').filter(p => p);
     const isShortCode = pathParts.length === 1 && /^[a-zA-Z0-9]{7}$/.test(pathParts[0]);
     const isOrgScoped = pathParts.length === 2 && pathParts[0] && pathParts[1];
-    const isPublicRoute = isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(initialPath));
+    const isPublicRoute = !isStudioPath(initialPath) && (isShortCode || isOrgScoped || (pathParts.length === 1 && pathParts[0] && !isReservedFrontendPath(initialPath)));
     return isPublicRoute ? 'public-loading' : 'loading';
   });
   const [data, setData] = useState(() => getDefaultTemplate(null));
@@ -975,6 +986,7 @@ const [settings, setSettings] = useState({
   // Router Logic - handle route changes and set view based on route
   useEffect(() => {
     const path = location.pathname;
+    if (isStudioPath(path)) return;
     // Handle editor route (/people/edit/:slug) - extract slug from pathname since useParams() doesn't work at App level
     if (path.startsWith('/people/edit/')) {
       // Extract slug from pathname (remove '/people/edit/' prefix)
@@ -985,7 +997,7 @@ const [settings, setSettings] = useState({
         fetchCsrfToken();
         checkAuth().then((authResult) => {
           if (authResult.isAuthenticated) {
-            // After auth check, load the card data â€” but skip if handleEdit is already
+            // After auth check, load the card data — but skip if handleEdit is already
             // in progress (e.g. triggered by the admin clicking the Edit button, which
             // navigates here and would otherwise cause a second fetch without userId)
             if (!editInProgressRef.current) {
@@ -1034,12 +1046,12 @@ const [settings, setSettings] = useState({
         } else {
           // Setup not complete, show wizard
           setView('setup-wizard');
-          document.title = `Configuration Â· ${APP_NAME}`;
+          document.title = `Configuration · ${APP_NAME}`;
         }
       }).catch(() => {
         // If check fails, show wizard anyway
         setView('setup-wizard');
-        document.title = `Configuration Â· ${APP_NAME}`;
+        document.title = `Configuration · ${APP_NAME}`;
       });
       return;
     } else if (path === '/login') {
@@ -1053,12 +1065,12 @@ const [settings, setSettings] = useState({
         } else {
           // Not authenticated, show login page
           setView('admin-login');
-          document.title = `Connexion Â· ${APP_NAME}`;
+          document.title = `Connexion · ${APP_NAME}`;
         }
       }).catch(() => {
         // Not authenticated, show login page
         setView('admin-login');
-        document.title = `Connexion Â· ${APP_NAME}`;
+        document.title = `Connexion · ${APP_NAME}`;
       });
     } else if (path === '/register') {
       setView('loading');
@@ -1068,11 +1080,11 @@ const [settings, setSettings] = useState({
           navigate('/people', { replace: true });
         } else {
           setView('admin-register');
-          document.title = `Inscription Â· ${APP_NAME}`;
+          document.title = `Inscription · ${APP_NAME}`;
         }
       }).catch(() => {
         setView('admin-register');
-        document.title = `Inscription Â· ${APP_NAME}`;
+        document.title = `Inscription · ${APP_NAME}`;
       });
     } else if (path === '/settings') {
       setView('admin-settings');
@@ -1108,7 +1120,7 @@ const [settings, setSettings] = useState({
             // Refresh auth state so the header can offer the dashboard link.
             checkAuth().catch(() => {});
             setView('home');
-            document.title = `${APP_NAME} â€” Cartes de visite avec QR code`;
+            document.title = `${APP_NAME} — Cartes de visite avec QR code`;
           }
           return;
         }
@@ -1255,7 +1267,7 @@ const [settings, setSettings] = useState({
           privacy: json.privacy || defaultTemplate.privacy
         });
         setView('public-card');
-        document.title = json.personal?.name ? `${json.personal.name} Â· ${APP_NAME}` : APP_NAME;
+        document.title = json.personal?.name ? `${json.personal.name} · ${APP_NAME}` : APP_NAME;
       } else {
         setError('Card not found');
         setView('404');
@@ -1549,14 +1561,14 @@ const [settings, setSettings] = useState({
         await fetchCsrfToken();
         const authResult = await checkAuth();
         if (authResult.isAuthenticated) {
-          navigate('/people');
+          navigate('/dashboard');
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
         setError(errorData.error || 'Email ou mot de passe incorrect');
       }
     } catch (e) {
-      setError('La connexion a Ã©chouÃ©. RÃ©essayez.');
+      setError('La connexion a échoué. Réessayez.');
     } finally {
       setIsLoggingIn(false);
     }
@@ -1578,12 +1590,12 @@ const [settings, setSettings] = useState({
         body: JSON.stringify({ email: email.toLowerCase().trim() })
       });
       if (res.ok) {
-        setForgotMessage('Si un compte existe, un lien de rÃ©initialisation a Ã©tÃ© envoyÃ©.');
+        setForgotMessage('Si un compte existe, un lien de réinitialisation a été envoyé.');
       } else {
-        setError('Impossible dâ€™envoyer le lien pour le moment.');
+        setError('Impossible d’envoyer le lien pour le moment.');
       }
     } catch (e) {
-      setError('Impossible dâ€™envoyer le lien pour le moment.');
+      setError('Impossible d’envoyer le lien pour le moment.');
     }
   };
 
@@ -1599,7 +1611,7 @@ const [settings, setSettings] = useState({
       return;
     }
     if (registerPassword.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractÃ¨res');
+      setError('Le mot de passe doit contenir au moins 8 caractères');
       return;
     }
     if (!/[A-Za-z]/.test(registerPassword) || !/\d/.test(registerPassword)) {
@@ -1629,14 +1641,14 @@ const [settings, setSettings] = useState({
         await fetchCsrfToken();
         const authResult = await checkAuth();
         if (authResult.isAuthenticated) {
-          navigate('/people');
+          navigate('/dashboard');
         }
       } else {
         const errorData = await res.json().catch(() => ({}));
         setError(errorData.error || 'Inscription impossible');
       }
     } catch (e) {
-      setError('Inscription impossible. RÃ©essayez.');
+      setError('Inscription impossible. Réessayez.');
     } finally {
       setIsSettingUp(false);
     }
@@ -2036,10 +2048,10 @@ const [settings, setSettings] = useState({
         <>
           <AuthShell
             title="Configuration initiale"
-            subtitle="CrÃ©ez votre organisation et le premier compte administrateur Macarte."
+            subtitle="Créez votre organisation et le premier compte administrateur Macarte."
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                DÃ©jÃ  configurÃ© ?{' '}
+                Déjà configuré ?{' '}
                 <button type="button" onClick={() => navigate('/login')} className="font-medium text-action dark:text-action-dark">Se connecter</button>
               </p>
             }
@@ -2073,7 +2085,7 @@ const [settings, setSettings] = useState({
                 <PasswordField
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractÃ¨res min."
+                  placeholder="8 caractères min."
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2087,7 +2099,7 @@ const [settings, setSettings] = useState({
                 className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {isSettingUp ? 'Configurationâ€¦' : 'Terminer'}
+                {isSettingUp ? 'Configuration…' : 'Terminer'}
               </button>
             </form>
           </AuthShell>
@@ -2099,15 +2111,15 @@ const [settings, setSettings] = useState({
         <>
           <AuthShell
             title="Connexion"
-            subtitle="AccÃ©dez Ã  votre espace Macarte."
+            subtitle="Accédez à votre espace Macarte."
             footer={
               <div className="mt-6 space-y-3 text-center text-sm">
                 <button type="button" onClick={() => { setForgotMode(!forgotMode); setError(''); setForgotMessage(''); }} className="text-text-muted dark:text-text-muted-dark hover:text-text-primary">
-                  Mot de passe oubliÃ© ?
+                  Mot de passe oublié ?
                 </button>
                 <p className="text-text-muted dark:text-text-muted-dark">
                   Nouveau sur Macarte ?{' '}
-                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">CrÃ©er un compte</button>
+                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">Créer un compte</button>
                 </p>
               </div>
             }
@@ -2140,7 +2152,7 @@ const [settings, setSettings] = useState({
                     id="login-password"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     autoComplete="current-password"
                     show={showPassword}
                     onToggle={() => setShowPassword(!showPassword)}
@@ -2153,7 +2165,7 @@ const [settings, setSettings] = useState({
                 )}
                 <button type="submit" disabled={isLoggingIn} className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">
                   {isLoggingIn && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  {isLoggingIn ? 'Connexionâ€¦' : 'Se connecter'}
+                  {isLoggingIn ? 'Connexion…' : 'Se connecter'}
                 </button>
               </form>
             )}
@@ -2165,24 +2177,24 @@ const [settings, setSettings] = useState({
       {view === 'admin-register' && (
         <>
           <AuthShell
-            title="CrÃ©er un compte"
-            subtitle="Inscrivez-vous pour crÃ©er votre organisation et vos cartes Macarte."
+            title="Créer un compte"
+            subtitle="Inscrivez-vous pour créer votre organisation et vos cartes Macarte."
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                Vous avez dÃ©jÃ  un compte ?{' '}
+                Vous avez déjà un compte ?{' '}
                 <button type="button" onClick={() => { setError(''); navigate('/login'); }} className="font-medium text-action dark:text-action-dark">Se connecter</button>
               </p>
             }
           >
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label htmlFor="reg-org" className="ui-label">Nom de lâ€™organisation</label>
+                <label htmlFor="reg-org" className="ui-label">Nom de l’organisation</label>
                 <input
                   id="reg-org"
                   type="text"
                   value={setupData.organisationName}
                   onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
-                  placeholder="Studio, Ã©quipe ou votre nom"
+                  placeholder="Studio, équipe ou votre nom"
                   className="ui-input"
                   required
                   autoFocus
@@ -2207,7 +2219,7 @@ const [settings, setSettings] = useState({
                   id="reg-password"
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractÃ¨res, lettre + chiffre"
+                  placeholder="8 caractères, lettre + chiffre"
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2220,7 +2232,7 @@ const [settings, setSettings] = useState({
                   id="reg-password-confirm"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="RÃ©pÃ©tez le mot de passe"
+                  placeholder="Répétez le mot de passe"
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2237,7 +2249,7 @@ const [settings, setSettings] = useState({
                 className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {isSettingUp ? 'CrÃ©ation du compteâ€¦' : 'CrÃ©er mon compte'}
+                {isSettingUp ? 'Création du compte…' : 'Créer mon compte'}
               </button>
             </form>
           </AuthShell>
@@ -2270,6 +2282,9 @@ const [settings, setSettings] = useState({
                      <Users className="w-4 h-4" /> Users
                    </button>
                  )}
+                 <button onClick={() => navigate('/dashboard')} className="px-3 py-2 rounded-lg font-medium text-text-secondary dark:text-text-secondary-dark bg-card dark:bg-card-dark border border-border dark:border-border-dark hover:bg-surface dark:hover:bg-surface-dark transition-all whitespace-nowrap flex items-center gap-2 text-sm shadow-sm">
+                   <LayoutGrid className="w-4 h-4" /> Tableau de bord
+                 </button>
                  <button onClick={handleCreateNew} className="bg-action dark:bg-action-dark text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-action-hover dark:hover:bg-action-hover-dark transition-all whitespace-nowrap text-sm shadow-sm">
                    <Plus className="w-4 h-4" /> New Person
                  </button>
@@ -2707,6 +2722,9 @@ const [settings, setSettings] = useState({
         <Route path="/users" element={renderAdminViews()} />
         <Route path="/cards" element={renderAdminViews()} />
         <Route path="/templates" element={renderTemplatesPage()} />
+        <Route path="/dashboard" element={<Suspense fallback={null}><StudioDashboard /></Suspense>} />
+        <Route path="/studio/:module" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
+        <Route path="/studio/:module/:id" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/" element={renderAdminViews()} />
         {/* Invitation acceptance route - must come before public card routes */}
         <Route path="/invite/:token" element={
@@ -3072,7 +3090,7 @@ function CardDisplay({ data, settings, darkMode, toggleDarkMode, showAlert }) {
     // Always cache latest rich payload for offline use
     saveQrPayloadToStorage(payload);
 
-    // Online check â€“ if offline, try to use cached payload instead of hitting API
+    // Online check – if offline, try to use cached payload instead of hitting API
     const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
     if (!isOnline) {
@@ -3343,7 +3361,7 @@ const shortUrl = websiteUrl
                     let instructions = 'To install this app:\n\n';
 
                     if (userAgent.includes('chrome') || userAgent.includes('edge')) {
-                      instructions += 'Chrome/Edge: Click the three dots menu (â‹®) in the address bar, then select "Install app" or "Add to Home Screen".';
+                      instructions += 'Chrome/Edge: Click the three dots menu (⋮) in the address bar, then select "Install app" or "Add to Home Screen".';
                     } else if (userAgent.includes('firefox')) {
                       instructions += 'Firefox: Click the menu button, then select "Install" or "Add to Home Screen".';
                     } else if (userAgent.includes('safari')) {
@@ -4766,7 +4784,7 @@ function UserManagementView({ apiCall, userRole, onBack, showAlert, showConfirm 
                               {inv.invited_by_email && (
                                 <span className="text-xs">invited by {inv.invited_by_email}</span>
                               )}
-                              <span className="text-xs">â€¢ {new Date(inv.created_at).toLocaleDateString()}</span>
+                              <span className="text-xs">• {new Date(inv.created_at).toLocaleDateString()}</span>
                             </div>
                           </div>
                         </div>
@@ -4995,7 +5013,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
     }
 
     if (password.length < 8) {
-      setPasswordError('Le mot de passe doit contenir au moins 8 caractÃ¨res');
+      setPasswordError('Le mot de passe doit contenir au moins 8 caractères');
       return false;
     }
 
@@ -5057,12 +5075,12 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
 
   if (error || !invitation) {
     return (
-      <AuthShell title="Invitation invalide" subtitle={error || 'Ce lien nâ€™est plus valable.'}>
+      <AuthShell title="Invitation invalide" subtitle={error || 'Ce lien n’est plus valable.'}>
         <button
           onClick={() => navigate('/login')}
           className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark"
         >
-          Aller Ã  la connexion
+          Aller à la connexion
         </button>
       </AuthShell>
     );
@@ -5071,7 +5089,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
   return (
     <AuthShell
       title={`Rejoindre ${invitation.organisationName}`}
-      subtitle={`Vous Ãªtes invitÃ©Â·e en tant que ${invitation.role}. Choisissez un mot de passe pour crÃ©er votre compte Macarte.`}
+      subtitle={`Vous êtes invité·e en tant que ${invitation.role}. Choisissez un mot de passe pour créer votre compte Macarte.`}
     >
       <form onSubmit={handleAcceptInvitation} className="space-y-4">
         <div>
@@ -5092,7 +5110,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
               setPassword(e.target.value);
               setPasswordError(null);
             }}
-            placeholder="8 caractÃ¨res, lettre + chiffre"
+            placeholder="8 caractères, lettre + chiffre"
             autoComplete="new-password"
             className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
           />
@@ -5107,7 +5125,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
               setConfirmPassword(e.target.value);
               setPasswordError(null);
             }}
-            placeholder="RÃ©pÃ©tez le mot de passe"
+            placeholder="Répétez le mot de passe"
             autoComplete="new-password"
             className="w-full px-4 py-2.5 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
           />
@@ -5123,7 +5141,7 @@ function InvitationAcceptance({ apiCall, showAlert, API_ENDPOINT }) {
           className="w-full py-3.5 rounded-full bg-action dark:bg-action-dark text-white font-bold hover:bg-action-hover dark:hover:bg-action-hover-dark disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {isSubmitting ? 'CrÃ©ation du compteâ€¦' : 'CrÃ©er mon compte'}
+          {isSubmitting ? 'Création du compte…' : 'Créer mon compte'}
         </button>
       </form>
     </AuthShell>
@@ -5646,7 +5664,7 @@ function SettingsView({ settings, setSettings, onBack, onSave, apiCall, showAler
               {isAppThemesOpen && (
                 <div className="mt-4 space-y-3">
                   {[
-                    { id: 'swiish', title: 'Macarte', desc: 'ThÃ¨me Macarte avec couleurs et textures.' },
+                    { id: 'swiish', title: 'Macarte', desc: 'Thème Macarte avec couleurs et textures.' },
                     { id: 'minimal', title: 'Minimal', desc: 'Black/white, few grays, no textures, border-only accents.' },
                   ].map(opt => (
                     <label
