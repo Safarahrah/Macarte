@@ -503,6 +503,19 @@ export function getTemplates(type, subtype) {
   }
 }
 
+/** Shapes and images touching the trim edge are pushed into the bleed for printing. */
+function extendToBleed(el, doc) {
+  const b = doc.bleed || 0;
+  if (!b || el.type === 'text' || el.type === 'qr' || el.type === 'icon' || el.rotation) return el;
+  const eps = Math.min(doc.width, doc.height) * 0.002;
+  const out = { ...el };
+  if (el.x <= eps) { out.x = el.x - b; out.w += b; }
+  if (el.y <= eps) { out.y = el.y - b; out.h += b; }
+  if (el.x + el.w >= doc.width - eps) out.w += b;
+  if (el.y + el.h >= doc.height - eps) out.h += b;
+  return out;
+}
+
 /** Apply a template to a document (keeps format, page ids and names). */
 export function applyTemplate(doc, template, ctx = {}) {
   const c = {
@@ -524,7 +537,7 @@ export function applyTemplate(doc, template, ctx = {}) {
       id: existing ? existing.id : newId('pg'),
       name: existing ? existing.name : `Page ${i + 1}`,
       background: src ? { ...src.background, color: doc.transparent && src.background.color === '#ffffff' ? 'transparent' : src.background.color } : (existing ? existing.background : { color: '#ffffff' }),
-      elements: src ? src.elements.map((el) => fitText(el)) : (existing ? existing.elements : [])
+      elements: src ? src.elements.map((el) => extendToBleed(fitText(el), doc)) : (existing ? existing.elements : [])
     };
   });
   return sanitizeDesignData({
