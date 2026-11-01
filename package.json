@@ -67,7 +67,8 @@
     "migrate": "db-migrate up",
     "watch:build": "nodemon --watch src --ext js,jsx,css --exec \"npm run build\" --ignore build",
     "watch:server": "nodemon --watch server.js --exec \"node server.js\" --ignore build --ignore src",
-    "dev": "concurrently \"npm run watch:build\" \"npm run watch:server\" --names \"BUILD,SERVER\" --prefix-colors \"cyan,yellow\""
+    "dev": "concurrently \"npm run watch:build\" \"npm run watch:server\" --names \"BUILD,SERVER\" --prefix-colors \"cyan,yellow\"",
+    "test:designs": "node scripts/test-designs-api.js"
   },
   "browserslist": {
     "production": [

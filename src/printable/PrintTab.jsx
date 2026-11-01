@@ -10,7 +10,8 @@ import PrintableCardCanvas from './PrintableCardCanvas';
 import CardSvgPreview from '../marketing/CardSvgPreview';
 import { defaultConfig, sanitizeConfig, applyTemplatePreset } from './shared/sanitize.js';
 import { FORMATS, FONT_STACKS, getExportPixelSize, getGeometry } from './shared/spec.js';
-import { PUBLIC_TEMPLATES, getCategories, getCategoryLabel } from './shared/templates.js';
+import { PUBLIC_TEMPLATES, getCategoryLabel } from './shared/templates.js';
+import { CARD_STYLES, CARD_INDUSTRIES } from './shared/cardCatalog.js';
 import { useQrValidation } from './QrMark';
 
 const API = '/api';
@@ -203,7 +204,7 @@ function NumField({ label, value, onChange, step = 0.5, min = -20, max = 200, su
   );
 }
 
-export default function PrintTab({ data, slug, csrfToken }) {
+export default function PrintTab({ data, slug, csrfToken, initialDesignId = null }) {
   const [config, setConfig] = useState(null);
   const [side, setSide] = useState('front');
   const [showGuides, setShowGuides] = useState(true);
@@ -213,6 +214,8 @@ export default function PrintTab({ data, slug, csrfToken }) {
   const [tab, setTab] = useState('templates');
   const [templateQuery, setTemplateQuery] = useState('');
   const [templateCategory, setTemplateCategory] = useState('all');
+  const [templateAxis, setTemplateAxis] = useState('all');
+  const [templateLimit, setTemplateLimit] = useState(24);
   const [qrKind, setQrKind] = useState('card');
   const [designs, setDesigns] = useState([]);
   const [designsBusy, setDesignsBusy] = useState(false);
@@ -267,6 +270,22 @@ export default function PrintTab({ data, slug, csrfToken }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      if (initialDesignId) {
+        try {
+          const res = await fetch(`${API}/printable-cards/${initialDesignId}`, { credentials: 'include' });
+          if (cancelled) return;
+          if (res.ok) {
+            const row = await res.json();
+            setConfig(sanitizeConfig(row.config));
+            setActiveDesignId(row.id);
+            setDesignName(row.name || '');
+            setPaymentStatus(row.payment_status || 'unpaid');
+            setPrice(row.price);
+            setPrintableCardId(row.id);
+            return;
+          }
+        } catch (e) { /* fall back to the card layout below */ }
+      }
       try {
         const res = await fetch(`${API}/printable/${encodeURIComponent(slug || '')}`, { credentials: 'include' });
         if (cancelled) return;
@@ -284,7 +303,7 @@ export default function PrintTab({ data, slug, csrfToken }) {
       }
     })();
     return () => { cancelled = true; };
-  }, [slug, data]);
+  }, [slug, data, initialDesignId]);
 
   // ---- personal designs ("Mes designs") ----
   const refreshDesigns = useCallback(async () => {
@@ -311,22 +330,24 @@ export default function PrintTab({ data, slug, csrfToken }) {
   );
   const qrValidation = useQrValidation(config ? qrValue : '');
 
-  const categories = useMemo(() => getCategories(), []);
   const filteredTemplates = useMemo(() => {
     const q = templateQuery.trim().toLowerCase();
     return PUBLIC_TEMPLATES.filter((t) => {
-      if (templateCategory !== 'all' && t.category !== templateCategory) return false;
+      if (templateAxis === 'popular' && !t.popular) return false;
+      if (templateAxis === 'new' && !t.isNew) return false;
+      if (templateCategory !== 'all' && t.category !== templateCategory
+        && !(t.styles || []).includes(templateCategory) && !(t.industries || []).includes(templateCategory)) return false;
       if (!q) return true;
       return [t.name, t.description, getCategoryLabel(t.category), ...(t.tags || [])].join(' ').toLowerCase().includes(q);
     });
-  }, [templateQuery, templateCategory]);
+  }, [templateQuery, templateCategory, templateAxis]);
 
   const previewConfigs = useMemo(() => {
     const map = new Map();
     if (!config || tab !== 'templates') return map;
-    filteredTemplates.forEach((t) => map.set(t.id, applyTemplatePreset(config, t.id)));
+    filteredTemplates.slice(0, templateLimit).forEach((t) => map.set(t.id, applyTemplatePreset(config, t.id)));
     return map;
-  }, [tab, filteredTemplates, config]);
+  }, [tab, filteredTemplates, config, templateLimit]);
 
   if (!config) {
     return (
@@ -812,22 +833,34 @@ export default function PrintTab({ data, slug, csrfToken }) {
                   <p className="text-xs text-text-muted dark:text-text-muted-dark">{filteredTemplates.length} modèles</p>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  <button type="button" onClick={() => setTemplateCategory('all')} className={`ui-btn !px-3 !py-1.5 !text-xs ${templateCategory === 'all' ? 'ui-btn-primary' : 'ui-btn-secondary'}`}>
-                    Tous
-                  </button>
-                  {categories.map((id) => (
-                    <button key={id} type="button" onClick={() => setTemplateCategory(id)} className={`ui-btn !px-3 !py-1.5 !text-xs ${templateCategory === id ? 'ui-btn-primary' : 'ui-btn-secondary'}`}>
-                      {getCategoryLabel(id)}
+                <div className="mt-3 flex flex-wrap gap-1.5" role="tablist" aria-label="Parcourir les modèles">
+                  {[['all', 'Tous'], ['popular', 'Populaires'], ['new', 'Nouveautés'], ['style', 'Par style'], ['industry', 'Par industrie']].map(([id, label]) => (
+                    <button key={id} type="button" role="tab" aria-selected={templateAxis === id}
+                      onClick={() => { setTemplateAxis(id); setTemplateCategory('all'); setTemplateLimit(24); }}
+                      className={`ui-btn !px-3 !py-1.5 !text-xs ${templateAxis === id ? 'ui-btn-primary' : 'ui-btn-secondary'}`}>
+                      {label}
                     </button>
                   ))}
                 </div>
+                {(templateAxis === 'style' || templateAxis === 'industry') && (
+                  <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1" data-testid="template-categories">
+                    {(templateAxis === 'style'
+                      ? [...CARD_STYLES, { id: 'corporate', label: 'Corporate' }]
+                      : [...CARD_INDUSTRIES, { id: 'healthcare', label: 'Santé' }, { id: 'technology', label: 'Technologie' }]
+                    ).map((c) => (
+                      <button key={c.id} type="button" onClick={() => { setTemplateCategory(templateCategory === c.id ? 'all' : c.id); setTemplateLimit(24); }}
+                        className={`shrink-0 rounded-full border px-3 py-1 text-xs whitespace-nowrap ${templateCategory === c.id ? 'border-action bg-action text-white' : 'border-border dark:border-border-dark text-text-secondary dark:text-text-secondary-dark hover:border-action'}`}>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {filteredTemplates.length === 0 ? (
                   <p className="mt-4 text-sm text-text-muted dark:text-text-muted-dark">Aucun modèle ne correspond à cette recherche.</p>
                 ) : (
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {filteredTemplates.map((t) => (
+                    {filteredTemplates.slice(0, templateLimit).map((t) => (
                       <button
                         key={t.id}
                         type="button"
@@ -844,11 +877,16 @@ export default function PrintTab({ data, slug, csrfToken }) {
                             <span className="text-xs font-semibold text-text-primary dark:text-text-primary-dark truncate">{t.name}</span>
                             {config.templateId === t.id && <Check className="w-3.5 h-3.5 shrink-0 text-action dark:text-action-dark" />}
                           </span>
-                          <span className="block text-[11px] text-text-muted dark:text-text-muted-dark capitalize">{t.category}</span>
+                          <span className="block text-[11px] text-text-muted dark:text-text-muted-dark ">{getCategoryLabel(t.category)}{t.isNew ? ' · Nouveau' : ''}</span>
                         </span>
                       </button>
                     ))}
                   </div>
+                )}
+                {filteredTemplates.length > templateLimit && (
+                  <button type="button" className="ui-btn ui-btn-secondary mt-3 w-full !text-xs" onClick={() => setTemplateLimit((n) => n + 24)}>
+                    Afficher plus de modèles ({filteredTemplates.length - templateLimit})
+                  </button>
                 )}
               </div>
             </div>
