@@ -4,6 +4,7 @@
 const { getGeometry, getFont, mmToPx } = require('./spec');
 const { getTemplate } = require('./templates');
 const { sanitizeConfig } = require('./sanitize');
+const { catalogLayout } = require('./catalogLayout.js');
 
 // --- TEXTE ET COORDONNÉES ---
 function visibleText(config, key) {
@@ -34,6 +35,10 @@ function applyOverride(node, overrides) {
     w: Number.isFinite(override.w) ? override.w : node.w,
     h: Number.isFinite(override.h) ? override.h : node.h
   };
+}
+
+function clampSafe(pos, size, start, length) {
+  return Math.max(start, Math.min(pos, start + length - size));
 }
 
 function constrainToDocument(node, widthMm, heightMm) {
@@ -478,7 +483,8 @@ function buildSide(config, side, publicUrl) {
     slogan: visibleText(config, 'slogan'),
     publicUrl
   };
-  const builder = LAYOUT_ENGINES[template.id] || LAYOUT_ENGINES.minimal;
+  const builder = LAYOUT_ENGINES[template.id]
+    || (template.composition ? (c) => catalogLayout(c, template, { textNode, buildLogoNode, buildQrNode }) : LAYOUT_ENGINES.minimal);
   
 let nodes = builder(ctx).filter(Boolean);
 
@@ -520,8 +526,9 @@ nodes = nodes.map((node) => {
     ...node,
     w: qrSize,
     h: qrSize,
-    x: hasX ? Number(config.qr.x) : ctx.W - qrSize - margin,
-    y: hasY ? Number(config.qr.y) : ctx.H - qrSize - margin
+    // Template positions are designed for their own QR size: keep a larger QR inside the safe area.
+    x: hasX ? Number(config.qr.x) : (node.keepPosition ? clampSafe(node.x, qrSize, ctx.s.x, ctx.s.widthMm) : ctx.W - qrSize - margin),
+    y: hasY ? Number(config.qr.y) : (node.keepPosition ? clampSafe(node.y, qrSize, ctx.s.y, ctx.s.heightMm) : ctx.H - qrSize - margin)
   };
 
   const override = config.elementOverrides?.[node.id];

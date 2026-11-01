@@ -1,3 +1,4 @@
+import { CATALOG_TEMPLATES, CATALOG_CATEGORIES } from './cardCatalog.js';
 // src/printable/shared/templates.js
 // Business-card design presets consumed by the print layout engine.
 // `category` is one of the ids in CATEGORIES below.
@@ -154,6 +155,9 @@ export const TEMPLATES = [
     defaultQrPosition: { x: 69, y: 19, size: 16 }, defaultLogoPosition: { x: 9, y: 9, w: 11, h: 11 }, safeAreaPadding: { top: 4, right: 4, bottom: 4, left: 4 }
   }
 ];
+
+TEMPLATES.push(...CATALOG_TEMPLATES);
+CATALOG_CATEGORIES.forEach((c) => { if (!CATEGORIES.some((x) => x.id === c.id)) CATEGORIES.push(c); });
 
 /** Public designs (excludes internal presets such as `custom`). */
 export const PUBLIC_TEMPLATES = TEMPLATES.filter((t) => !t.hidden);

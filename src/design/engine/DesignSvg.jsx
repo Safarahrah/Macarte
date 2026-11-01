@@ -16,21 +16,47 @@ function qrPath(value) {
   return { d: parts.join(''), size: matrix.size, quiet: matrix.quietZone };
 }
 
+function shade(hex) {
+  if (!/^#[0-9a-f]{6}$/i.test(hex || '')) return '#000000';
+  const n = parseInt(hex.slice(1), 16);
+  const c = (v) => Math.round(v * 0.55).toString(16).padStart(2, '0');
+  return `#${c((n >> 16) & 255)}${c((n >> 8) & 255)}${c(n & 255)}`;
+}
+
 export function ElementShape({ el, uid, resolveSrc }) {
   const common = { opacity: el.opacity };
   const stroke = el.stroke && el.stroke !== 'transparent' && el.strokeWidth > 0
     ? { stroke: el.stroke, strokeWidth: el.strokeWidth }
     : {};
-  const fill = (c) => (c === 'transparent' ? 'none' : c);
+  const gid = `gr-${uid}-${el.id}`;
+  const gradDef = el.gradient ? (
+    <defs>
+      <linearGradient id={gid} {...gradientVector(el.gradient.angle)}>
+        <stop offset="0" stopColor={el.gradient.from} />
+        <stop offset="1" stopColor={el.gradient.to} />
+      </linearGradient>
+    </defs>
+  ) : null;
+  const fill = (c) => (el.gradient ? `url(#${gid})` : (c === 'transparent' ? 'none' : c));
+  const withGrad = (node) => (gradDef ? <g>{gradDef}{node}</g> : node);
   switch (el.type) {
+    case 'path': {
+      const k = Math.max(el.w, el.h) ? 1 : 1;
+      return withGrad(
+        <g transform={`scale(${el.w / el.vb} ${el.h / el.vb})`}>
+          <path d={el.d} fill={fill(el.fill)} stroke={el.stroke !== 'transparent' && el.strokeWidth > 0 ? el.stroke : 'none'}
+            strokeWidth={el.strokeWidth * k} strokeLinecap="round" strokeLinejoin="round" opacity={el.opacity} vectorEffect={undefined} />
+        </g>
+      );
+    }
     case 'rect':
-      return <rect width={el.w} height={el.h} rx={Math.min(el.radius, el.w / 2, el.h / 2)} fill={fill(el.fill)} {...stroke} {...common} />;
+      return withGrad(<rect width={el.w} height={el.h} rx={Math.min(el.radius, el.w / 2, el.h / 2)} fill={fill(el.fill)} {...stroke} {...common} />);
     case 'ellipse':
-      return <ellipse cx={el.w / 2} cy={el.h / 2} rx={el.w / 2} ry={el.h / 2} fill={fill(el.fill)} {...stroke} {...common} />;
+      return withGrad(<ellipse cx={el.w / 2} cy={el.h / 2} rx={el.w / 2} ry={el.h / 2} fill={fill(el.fill)} {...stroke} {...common} />);
     case 'triangle':
-      return <polygon points={`${el.w / 2},0 ${el.w},${el.h} 0,${el.h}`} fill={fill(el.fill)} strokeLinejoin="round" {...stroke} {...common} />;
+      return withGrad(<polygon points={`${el.w / 2},0 ${el.w},${el.h} 0,${el.h}`} fill={fill(el.fill)} strokeLinejoin="round" {...stroke} {...common} />);
     case 'star':
-      return <polygon points={starPoints(el.w, el.h, el.points, el.innerRatio)} fill={fill(el.fill)} strokeLinejoin="round" {...stroke} {...common} />;
+      return withGrad(<polygon points={starPoints(el.w, el.h, el.points, el.innerRatio)} fill={fill(el.fill)} strokeLinejoin="round" {...stroke} {...common} />);
     case 'line':
       return (
         <line
@@ -92,7 +118,60 @@ export function ElementShape({ el, uid, resolveSrc }) {
       const anchor = el.align === 'center' ? 'middle' : el.align === 'right' ? 'end' : 'start';
       const tx = el.align === 'center' ? el.w / 2 : el.align === 'right' ? el.w : 0;
       const lh = el.size * el.lineHeight;
-      return (
+      const textProps = {
+        fontFamily: fontCss(el.font), fontSize: el.size, fontWeight: el.weight,
+        fontStyle: el.italic ? 'italic' : 'normal',
+        letterSpacing: el.letterSpacing ? el.letterSpacing * el.size : undefined
+      };
+      if (el.arc && Math.abs(el.arc) >= 5) {
+        // Curved text on a circular arc whose chord is the element width.
+        const sweep = (Math.abs(el.arc) * Math.PI) / 180;
+        const r = el.w / 2 / Math.sin(Math.min(sweep, Math.PI * 1.98) / 2) || el.w;
+        const up = el.arc > 0;
+        // Up: arc top sits on the box top. Down: arc bottom is the baseline inside the box.
+        const cy = up ? r + el.size : el.size * 0.8 - r;
+        const a0 = -Math.PI / 2 - sweep / 2;
+        const a1 = -Math.PI / 2 + sweep / 2;
+        const pid = `arc-${uid}-${el.id}`;
+        const pt = (a) => [el.w / 2 + r * Math.cos(a), up ? cy + r * Math.sin(a) : cy - r * Math.sin(a)];
+        const [x0, y0] = pt(up ? a0 : a0);
+        const [x1, y1] = pt(up ? a1 : a1);
+        const large = sweep > Math.PI ? 1 : 0;
+        const d = up ? `M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}` : `M${x0} ${y0} A${r} ${r} 0 ${large} 0 ${x1} ${y1}`;
+        const arcText = (color, off = 0, key = 'top') => (
+          <text key={key} {...textProps} fill={color} textAnchor="middle" transform={off ? `translate(${off} ${off})` : undefined}>
+            <textPath href={`#${pid}`} startOffset="50%">{el.uppercase ? el.text.toUpperCase() : el.text}</textPath>
+          </text>
+        );
+        const arcSteps = el.depth > 0 ? Math.min(12, Math.ceil(el.depth)) : 0;
+        const arcUnit = arcSteps ? (el.size * el.depth) / 100 / arcSteps : 0;
+        return withGrad(
+          <g opacity={el.opacity}>
+            <defs><path id={pid} d={d} /></defs>
+            {Array.from({ length: arcSteps }, (_, i) => arcText(shade(el.gradient ? el.gradient.to : el.color), (arcSteps - i) * arcUnit, `d${i}`))}
+            {arcText(fill(el.color))}
+          </g>
+        );
+      }
+      const body = (color, dx = 0, dy = 0, key) => (
+        <text key={key} {...textProps} transform={dx || dy ? `translate(${dx} ${dy})` : undefined}
+          textDecoration={el.underline ? 'underline' : undefined} fill={color} textAnchor={anchor} style={{ whiteSpace: 'pre' }}>
+          {lines.map((line, i) => (
+            <tspan key={i} x={tx} y={lh * i + (lh - el.size) / 2 + el.size * 0.8}>{line || ' '}</tspan>
+          ))}
+        </text>
+      );
+      if (el.depth > 0) {
+        const steps = Math.min(12, Math.ceil(el.depth));
+        const unit = (el.size * el.depth) / 100 / steps;
+        return withGrad(
+          <g opacity={el.opacity}>
+            {Array.from({ length: steps }, (_, i) => body(shade(el.gradient ? el.gradient.to : el.color), (steps - i) * unit, (steps - i) * unit, `d${i}`))}
+            {body(fill(el.color), 0, 0, 'top')}
+          </g>
+        );
+      }
+      return withGrad(
         <text
           fontFamily={fontCss(el.font)}
           fontSize={el.size}
@@ -100,7 +179,7 @@ export function ElementShape({ el, uid, resolveSrc }) {
           fontStyle={el.italic ? 'italic' : 'normal'}
           textDecoration={el.underline ? 'underline' : undefined}
           letterSpacing={el.letterSpacing ? el.letterSpacing * el.size : undefined}
-          fill={el.color}
+          fill={fill(el.color)}
           textAnchor={anchor}
           opacity={el.opacity}
           style={{ whiteSpace: 'pre' }}
