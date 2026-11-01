@@ -14,7 +14,8 @@ export const DESIGN_LIMITS = {
   maxDimension: { mm: 5000, px: 10000 }
 };
 
-export const ELEMENT_TYPES = ['text', 'rect', 'ellipse', 'triangle', 'star', 'line', 'icon', 'image', 'qr'];
+export const ELEMENT_TYPES = ['text', 'rect', 'ellipse', 'triangle', 'star', 'line', 'icon', 'image', 'qr', 'path'];
+const PATH_RE = /^[MmLlHhVvCcSsQqTtAaZzeE0-9.,\s+-]*$/;
 
 const ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
 const UPLOAD_RE = /^\/uploads\/[A-Za-z0-9._-]{1,200}\.(png|jpe?g|webp|gif)$/i;
@@ -82,6 +83,9 @@ export function sanitizeElement(raw, maxCoord) {
     locked: Boolean(raw.locked),
     hidden: Boolean(raw.hidden)
   };
+  if (raw.gradient && typeof raw.gradient === 'object' && ['rect', 'ellipse', 'triangle', 'star', 'path', 'text'].includes(raw.type)) {
+    el.gradient = { from: color(raw.gradient.from, '#4f46e5'), to: color(raw.gradient.to, '#ec4899'), angle: num(raw.gradient.angle, 135, 0, 360) };
+  }
   switch (raw.type) {
     case 'text':
       Object.assign(el, {
@@ -95,7 +99,9 @@ export function sanitizeElement(raw, maxCoord) {
         align: ALIGNS.includes(raw.align) ? raw.align : 'left',
         color: color(raw.color, '#111111'),
         lineHeight: num(raw.lineHeight, 1.2, 0.5, 4),
-        letterSpacing: num(raw.letterSpacing, 0, -0.5, 2)
+        letterSpacing: num(raw.letterSpacing, 0, -0.5, 2),
+        arc: num(raw.arc, 0, -360, 360),
+        depth: num(raw.depth, 0, 0, 30)
       });
       break;
     case 'rect':
@@ -131,6 +137,15 @@ export function sanitizeElement(raw, maxCoord) {
         src: sanitizeImageSrc(raw.src),
         fit: FITS.includes(raw.fit) ? raw.fit : 'cover',
         radius: num(raw.radius, 0, 0, lim)
+      });
+      break;
+    case 'path':
+      Object.assign(el, {
+        d: PATH_RE.test(String(raw.d || '')) ? String(raw.d || '').substring(0, 20000) : '',
+        vb: num(raw.vb, 24, 1, 10000),
+        fill: color(raw.fill, '#4f46e5'),
+        stroke: color(raw.stroke, 'transparent'),
+        strokeWidth: num(raw.strokeWidth, 0, 0, 1000)
       });
       break;
     case 'qr':
