@@ -58,6 +58,11 @@ const SETS = {
   hiring: [['serviceList', 'mint', 'modern'], ['bigType', 'royal', 'bold'], ['diagonalHero', 'forest', 'modern'], ['minimalPhoto', 'sky', 'minimal']]
 };
 
+const onColor = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150 ? '#111111' : '#ffffff';
+};
+
 const WAVE = 'M0 10 C6 4 12 4 18 9 C21 11.5 23 12 24 11.5 V24 H0 Z';
 const BURST = 'M12 1 L14.5 6.5 L20.5 4.5 L18.5 10 L23 12 L18.5 14 L20.5 19.5 L14.5 17.5 L12 23 L9.5 17.5 L3.5 19.5 L5.5 14 L1 12 L5.5 10 L3.5 4.5 L9.5 6.5 Z';
 
@@ -97,7 +102,7 @@ export function buildFlyerCatalog(kit) {
         ...list(c, 0.07, 0.67, 0.5, t.items, p[2], p[1]),
         Sq(c, 0.8, 0.75, 0.3, p[0], { shape: 'ellipse' }),
         T(c, 0.65, 0.72, 0.3, 0.06, t.price, { color: '#ffffff', weight: 900, align: 'center', fit: true }),
-        ...cta(c, 0.07, 0.9, 0.45, t.cta, p[1], '#111111'),
+        ...cta(c, 0.07, 0.9, 0.45, t.cta, p[1], onColor(p[1])),
         T(c, 0.57, 0.915, 0.38, 0.026, '01 23 45 67 89', { color: p[2], weight: 700, align: 'right', fit: true })
       ]
     }),
@@ -110,8 +115,8 @@ export function buildFlyerCatalog(kit) {
         T(c, 0.55, 0.42, 0.4, 0.026, t.body, { color: '#ffffff', lh: 1.45, opacity: 0.85 }),
         ...list(c, 0.55, 0.58, 0.4, t.items, '#ffffff', p[1], { s: 0.027, gap: 0.05 }),
         Sq(c, 0.5, 0.5, 0.2, p[1], { shape: 'ellipse' }),
-        T(c, 0.42, 0.485, 0.16, 0.035, t.price, { color: '#111111', weight: 900, align: 'center', fit: true }),
-        ...cta(c, 0.55, 0.86, 0.38, t.cta, p[1], '#111111')
+        T(c, 0.42, 0.485, 0.16, 0.035, t.price, { color: onColor(p[1]), weight: 900, align: 'center', fit: true }),
+        ...cta(c, 0.55, 0.86, 0.38, t.cta, p[1], onColor(p[1]))
       ]
     }),
     bigType: (c, p, t, s) => ({
@@ -124,7 +129,7 @@ export function buildFlyerCatalog(kit) {
         T(c, 0.07, 0.55, 0.7, 0.03, t.body, { color: p[2], lh: 1.45, opacity: 0.85 }),
         Img(c, 0.07, 0.66, 0.5, 0.22, { r: 0.03 }),
         Sq(c, 0.78, 0.74, 0.28, p[1], { shape: 'ellipse' }),
-        T(c, 0.64, 0.715, 0.28, 0.055, t.price, { color: '#111111', weight: 900, align: 'center', fit: true }),
+        T(c, 0.64, 0.715, 0.28, 0.055, t.price, { color: onColor(p[1]), weight: 900, align: 'center', fit: true }),
         R(c, 0, 0.92, 1, 0.08, p[0]),
         T(c, 0.07, 0.945, 0.86, 0.028, `${t.cta} · www.votresite.com`, { color: '#ffffff', weight: 700, align: 'center', fit: true })
       ]
@@ -138,7 +143,7 @@ export function buildFlyerCatalog(kit) {
         { ...T(c, 0.05, 0.4, 0.9, 0.12, t.title, { ...head('bold'), color: '#ffffff', align: 'center', lh: 1 }), depth: 4 },
         L(c, 0.35, 0.68, 0.3, p[1], { t: 0.006 }),
         T(c, 0.1, 0.71, 0.8, 0.03, t.items.join(' · '), { color: '#ffffff', align: 'center', weight: 600, fit: true }),
-        ...cta(c, 0.3, 0.8, 0.4, t.cta, p[1], '#111111'),
+        ...cta(c, 0.3, 0.8, 0.4, t.cta, p[1], onColor(p[1])),
         T(c, 0.07, 0.92, 0.86, 0.026, 'Lieu · Ville · www.votresite.com', { color: '#ffffff', align: 'center', opacity: 0.8, fit: true })
       ]
     }),
@@ -181,7 +186,7 @@ export function buildFlyerCatalog(kit) {
       elements: [
         Img(c, 0, 0, 1, 0.5),
         R(c, 0.07, 0.42, 0.42, 0.1, p[1], { r: 0.02 }),
-        T(c, 0.07, 0.448, 0.42, 0.045, t.price, { color: '#111111', weight: 900, align: 'center', fit: true }),
+        T(c, 0.07, 0.448, 0.42, 0.045, t.price, { color: onColor(p[1]), weight: 900, align: 'center', fit: true }),
         T(c, 0.07, 0.56, 0.86, 0.028, t.kicker, { color: p[0], weight: 800, ls: 0.2, fit: true }),
         T(c, 0.07, 0.6, 0.86, 0.06, t.title.replace('\n', ' '), { ...head(s), color: p[2], fit: true }),
         ...['BedDouble', 'Bath', 'Ruler', 'Car'].flatMap((ic, i) => [
@@ -199,7 +204,7 @@ export function buildFlyerCatalog(kit) {
       elements: [
         R(c, 0, 0, 1, 0.55, p[0]),
         P(c, 0.52, 0.08, 0.42, 0.42 * (c.w / c.h), BURST, p[1]),
-        T(c, 0.55, 0.2, 0.36, 0.08, t.price, { ...head('bold'), color: '#111111', align: 'center', fit: true }),
+        T(c, 0.55, 0.2, 0.36, 0.08, t.price, { ...head('bold'), color: onColor(p[1]), align: 'center', fit: true }),
         T(c, 0.07, 0.08, 0.44, 0.03, t.kicker, { color: '#ffffff', weight: 800, ls: 0.15, fit: true }),
         T(c, 0.07, 0.14, 0.45, 0.085, t.title, { ...head('bold'), color: '#ffffff', lh: 1 }),
         Img(c, 0.07, 0.6, 0.27, 0.2, { r: 0.02 }), Img(c, 0.365, 0.6, 0.27, 0.2, { r: 0.02 }), Img(c, 0.66, 0.6, 0.27, 0.2, { r: 0.02 }),
@@ -253,7 +258,7 @@ export function buildFlyerCatalog(kit) {
         T(c, 0.07, 0.5, 0.86, 0.03, t.kicker, { color: p[1], weight: 800, ls: 0.2, fit: true }),
         T(c, 0.07, 0.55, 0.86, 0.075, t.title, { ...head('bold'), color: '#ffffff', lh: 1 }),
         ...list(c, 0.07, 0.75, 0.5, t.items.slice(0, 3), '#ffffff', p[1]),
-        ...cta(c, 0.58, 0.8, 0.35, t.cta, p[1], '#111111')
+        ...cta(c, 0.58, 0.8, 0.35, t.cta, p[1], onColor(p[1]))
       ]
     }),
     confetti: (c, p, t, s) => ({
