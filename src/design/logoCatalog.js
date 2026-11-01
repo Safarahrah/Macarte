@@ -140,7 +140,7 @@ export function buildLogoCatalog(kit) {
     const w = 2 * rr * Math.sin(Math.min(Math.abs(sweep), 340) * Math.PI / 360);
     const el = T(c, 0, 0, 0.1, s, text, o);
     const up = sweep > 0;
-    return { ...el, arc: sweep, w, h: up ? rr : 2 * rr, x: cx * c.w - w / 2, y: up ? cy * c.h - rr - s * c.u : cy * c.h - rr + 0.2 * s * c.u };
+    return { ...el, arc: sweep, w, x: cx * c.w - w / 2, y: up ? cy * c.h - rr - s * c.u : cy * c.h + rr - 0.8 * s * c.u };
   };
   const txt = (o, extra = {}) => ({ fit: true, font: o.font, weight: o.weight, upper: o.upper, ls: o.ls, italic: o.italic, color: o.ink, ...extra });
   const sub = (o, extra = {}) => ({ fit: true, color: o.c2, ls: 0.2, upper: true, weight: 600, ...extra });

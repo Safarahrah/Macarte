@@ -128,7 +128,8 @@ export function ElementShape({ el, uid, resolveSrc }) {
         const sweep = (Math.abs(el.arc) * Math.PI) / 180;
         const r = el.w / 2 / Math.sin(Math.min(sweep, Math.PI * 1.98) / 2) || el.w;
         const up = el.arc > 0;
-        const cy = up ? r + el.size : el.h - r - el.size * 0.2;
+        // Up: arc top sits on the box top. Down: arc bottom is the baseline inside the box.
+        const cy = up ? r + el.size : el.size * 0.8 - r;
         const a0 = -Math.PI / 2 - sweep / 2;
         const a1 = -Math.PI / 2 + sweep / 2;
         const pid = `arc-${uid}-${el.id}`;
