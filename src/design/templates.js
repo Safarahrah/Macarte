@@ -6,7 +6,8 @@ import { newId } from './shared/sanitize.js';
 import { sanitizeDesignData } from './shared/sanitize.js';
 import { fitText } from './engine/factory';
 import { measure } from './engine/text';
-import { buildLogoCatalog } from './logoCatalog.js';
+import { buildLogoCatalog, LOGO_STYLE_CATS, LOGO_INDUSTRY_CATS } from './logoCatalog.js';
+import { buildFlyerCatalog, FLYER_USES, FLYER_STYLES } from './flyerCatalog.js';
 
 // ---------- relative element helpers ----------
 const base = () => ({ id: newId(), rotation: 0, opacity: 1, locked: false, hidden: false, name: '' });
@@ -332,6 +333,7 @@ const LOGO_TEMPLATES = LOGO_SECTORS.slice(0, 12).map((sec, i) => {
 });
 
 const LOGO_CATALOG = buildLogoCatalog({ T, Sq, Ic, R, L, bg, initials, newId });
+const FLYER_CATALOG = buildFlyerCatalog({ T, Sq, Ic, R, L, Img, Q, bg, newId });
 
 // ---------- "other" kinds ----------
 const OTHER = {
@@ -494,12 +496,19 @@ OTHER.video = [{
 }];
 
 /** Templates available for a module / subtype. */
+/** Style / industry filter lists for the template gallery of a module. */
+export function getTemplateFilters(type) {
+  if (type === 'logo') return { styles: LOGO_STYLE_CATS, industries: LOGO_INDUSTRY_CATS };
+  if (type === 'flyer' || type === 'poster') return { styles: FLYER_STYLES, industries: FLYER_USES };
+  return { styles: [], industries: [] };
+}
+
 export function getTemplates(type, subtype) {
   switch (type) {
     case 'pocket': return POCKETS;
     case 'logo': return [...LOGO_CATALOG, ...LOGO_TEMPLATES];
     case 'flyer':
-    case 'poster':
+    case 'poster': return [...FLYER_CATALOG, ...GENERIC];
     case 'social_design': return GENERIC;
     case 'other': return [...(OTHER[subtype] || []), ...GENERIC.slice(0, 2)];
     default: return GENERIC;
@@ -529,7 +538,7 @@ export function applyTemplate(doc, template, ctx = {}) {
     accent: ctx.accent || template.palette?.accent || '#f59e0b',
     ink: template.palette?.ink || '#111827'
   };
-  const built = template.build(c);
+  const built = template.build(c, ctx);
   const pagesSource = built.length > doc.pages.length && (doc.pages.length === 1 || ctx.allowExtraPages)
     ? built
     : doc.pages;

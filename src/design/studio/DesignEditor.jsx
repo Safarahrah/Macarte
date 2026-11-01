@@ -10,7 +10,8 @@ import useHistory from '../engine/useHistory';
 import { adaptDocument, cloneElements, createElement, fitText } from '../engine/factory';
 import { exportDocument, makeThumbnail, pagePreviewUrl, pixelSize } from '../engine/exporters';
 import { unionBounds, round } from '../engine/geometry';
-import { applyTemplate, getTemplates } from '../templates';
+import { applyTemplate, getTemplates, getTemplateFilters } from '../templates';
+import TemplateGallery from './TemplateGallery';
 import { sanitizeDesignData, newId } from '../shared/sanitize';
 import { DESIGN_FONTS } from '../shared/fonts';
 import { ICON_GROUPS } from '../shared/icons';
@@ -741,24 +742,29 @@ function ElementProperties({ el, unit, sizeLabel, toSizeUi, fromSizeUi, update, 
 
 function TemplatesPanel({ doc, type, subtype, onApply }) {
   const templates = useMemo(() => getTemplates(type, subtype), [type, subtype]);
-  const [q, setQ] = useState('');
-  const previews = useMemo(() => templates
-    .filter((t) => !q || [t.name, ...(t.tags || [])].join(' ').toLowerCase().includes(q.toLowerCase()))
-    .map((t) => ({ t, doc: applyTemplate({ ...doc, pages: [doc.pages[0]] }, t, { type, subtype }) })), [templates, doc.width, doc.height, q]);
+  const filters = useMemo(() => getTemplateFilters(type), [type]);
+  const brandName = doc.meta?.brandName;
+  const cache = useMemo(() => new Map(), [templates, doc.width, doc.height]);
+  const previewOf = (t) => {
+    if (!cache.has(t.id)) cache.set(t.id, applyTemplate({ ...doc, pages: [doc.pages[0]] }, t, { type, subtype, name: brandName }));
+    return cache.get(t.id);
+  };
   return (
-    <div className="space-y-3">
-      <input className={inputCls} placeholder={type === 'logo' ? 'Rechercher (secteur, style…)' : 'Rechercher un modèle'} value={q} onChange={(e) => setQ(e.target.value)} />
-      <div className="grid grid-cols-2 gap-2">
-        {previews.map(({ t, doc: d }) => (
-          <button key={t.id} type="button" onClick={() => onApply(t)} className="overflow-hidden rounded-md border border-border dark:border-border-dark text-left hover:border-action" data-testid={`apply-${t.id}`}>
-            <div className="flex aspect-square items-center justify-center bg-surface dark:bg-surface-dark p-1.5">
-              <DesignSvg doc={d} uid={`tp${t.id}`.replace(/[^a-zA-Z0-9]/g, '')} width="100%" height="100%" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-            </div>
-            <p className="truncate px-1.5 py-1 text-[11px]">{t.name}</p>
-          </button>
-        ))}
-      </div>
-    </div>
+    <TemplateGallery
+      compact
+      templates={templates}
+      styles={filters.styles}
+      industries={filters.industries}
+      placeholder={type === 'logo' ? 'Rechercher (symbole, style, secteur…)' : 'Rechercher un modèle'}
+      renderTile={(t) => (
+        <button key={t.id} type="button" onClick={() => onApply(t)} className="overflow-hidden rounded-md border border-border dark:border-border-dark text-left hover:border-action" data-testid={`apply-${t.id}`}>
+          <div className="flex aspect-square items-center justify-center bg-surface dark:bg-surface-dark p-1.5">
+            <DesignSvg doc={previewOf(t)} uid={`tp${t.id}`.replace(/[^a-zA-Z0-9]/g, '')} width="100%" height="100%" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+          </div>
+          <p className="truncate px-1.5 py-1 text-[11px]">{t.name}</p>
+        </button>
+      )}
+    />
   );
 }
 

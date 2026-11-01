@@ -2,6 +2,7 @@
 // Whitelisted symbol names (rendered client-side with lucide-react). The server
 // sanitizer only accepts names from this list.
 import { LOGO_ICON_NAMES } from '../logoCatalog.js';
+import { FLYER_ICON_NAMES } from '../flyerCatalog.js';
 
 export const ICON_GROUPS = [
   { id: 'general', label: 'Général', icons: ['Star', 'Heart', 'Check', 'CheckCircle', 'Circle', 'Square', 'Triangle', 'Hexagon', 'Diamond', 'Sparkles', 'Zap', 'Award', 'Crown', 'Flag', 'Bookmark', 'Tag', 'Gift', 'Bell'] },
@@ -16,7 +17,7 @@ export const ICON_GROUPS = [
 
 {
   const known = new Set(ICON_GROUPS.flatMap((g) => g.icons));
-  const extra = LOGO_ICON_NAMES.filter((n) => !known.has(n));
+  const extra = [...new Set([...LOGO_ICON_NAMES, ...FLYER_ICON_NAMES])].filter((n) => !known.has(n));
   if (extra.length) ICON_GROUPS.push({ id: 'logos', label: 'Logos & emblèmes', icons: extra });
 }
 

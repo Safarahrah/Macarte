@@ -7,7 +7,8 @@ import StudioLayout, { Icon, Loading } from './StudioLayout';
 import { api, formatDate, useSession } from './api';
 import DesignSvg from '../engine/DesignSvg';
 import { createDocument } from '../engine/factory';
-import { applyTemplate, generateLogoProposals, getTemplates, LOGO_SECTORS, LOGO_STYLES } from '../templates';
+import { applyTemplate, generateLogoProposals, getTemplates, getTemplateFilters, LOGO_SECTORS, LOGO_STYLES } from '../templates';
+import TemplateGallery from './TemplateGallery';
 import { allowsFreePages, getKind } from '../shared/modules';
 
 function formatLabel(mod, p) {
@@ -132,22 +133,25 @@ function NewDesignDialog({ mod, onClose, onCreated }) {
   const baseDoc = useMemo(() => createDocument({ type, subtype: kind, format, platform }), [type, kind, format.id, format.width, format.height, format.unit, platform]);
 
   const templates = useMemo(() => {
-    if (type === 'logo') return generateLogoProposals(brand);
+    if (type === 'logo') return [...generateLogoProposals(brand), ...getTemplates(type, kind)];
     return getTemplates(type, kind);
   }, [type, kind, brand]);
+  const filters = useMemo(() => getTemplateFilters(type), [type]);
 
-  const ctx = { type, subtype: kind, allowExtraPages: allowsFreePages(type, kind) };
-  const previews = useMemo(
-    () => templates.map((t) => ({ t, doc: applyTemplate(baseDoc, t, ctx) })),
-    [templates, baseDoc]
-  );
+  const ctx = { type, subtype: kind, allowExtraPages: allowsFreePages(type, kind), name: brand.name, slogan: brand.slogan };
+  // Previews are built lazily, only for the tiles the gallery displays.
+  const previewCache = useMemo(() => new Map(), [templates, baseDoc]);
+  const previewOf = (t) => {
+    if (!previewCache.has(t.id)) previewCache.set(t.id, applyTemplate(baseDoc, t, ctx));
+    return previewCache.get(t.id);
+  };
 
   const create = async () => {
     setBusy(true);
     setError('');
     try {
-      const chosen = previews.find((p) => p.t.id === templateId);
-      const data = chosen ? chosen.doc : baseDoc;
+      const chosen = templates.find((t) => t.id === templateId);
+      const data = chosen ? previewOf(chosen) : baseDoc;
       if (type === 'logo') data.meta = { ...data.meta, sector: brand.sector, style: brand.style };
       const defaultTitle = type === 'logo' ? brand.name : `${type === 'other' ? getKind(kind).label : mod.singular[0].toUpperCase() + mod.singular.slice(1)} – ${format.label}`;
       const project = await api('POST', mod.api, { title: (title || defaultTitle).slice(0, 120), subtype: kind, format: format.id, data });
@@ -231,12 +235,17 @@ function NewDesignDialog({ mod, onClose, onCreated }) {
           )}
           <section>
             <h3 className="ui-label mb-2">{type === 'logo' ? 'Propositions' : 'Modèle'}</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-              <TemplatePreview doc={baseDoc} label="Page blanche" active={templateId === 'blank'} onClick={() => setTemplateId('blank')} testId="template-blank" />
-              {previews.map(({ t, doc }) => (
-                <TemplatePreview key={t.id} doc={doc} label={t.name} active={templateId === t.id} onClick={() => setTemplateId(t.id)} testId={`template-${t.id}`} />
-              ))}
-            </div>
+            <TemplateGallery
+              templates={templates}
+              styles={filters.styles}
+              industries={filters.industries}
+              gridClass="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6"
+              placeholder={type === 'logo' ? 'Rechercher (symbole, style, secteur…)' : 'Rechercher un modèle'}
+              leading={<TemplatePreview doc={baseDoc} label="Page blanche" active={templateId === 'blank'} onClick={() => setTemplateId('blank')} testId="template-blank" />}
+              renderTile={(t) => (
+                <TemplatePreview key={t.id} doc={previewOf(t)} label={t.name} active={templateId === t.id} onClick={() => setTemplateId(t.id)} testId={`template-${t.id}`} />
+              )}
+            />
           </section>
         </div>
         <div className="flex flex-wrap items-center gap-3 border-t border-border dark:border-border-dark px-5 py-4">
