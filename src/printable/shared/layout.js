@@ -37,6 +37,10 @@ function applyOverride(node, overrides) {
   };
 }
 
+function clampSafe(pos, size, start, length) {
+  return Math.max(start, Math.min(pos, start + length - size));
+}
+
 function constrainToDocument(node, widthMm, heightMm) {
   if (node.locked || ['rect', 'line', 'path', 'polygon', 'circle'].includes(node.type)) return node;
   const w = node.w || 10;
@@ -523,8 +527,8 @@ nodes = nodes.map((node) => {
     w: qrSize,
     h: qrSize,
     // Template positions are designed for their own QR size: keep a larger QR inside the safe area.
-    x: hasX ? Number(config.qr.x) : (node.keepPosition ? Math.max(margin, Math.min(node.x, ctx.W - qrSize - margin)) : ctx.W - qrSize - margin),
-    y: hasY ? Number(config.qr.y) : (node.keepPosition ? Math.max(margin, Math.min(node.y, ctx.H - qrSize - margin)) : ctx.H - qrSize - margin)
+    x: hasX ? Number(config.qr.x) : (node.keepPosition ? clampSafe(node.x, qrSize, ctx.s.x, ctx.s.widthMm) : ctx.W - qrSize - margin),
+    y: hasY ? Number(config.qr.y) : (node.keepPosition ? clampSafe(node.y, qrSize, ctx.s.y, ctx.s.heightMm) : ctx.H - qrSize - margin)
   };
 
   const override = config.elementOverrides?.[node.id];

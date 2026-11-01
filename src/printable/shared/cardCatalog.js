@@ -127,13 +127,15 @@ const SIZES = {
 const NEW_IDS = new Set(['cat-3d-1', 'cat-3d-2', 'cat-cool-1', 'cat-unique-3', 'cat-electrician-1', 'cat-photography-4', 'cat-beauty-1', 'cat-cute-1']);
 const POPULAR_IDS = new Set(['cat-business-1', 'cat-modern-1', 'cat-construction-1', 'cat-realestate-1', 'cat-luxury-1', 'cat-minimal-1', 'cat-professional-1', 'cat-beauty-2', 'cat-restaurant-1', 'cat-barber-1', 'cat-lawyer-1', 'cat-elegant-1']);
 
+const COMPOSITION_LABELS = { glow: 'halo lumineux', diagonal: 'diagonale', split: 'deux tons', wave: 'vague', dots: 'points', triangles: 'triangles', blob: 'forme organique', corner: 'coin graphique', sidebar: 'bande latérale', topband: 'bandeau', arrowtab: 'onglet flèche', circuit: 'circuit', stripes: 'rayures', circles: 'cercles', frame: 'cadre', minimal: 'épuré', bottomwave: 'vague basse' };
+
 function build(kind, catId, entries, label) {
   return entries.map(([composition, palette, fonts, emblem, opts = {}], i) => {
     const id = `cat-${catId}-${i + 1}`;
     return {
       id,
       name: `${label} ${i + 1}`,
-      description: `${label} · ${composition}`,
+      description: `${label} · ${COMPOSITION_LABELS[composition] || composition}`,
       category: catId,
       styles: kind === 'style' ? [catId] : [],
       industries: kind === 'industry' ? [catId] : [],
