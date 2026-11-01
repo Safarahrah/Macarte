@@ -4,6 +4,7 @@
 const { getGeometry, getFont, mmToPx } = require('./spec');
 const { getTemplate } = require('./templates');
 const { sanitizeConfig } = require('./sanitize');
+const { catalogLayout } = require('./catalogLayout.js');
 
 // --- TEXTE ET COORDONNÉES ---
 function visibleText(config, key) {
@@ -478,7 +479,8 @@ function buildSide(config, side, publicUrl) {
     slogan: visibleText(config, 'slogan'),
     publicUrl
   };
-  const builder = LAYOUT_ENGINES[template.id] || LAYOUT_ENGINES.minimal;
+  const builder = LAYOUT_ENGINES[template.id]
+    || (template.composition ? (c) => catalogLayout(c, template, { textNode, buildLogoNode, buildQrNode }) : LAYOUT_ENGINES.minimal);
   
 let nodes = builder(ctx).filter(Boolean);
 
@@ -520,8 +522,8 @@ nodes = nodes.map((node) => {
     ...node,
     w: qrSize,
     h: qrSize,
-    x: hasX ? Number(config.qr.x) : ctx.W - qrSize - margin,
-    y: hasY ? Number(config.qr.y) : ctx.H - qrSize - margin
+    x: hasX ? Number(config.qr.x) : (node.keepPosition ? node.x : ctx.W - qrSize - margin),
+    y: hasY ? Number(config.qr.y) : (node.keepPosition ? node.y : ctx.H - qrSize - margin)
   };
 
   const override = config.elementOverrides?.[node.id];
