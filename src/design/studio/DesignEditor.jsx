@@ -601,7 +601,27 @@ export default function DesignEditor({ mod, id }) {
   );
 }
 
-const ELEMENT_LABELS = { text: 'Texte', rect: 'Rectangle', ellipse: 'Cercle / ellipse', triangle: 'Triangle', star: 'Étoile', line: 'Ligne', icon: 'Symbole', image: 'Image', qr: 'QR code' };
+const ELEMENT_LABELS = { text: 'Texte', rect: 'Rectangle', ellipse: 'Cercle / ellipse', triangle: 'Triangle', star: 'Étoile', line: 'Ligne', icon: 'Symbole', image: 'Image', qr: 'QR code', path: 'Forme vectorielle' };
+
+function GradientFields({ el, update, commit }) {
+  const g = el.gradient;
+  return (
+    <div className="space-y-2">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={Boolean(g)} data-testid="gradient-toggle"
+          onChange={(e) => update({ gradient: e.target.checked ? { from: el.type === 'text' ? el.color : (el.fill && el.fill !== 'transparent' ? el.fill : '#4f46e5'), to: '#ec4899', angle: 135 } : undefined })} />
+        Dégradé
+      </label>
+      {g && (
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="De"><ColorInput value={g.from} onChange={(v) => update({ gradient: { ...g, from: v } }, true)} onCommit={commit} /></Field>
+          <Field label="À"><ColorInput value={g.to} onChange={(v) => update({ gradient: { ...g, to: v } }, true)} onCommit={commit} /></Field>
+          <Field label="Angle (°)"><NumInput value={g.angle} step={15} min={0} max={360} onChange={(v) => update({ gradient: { ...g, angle: v } })} /></Field>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ElementProperties({ el, unit, sizeLabel, toSizeUi, fromSizeUi, update, commit, textRef, onReplaceImage }) {
   return (
@@ -638,6 +658,19 @@ function ElementProperties({ el, unit, sizeLabel, toSizeUi, fromSizeUi, update, 
             <Field label="Interligne"><NumInput value={el.lineHeight} step={0.1} min={0.5} max={4} onChange={(v) => update({ lineHeight: v })} /></Field>
             <Field label="Espacement"><NumInput value={el.letterSpacing} step={0.01} min={-0.5} max={2} onChange={(v) => update({ letterSpacing: v })} suffix="em" /></Field>
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Courbure (°)"><NumInput value={el.arc || 0} step={10} min={-360} max={360} onChange={(v) => update({ arc: v })} /></Field>
+            <Field label="Relief 3D"><NumInput value={el.depth || 0} step={1} min={0} max={30} onChange={(v) => update({ depth: Math.max(0, v) })} /></Field>
+          </div>
+          <GradientFields el={el} update={update} commit={commit} />
+        </>
+      )}
+      {el.type === 'path' && (
+        <>
+          <Field label="Remplissage"><ColorInput value={el.fill} onChange={(v) => update({ fill: v }, true)} onCommit={commit} allowTransparent /></Field>
+          <Field label="Contour"><ColorInput value={el.stroke} onChange={(v) => update({ stroke: v, strokeWidth: el.strokeWidth || 1 }, true)} onCommit={commit} allowTransparent /></Field>
+          <Field label="Épaisseur du contour"><NumInput value={el.strokeWidth} step={0.25} min={0} onChange={(v) => update({ strokeWidth: Math.max(0, v) })} /></Field>
+          <GradientFields el={el} update={update} commit={commit} />
         </>
       )}
       {['rect', 'ellipse', 'triangle', 'star'].includes(el.type) && (
@@ -645,6 +678,7 @@ function ElementProperties({ el, unit, sizeLabel, toSizeUi, fromSizeUi, update, 
           <Field label="Remplissage"><ColorInput value={el.fill} onChange={(v) => update({ fill: v }, true)} onCommit={commit} allowTransparent /></Field>
           <Field label="Contour"><ColorInput value={el.stroke} onChange={(v) => update({ stroke: v, strokeWidth: el.strokeWidth || Math.min(el.w, el.h) * 0.02 }, true)} onCommit={commit} allowTransparent /></Field>
           <Field label={`Épaisseur du contour (${unit})`}><NumInput value={el.strokeWidth} step={0.1} min={0} onChange={(v) => update({ strokeWidth: Math.max(0, v) })} /></Field>
+          <GradientFields el={el} update={update} commit={commit} />
           {el.type === 'rect' && <Field label={`Arrondi (${unit})`}><NumInput value={el.radius} step={0.5} min={0} onChange={(v) => update({ radius: Math.max(0, v) })} /></Field>}
           {el.type === 'star' && (
             <div className="grid grid-cols-2 gap-2">

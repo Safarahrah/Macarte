@@ -6,6 +6,7 @@ import { newId } from './shared/sanitize.js';
 import { sanitizeDesignData } from './shared/sanitize.js';
 import { fitText } from './engine/factory';
 import { measure } from './engine/text';
+import { buildLogoCatalog } from './logoCatalog.js';
 
 // ---------- relative element helpers ----------
 const base = () => ({ id: newId(), rotation: 0, opacity: 1, locked: false, hidden: false, name: '' });
@@ -330,6 +331,8 @@ const LOGO_TEMPLATES = LOGO_SECTORS.slice(0, 12).map((sec, i) => {
   return { ...props[(i * 3) % props.length], id: `logo-tpl-${sec.id}`, name: `${sec.label} · ${sty.label}` };
 });
 
+const LOGO_CATALOG = buildLogoCatalog({ T, Sq, Ic, R, L, bg, initials, newId });
+
 // ---------- "other" kinds ----------
 const OTHER = {
   'email-signature': [{
@@ -494,7 +497,7 @@ OTHER.video = [{
 export function getTemplates(type, subtype) {
   switch (type) {
     case 'pocket': return POCKETS;
-    case 'logo': return LOGO_TEMPLATES;
+    case 'logo': return [...LOGO_CATALOG, ...LOGO_TEMPLATES];
     case 'flyer':
     case 'poster':
     case 'social_design': return GENERIC;
