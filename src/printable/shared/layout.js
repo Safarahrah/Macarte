@@ -522,8 +522,9 @@ nodes = nodes.map((node) => {
     ...node,
     w: qrSize,
     h: qrSize,
-    x: hasX ? Number(config.qr.x) : (node.keepPosition ? node.x : ctx.W - qrSize - margin),
-    y: hasY ? Number(config.qr.y) : (node.keepPosition ? node.y : ctx.H - qrSize - margin)
+    // Template positions are designed for their own QR size: keep a larger QR inside the safe area.
+    x: hasX ? Number(config.qr.x) : (node.keepPosition ? Math.max(margin, Math.min(node.x, ctx.W - qrSize - margin)) : ctx.W - qrSize - margin),
+    y: hasY ? Number(config.qr.y) : (node.keepPosition ? Math.max(margin, Math.min(node.y, ctx.H - qrSize - margin)) : ctx.H - qrSize - margin)
   };
 
   const override = config.elementOverrides?.[node.id];

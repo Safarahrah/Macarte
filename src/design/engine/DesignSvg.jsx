@@ -138,12 +138,18 @@ export function ElementShape({ el, uid, resolveSrc }) {
         const [x1, y1] = pt(up ? a1 : a1);
         const large = sweep > Math.PI ? 1 : 0;
         const d = up ? `M${x0} ${y0} A${r} ${r} 0 ${large} 1 ${x1} ${y1}` : `M${x0} ${y0} A${r} ${r} 0 ${large} 0 ${x1} ${y1}`;
+        const arcText = (color, off = 0, key = 'top') => (
+          <text key={key} {...textProps} fill={color} textAnchor="middle" transform={off ? `translate(${off} ${off})` : undefined}>
+            <textPath href={`#${pid}`} startOffset="50%">{el.uppercase ? el.text.toUpperCase() : el.text}</textPath>
+          </text>
+        );
+        const arcSteps = el.depth > 0 ? Math.min(12, Math.ceil(el.depth)) : 0;
+        const arcUnit = arcSteps ? (el.size * el.depth) / 100 / arcSteps : 0;
         return withGrad(
           <g opacity={el.opacity}>
             <defs><path id={pid} d={d} /></defs>
-            <text {...textProps} fill={fill(el.color)} textAnchor="middle">
-              <textPath href={`#${pid}`} startOffset="50%">{el.uppercase ? el.text.toUpperCase() : el.text}</textPath>
-            </text>
+            {Array.from({ length: arcSteps }, (_, i) => arcText(shade(el.gradient ? el.gradient.to : el.color), (arcSteps - i) * arcUnit, `d${i}`))}
+            {arcText(fill(el.color))}
           </g>
         );
       }

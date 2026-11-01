@@ -170,7 +170,7 @@ export function buildLogoCatalog(kit) {
       Sq(c, 0.5, 0.5, 0.56, 'transparent', { shape: 'ellipse', stroke: '#ffffff', sw: 0.008 }),
       Ic(c, 0.5, 0.5, 0.24, o.icon, '#ffffff', { sw: 1.8 }),
       ArcT(c, 0.5, 0.5, 0.31, 0.075, o.name, 170, txt(o, { align: 'center', color: '#ffffff', fit: false })),
-      ArcT(c, 0.5, 0.5, 0.31, 0.05, o.slogan, -120, { ...sub(o), align: 'center', color: '#ffffff', fit: false })
+      ArcT(c, 0.5, 0.5, 0.355, 0.045, o.slogan, -110, { ...sub(o), align: 'center', color: '#ffffff', fit: false })
     ],
     vintage: (c, o) => [
       Sq(c, 0.5, 0.5, 0.86, 'transparent', { shape: 'ellipse', stroke: o.c1, sw: 0.02 }),
