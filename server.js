@@ -426,10 +426,9 @@ app.post(
     ) {
       const session = event.data.object;
 
-      // Extraire l'ID de la carte printable.
-      const printableCardId =
-        session.client_reference_id ||
-        session.metadata?.printableCardId;
+      // Extraire l'ID de l'entité (carte imprimable ou design project).
+      const entityId = session.client_reference_id || session.metadata?.entityId;
+      const entityType = session.metadata?.entityType;
 
       // Extraire l'ID du paiement (payment_intent).
       const paymentIntentId =
@@ -437,16 +436,16 @@ app.post(
           ? session.payment_intent
           : session.payment_intent?.id || null;
 
-      if (!printableCardId) {
+      if (!entityId || !entityType) {
         log(
-          '[STRIPE] Aucun printableCardId trouvé dans la session Checkout. Événement ignoré.',
+          '[STRIPE] Aucun entityId ou entityType trouvé dans la session Checkout. Événement ignoré.',
           { sessionId: session.id }
         );
 
         // On retourne 200 pour éviter que Stripe ne renvoie sans cesse l'événement.
         return res.status(200).json({
           received: true,
-          warning: 'Missing printableCardId'
+          warning: 'Missing entityId or entityType'
         });
       }
 
@@ -459,44 +458,38 @@ app.post(
       }
 
       log(
-        `[STRIPE] Paiement confirmé pour la carte : ${printableCardId} (Intent: ${paymentIntentId})`
+        `[STRIPE] Paiement confirmé pour ${entityType} : ${entityId} (Intent: ${paymentIntentId})`
       );
 
       try {
-        // Vérifier si la carte existe et n'est pas déjà payée.
-        const card = await dbGet(
-          'SELECT id, payment_status FROM printable_cards WHERE id = ?',
-          [printableCardId]
-        );
+        const { loadEntityWithPayment, markEntityAsPaid } = require('./lib/payment-service');
 
-        if (!card) {
+        // Déterminer la table en fonction du type d'entité
+        const tableName = entityType === 'printable_card' ? 'printable_cards' : 'design_projects';
+
+        // Vérifier si l'entité existe et n'est pas déjà payée.
+        const entity = await loadEntityWithPayment(db, tableName, entityId);
+
+        if (!entity) {
           console.error(
-            `[STRIPE] Carte introuvable en base : ${printableCardId}`
+            `[STRIPE] ${entityType} introuvable en base : ${entityId}`
           );
           // On retourne 200 car l'événement est valide techniquement, mais la donnée n'existe pas chez nous.
           return res.status(200).json({
             received: true,
-            error: 'Card not found'
+            error: 'Entity not found'
           });
         }
 
-        if (card.payment_status === 'paid') {
-          log(`[STRIPE] La carte ${printableCardId} est déjà marquée comme payée.`);
+        if (entity.payment_status === 'paid') {
+          log(`[STRIPE] ${entityType} ${entityId} est déjà marqué comme payé.`);
           return res.status(200).json({ received: true, already_paid: true });
         }
 
         // Mettre à jour le statut.
-        await dbRun(
-          `UPDATE printable_cards
-           SET payment_status = 'paid',
-               stripe_payment_intent_id = ?,
-               paid_at = CURRENT_TIMESTAMP,
-               updated_at = CURRENT_TIMESTAMP
-           WHERE id = ?`,
-          [paymentIntentId, printableCardId]
-        );
+        await markEntityAsPaid(db, tableName, entityId, paymentIntentId);
 
-        log(`[STRIPE] Carte mise à jour avec succès : ${printableCardId}`);
+        log(`[STRIPE] ${entityType} mis à jour avec succès : ${entityId}`);
       } catch (dbErr) {
         console.error(
           '[STRIPE] Erreur de mise à jour de la base de données :',

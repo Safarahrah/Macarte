@@ -54,3 +54,8 @@ export function gradientVector(angle) {
 }
 
 export const round = (n, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
+
+// Export for both CommonJS and ES modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { DEG, rotatePoint, center, bounds, unionBounds, intersects, starPoints, gradientVector, round };
+}

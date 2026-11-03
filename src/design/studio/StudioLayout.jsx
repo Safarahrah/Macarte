@@ -25,20 +25,22 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
   };
   return (
     <div className="min-h-screen bg-main dark:bg-main-dark">
-      <header className="sticky top-0 z-30 border-b border-border dark:border-border-dark bg-card/90 dark:bg-card-dark/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border-subtle dark:border-border-subtle-dark bg-card/95 dark:bg-card-dark/95 backdrop-blur shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-8">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-text-primary dark:text-text-primary-dark">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-action dark:bg-action-dark text-white"><Icons.LayoutGrid className="h-4 w-4" /></span>
-            <span className="hidden sm:inline">Macarte Studio</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-action to-accent text-white shadow-md">
+              <Icons.LayoutGrid className="h-5 w-5" />
+            </span>
+            <span className="hidden sm:inline font-display">Macarte Studio</span>
           </Link>
           <nav className="ml-2 flex flex-1 items-center gap-1 overflow-x-auto text-sm" aria-label="Rubriques">
             {CATEGORIES.map((c) => (
-              <Link key={c.key} to={c.to} className="whitespace-nowrap rounded-lg px-2.5 py-1.5 text-text-muted dark:text-text-muted-dark hover:bg-surface dark:hover:bg-surface-dark hover:text-text-primary dark:hover:text-text-primary-dark">
+              <Link key={c.key} to={c.to} className="whitespace-nowrap rounded-lg px-3 py-2 text-text-muted dark:text-text-muted-dark hover:bg-action/5 dark:hover:bg-action/10 hover:text-action dark:hover:text-action-dark transition-colors">
                 {c.label}
               </Link>
             ))}
           </nav>
-          <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm" title="Se déconnecter">
+          <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm hover:bg-error/5 hover:text-error" title="Se déconnecter">
             <Icons.LogOut className="h-4 w-4" /><span className="hidden md:inline">Déconnexion</span>
           </button>
         </div>

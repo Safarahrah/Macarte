@@ -68,3 +68,82 @@ export function formatDate(value) {
   const d = new Date(String(value).includes('T') ? value : `${String(value).replace(' ', 'T')}Z`);
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
+/**
+ * Export a design project via server-side endpoint (protected by payment).
+ * @param {string} apiUrl - API endpoint (e.g., '/api/designs')
+ * @param {string} id - Project ID
+ * @param {Object} options - Export options
+ * @returns {Promise<Blob>}
+ */
+export async function exportDesignViaServer(apiUrl, id, options) {
+  const headers = { 'Content-Type': 'application/json', 'X-CSRF-Token': await getCsrf() };
+  const body = JSON.stringify(options);
+
+  let res = await fetch(`${apiUrl}/${id}/export`, {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body
+  });
+
+  if (res.status === 403 && options.format !== 'GET') {
+    headers['X-CSRF-Token'] = await getCsrf(true);
+    res = await fetch(`${apiUrl}/${id}/export`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body
+    });
+  }
+
+  if (res.status === 402) {
+    const err = new Error('Payment required');
+    err.status = 402;
+    err.needsPayment = true;
+    throw err;
+  }
+
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    const err = new Error(json.error || `Erreur ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+
+  return await res.blob();
+}
+
+/**
+ * Create a Stripe checkout session for a design project.
+ * @param {string} apiUrl - API endpoint (e.g., '/api/designs')
+ * @param {string} id - Project ID
+ * @returns {Promise<{url: string}>}
+ */
+export async function createDesignCheckout(apiUrl, id) {
+  const headers = { 'Content-Type': 'application/json', 'X-CSRF-Token': await getCsrf() };
+
+  let res = await fetch(`${apiUrl}/${id}/checkout`, {
+    method: 'POST',
+    headers,
+    credentials: 'include'
+  });
+
+  if (res.status === 403) {
+    headers['X-CSRF-Token'] = await getCsrf(true);
+    res = await fetch(`${apiUrl}/${id}/checkout`, {
+      method: 'POST',
+      headers,
+      credentials: 'include'
+    });
+  }
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(json.error || 'Erreur lors de la création du paiement');
+    err.status = res.status;
+    throw err;
+  }
+
+  return json;
+}

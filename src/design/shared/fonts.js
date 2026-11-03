@@ -21,3 +21,8 @@ export const DESIGN_FONT_IDS = Object.keys(DESIGN_FONTS);
 export function fontCss(id) {
   return (DESIGN_FONTS[id] || DESIGN_FONTS.sans).css;
 }
+
+// Export for both CommonJS and ES modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { DESIGN_FONTS, DESIGN_FONT_IDS, fontCss };
+}

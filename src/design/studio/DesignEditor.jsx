@@ -16,7 +16,7 @@ import { sanitizeDesignData, newId } from '../shared/sanitize';
 import { DESIGN_FONTS } from '../shared/fonts';
 import { ICON_GROUPS } from '../shared/icons';
 import { allowsFreePages, getExports, getKind, getModule, SOCIAL_PLATFORMS } from '../shared/modules';
-import { api, uploadImage, useSession } from './api';
+import { api, uploadImage, useSession, exportDesignViaServer, createDesignCheckout } from './api';
 import { Loading } from './StudioLayout';
 
 const PT_MM = 0.352778;
@@ -582,7 +582,7 @@ export default function DesignEditor({ mod, id }) {
         )}
       </div>
 
-      {modal === 'export' && <ExportDialog doc={doc} type={type} exports={exports} title={title} pageIndex={pageIndex} mod={mod} onClose={() => setModal(null)} />}
+      {modal === 'export' && <ExportDialog doc={doc} type={type} exports={exports} title={title} pageIndex={pageIndex} mod={mod} onClose={() => setModal(null)} projectId={id} projectPaymentStatus={project?.paymentStatus || 'unpaid'} />}
       {modal === 'fold' && <FoldPreview doc={doc} onClose={() => setModal(null)} />}
       {modal === 'logo' && (
         <LogoPreview
@@ -894,7 +894,7 @@ function DocumentPanel({ doc, mod, type, subtype, page, setDoc, setPage, commit,
   );
 }
 
-function ExportDialog({ doc, type, exports, title, pageIndex, mod, onClose }) {
+function ExportDialog({ doc, type, exports, title, pageIndex, mod, onClose, projectId, projectPaymentStatus }) {
   const [format, setFormat] = useState(exports[0]);
   const [pages, setPages] = useState('all');
   const [includeBleed, setIncludeBleed] = useState(doc.unit === 'mm' && doc.bleed > 0);
@@ -904,20 +904,66 @@ function ExportDialog({ doc, type, exports, title, pageIndex, mod, onClose }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
+  const [needsPayment, setNeedsPayment] = useState(false);
   const isPrint = doc.unit === 'mm';
   const size = pixelSize(doc, { includeBleed: includeBleed && isPrint, dpi, scale: format === 'png-hd' ? 4 : 1 });
   const run = async () => {
     setBusy(true);
     setError('');
+    setNeedsPayment(false);
     try {
-      await exportDocument(doc, format, {
-        pages: pages === 'current' ? pageIndex : 'all', includeBleed, cropMarks, dpi, title,
-        spreads: spreads && mod.spreads ? mod.spreads : null, onProgress: setProgress
-      });
-      onClose();
+      // For webm, first validate payment via server, then use client-side export
+      if (format === 'webm') {
+        await exportDesignViaServer(mod.api, projectId, {
+          format: 'webm',
+          pageIndex: pages === 'current' ? pageIndex : 0
+        });
+        // Payment validated, proceed with client-side export
+        await exportDocument(doc, format, {
+          pages: pages === 'current' ? pageIndex : 'all', includeBleed, cropMarks, dpi, title,
+          spreads: spreads && mod.spreads ? mod.spreads : null, onProgress: setProgress
+        });
+        onClose();
+      } else if (['svg', 'png', 'png-hd', 'jpg', 'pdf'].includes(format)) {
+        // Use server-side export for payment-protected formats
+        const blob = await exportDesignViaServer(mod.api, projectId, {
+          format,
+          pageIndex: pages === 'current' ? pageIndex : 0,
+          includeBleed,
+          dpi
+        });
+        const ext = format === 'png-hd' ? 'png' : format;
+        const filename = `${title.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'design'}.${ext}`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        onClose();
+      }
     } catch (e) {
-      setError(e.message || 'Export impossible');
+      if (e.status === 402 || e.needsPayment) {
+        setNeedsPayment(true);
+        setError('Paiement requis pour exporter ce fichier.');
+      } else {
+        setError(e.message || 'Export impossible');
+      }
     } finally {
+      setBusy(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const result = await createDesignCheckout(mod.api, projectId);
+      window.location.href = result.url;
+    } catch (e) {
+      setError(e.message || 'Erreur lors de la création du paiement');
       setBusy(false);
     }
   };
@@ -972,9 +1018,18 @@ function ExportDialog({ doc, type, exports, title, pageIndex, mod, onClose }) {
           {format === 'webm' && <p className="text-xs text-text-muted">Diaporama animé : chaque page est une scène de {doc.meta.sceneDuration} s avec fondu enchaîné. L’enregistrement se fait en temps réel ({Math.round(doc.meta.sceneDuration * doc.pages.length)} s).</p>}
           {isPrint && <p className="text-xs text-text-muted">Exports en RVB, prêts pour la taille et le fond perdu (pas de conversion CMJN).</p>}
           {error && <p className="text-error-text">{error}</p>}
-          <button type="button" className="ui-btn ui-btn-primary w-full" onClick={run} disabled={busy} data-testid="run-export">
-            {busy ? <><Icons.Loader2 className="h-4 w-4 animate-spin" /> {format === 'webm' ? `Enregistrement ${Math.round(progress * 100)}%` : 'Export en cours…'}</> : <><Icons.Download className="h-4 w-4" /> Télécharger</>}
-          </button>
+          {needsPayment ? (
+            <div className="space-y-2">
+              <p className="text-sm text-text-muted">Un paiement unique de 4,99 $ est requis pour télécharger ce fichier.</p>
+              <button type="button" className="ui-btn ui-btn-primary w-full" onClick={handlePayment} disabled={busy}>
+                {busy ? <><Icons.Loader2 className="h-4 w-4 animate-spin" /> Chargement…</> : <><Icons.CreditCard className="h-4 w-4" /> Payer 4,99 $</>}
+              </button>
+            </div>
+          ) : (
+            <button type="button" className="ui-btn ui-btn-primary w-full" onClick={run} disabled={busy} data-testid="run-export">
+              {busy ? <><Icons.Loader2 className="h-4 w-4 animate-spin" /> {format === 'webm' ? `Enregistrement ${Math.round(progress * 100)}%` : 'Export en cours…'}</> : <><Icons.Download className="h-4 w-4" /> Télécharger</>}
+            </button>
+          )}
         </div>
       </div>
     </div>

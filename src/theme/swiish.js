@@ -1,7 +1,7 @@
 
  // Swiish Design Tokens
 // Centralized theme configuration - change values here to restyle the entire site
-// Only includes values actually used in the application
+// Premium SaaS palette inspired by Canva, Design.com, Adobe Express
 
 const tailwindColors = require('tailwindcss/colors');
 
@@ -10,49 +10,60 @@ module.exports = {
   colors: {
     // Main backgrounds - clean, elegant
     main: {
-      light: '#f7f9fc',
-      dark: '#0b1026',
+      light: '#F8F9FC',
+      dark: '#0a0e27',
     },
 
     // Card backgrounds - crisp, elevated
     card: {
       light: '#ffffff',
-      dark: '#151b2f',
+      dark: '#131830',
     },
 
     // Secondary card/surface backgrounds
     surface: {
       light: '#f8fafc',
-      dark: '#10162a',
+      dark: '#0f1429',
     },
 
-    // Primary action - refined indigo/violet
+    // Primary action - refined violet
     action: {
-      light: '#4f46e5',
-      dark: '#6366f1',
+      light: '#7257E8',
+      dark: '#8B6EF9',
     },
 
     // Primary action button hover
     actionHover: {
-      light: '#4338ca',
-      dark: '#4f46e5',
+      light: '#6246D6',
+      dark: '#7B5BE8',
     },
 
-    // Accent - vivid purple/magenta for highlights
+    // Accent - vivid turquoise for highlights
     accent: {
-      light: '#a855f6',
-      dark: '#d946ef',
+      light: '#22BFA5',
+      dark: '#2DD4BF',
     },
 
     // Accent hover
     accentHover: {
-      light: '#c084fc',
-      dark: '#e9d8fd',
+      light: '#1AA891',
+      dark: '#26B3A0',
     },
 
-    // Primary text
+    // Secondary accent - coral for special highlights
+    coral: {
+      light: '#FFB86B',
+      dark: '#FFC97B',
+    },
+
+    coralHover: {
+      light: '#FFA855',
+      dark: '#FFB96B',
+    },
+
+    // Primary text - anthracite
     textPrimary: {
-      light: '#0f172a',
+      light: '#1a1f36',
       dark: '#f8fafc',
     },
 
@@ -74,9 +85,9 @@ module.exports = {
       dark: '#64748b',
     },
 
-    // Borders
+    // Borders - fine, subtle
     border: {
-      light: '#e5e7eb',
+      light: '#e2e8f0',
       dark: '#2a2f45',
     },
 
@@ -164,10 +175,10 @@ module.exports = {
       dark: '#6b46c1',
     },
 
-    // Link colors - indigo for tech feel
+    // Link colors - violet for premium feel
     link: {
-      light: '#4f46e5',
-      dark: '#a5f3fc',
+      light: '#7257E8',
+      dark: '#A5B4FC',
     },
 
     linkBg: {
@@ -203,8 +214,8 @@ module.exports = {
 
     // Focus ring
     focusRing: {
-      light: '#6366f1',
-      dark: '#818cf8',
+      light: '#7257E8',
+      dark: '#8B6EF9',
     },
 
     // Modal overlay

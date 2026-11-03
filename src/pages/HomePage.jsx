@@ -83,7 +83,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
         <div className="absolute inset-0 ui-hero-grid pointer-events-none" aria-hidden="true" />
         <div className="ui-container relative py-16 md:py-24 grid items-center gap-12 lg:grid-cols-2">
           <div className="ui-fade-up">
-            <span className="ui-badge">
+            <span className="ui-badge bg-gradient-to-r from-action/10 to-accent/10 text-action dark:text-action-dark border-action/20">
               <Sparkles className="w-3.5 h-3.5" /> Cartes de visite avec QR code
             </span>
             <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] leading-[1.08] font-bold text-text-primary dark:text-text-primary-dark">
@@ -94,7 +94,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
               Votre carte, votre identité.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Link to={primaryHref} className="ui-btn ui-btn-primary ui-btn-lg">
+              <Link to={primaryHref} className="ui-btn ui-btn-primary ui-btn-lg bg-gradient-to-r from-action to-accent hover:from-action-hover hover:to-accent-hover shadow-md">
                 Créer ma carte <ArrowRight className="w-4 h-4" />
               </Link>
               <Link to="/templates" className="ui-btn ui-btn-secondary ui-btn-lg">
@@ -103,8 +103,8 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-muted dark:text-text-muted-dark">
               <li className="flex items-center gap-2"><QrCode className="w-4 h-4 text-action dark:text-action-dark" /> QR scannable</li>
-              <li className="flex items-center gap-2"><Printer className="w-4 h-4 text-action dark:text-action-dark" /> Export imprimable</li>
-              <li className="flex items-center gap-2"><Smartphone className="w-4 h-4 text-action dark:text-action-dark" /> 100 % responsive</li>
+              <li className="flex items-center gap-2"><Printer className="w-4 h-4 text-accent dark:text-accent-dark" /> Export imprimable</li>
+              <li className="flex items-center gap-2"><Smartphone className="w-4 h-4 text-coral dark:text-coral-dark" /> 100 % responsive</li>
             </ul>
           </div>
 
@@ -217,17 +217,17 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       {/* ---------------- FINAL CTA ---------------- */}
       <section className="py-16 md:py-24">
         <div className="ui-container">
-          <div className="relative overflow-hidden rounded-md bg-gradient-to-br from-teal-600 via-teal-500 to-cyan-500 px-6 py-14 sm:px-12 text-center text-white shadow-floating">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-action via-action to-accent px-6 py-14 sm:px-12 text-center text-white shadow-floating">
             <div className="absolute inset-0 opacity-20 ui-hero-grid" aria-hidden="true" />
             <div className="relative">
               <h2 className="font-display text-3xl sm:text-4xl font-bold">Prêt à créer votre carte ?</h2>
-              <p className="mt-3 text-teal-50 max-w-xl mx-auto">
+              <p className="mt-3 text-white/90 max-w-xl mx-auto">
                 Choisissez un modèle ou importez votre visuel, ajoutez votre QR code et téléchargez un fichier prêt à imprimer.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   to={primaryHref}
-                  className="ui-btn ui-btn-lg bg-white text-teal-700 hover:bg-teal-50 shadow-lifted"
+                  className="ui-btn ui-btn-lg bg-white text-action hover:bg-white/90 shadow-lifted"
                 >
                   Créer ma carte <ArrowRight className="w-4 h-4" />
                 </Link>
