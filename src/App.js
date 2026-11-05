@@ -804,14 +804,9 @@ export default function App() {
       }
       return isDark;
     }
-    // Use system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    return prefersDark;
+    // Default to light mode for new users (day mode)
+    document.documentElement.classList.remove('dark');
+    return false;
   });
 
   // Apply dark mode class to document whenever state changes
@@ -824,17 +819,18 @@ export default function App() {
   }, [darkMode]);
 
   // Listen for system preference changes (only if no manual preference set)
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      const stored = localStorage.getItem('darkMode');
-      if (stored === null) {
-        setDarkMode(e.matches);
-      }
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  // Disabled - we now default to light mode and don't follow system preferences
+  // useEffect(() => {
+  //   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  //   const handleChange = (e) => {
+  //     const stored = localStorage.getItem('darkMode');
+  //     if (stored === null) {
+  //       setDarkMode(e.matches);
+  //     }
+  //   };
+  //   mediaQuery.addEventListener('change', handleChange);
+  //   return () => mediaQuery.removeEventListener('change', handleChange);
+  // }, []);
 
   // Check for demo mode on app load
   useEffect(() => {
