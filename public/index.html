@@ -4,42 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0f766e" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com;" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="manifest" id="pwa-manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/icons/icon-192.png" />
-    <script>
-      // Update manifest link immediately based on URL slug (before React loads)
-      (function() {
-        const path = window.location.pathname || '';
-        const slug = path.replace(/^\//, '').split('/')[0]; // Get first path segment
-        if (slug && slug !== 'admin' && slug !== '') {
-          const manifestLink = document.getElementById('pwa-manifest') || document.querySelector('link[rel="manifest"]');
-          if (manifestLink) {
-            const newHref = '/manifest/' + slug + '.json';
-            manifestLink.setAttribute('href', newHref);
-          }
-        }
-      })();
-    </script>
+    <!-- Update manifest link immediately based on URL slug (before React loads) -->
+    <script src="%PUBLIC_URL%/init-manifest.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Macarte</title>
-    <!-- Inline theme pre-load to avoid flash of incorrect theme -->
-    <script>
-      (function() {
-        const stored = localStorage.getItem('darkMode');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const shouldBeDark = stored === 'true' || (stored === null && prefersDark);
-        if (shouldBeDark) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-    </script>
+    <!-- Theme pre-load to avoid flash of incorrect theme -->
+    <script src="%PUBLIC_URL%/init-theme.js"></script>
     <style>
       /* Hide scrollbar for Chrome, Safari and Opera */
       .scrollbar-hide::-webkit-scrollbar { display: none; }

@@ -348,28 +348,20 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Autoriser les requêtes sans Origin en développement.
-    if (!origin && NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-
-    // Autoriser les origines configurées et les requêtes sans Origin.
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-CSRF-Token'
-  ]
-}));
+app.use((req, res, next) => {
+  const sameOrigin = `${req.protocol}://${req.get('host')}`;
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || origin === sameOrigin || ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false); // refuse sans faire planter la requête
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+  })(req, res, next);
+});
 
 // =========================================================
 // STRIPE WEBHOOK
@@ -519,7 +511,23 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: 'Too many login attempts, please try again later.', standardHeaders: true, legacyHeaders: false });
+// Limitation indépendante des tentatives de connexion
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many login attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Limitation indépendante des inscriptions
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many registration attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false });
 const uploadLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: 'Too many upload attempts, please try again later.', standardHeaders: true, legacyHeaders: false });
 const publicReadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, message: 'Too many requests from this IP, please try again later.', standardHeaders: true, legacyHeaders: false });
@@ -823,7 +831,7 @@ async function findAvailableOrgSlug(baseSlug) {
   }
 }
 
-app.post('/api/register', loginLimiter, [
+app.post('/api/register', registerLimiter, [
   body('organisationName').trim().isLength({ min: 1, max: 200 }),
   body('email').isEmail({ allow_display_name: false, require_tld: false }),
   body('password').isLength({ min: 8 }).matches(/[A-Za-z]/).matches(/\d/),
