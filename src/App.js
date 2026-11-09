@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import Landing from './Landing';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import PhoneInput from 'react-phone-number-input';
@@ -2721,7 +2722,7 @@ const [settings, setSettings] = useState({
         <Route path="/dashboard" element={<Suspense fallback={null}><StudioDashboard /></Suspense>} />
         <Route path="/studio/:module" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/studio/:module/:id" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
-        <Route path="/" element={renderAdminViews()} />
+        <Route path="/" element={isAuthenticated ? renderAdminViews() : <Landing />} />
         {/* Invitation acceptance route - must come before public card routes */}
         <Route path="/invite/:token" element={
           <InvitationAcceptance

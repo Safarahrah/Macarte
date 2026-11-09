@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,7 +13,60 @@
     <script src="%PUBLIC_URL%/init-manifest.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>Macarte</title>
+
+    <!-- ===== SEO ===== -->
+    <title>MaCarte – Cartes de visite numériques et imprimables avec QR code</title>
+    <meta name="description" content="Créez votre carte de visite numérique avec QR code, partagez-la en un scan et téléchargez un design prêt à imprimer en PDF. Modèles professionnels, simple et rapide." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://www.macarte.pro/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MaCarte" />
+    <meta property="og:locale" content="fr_CA" />
+    <meta property="og:url" content="https://www.macarte.pro/" />
+    <meta property="og:title" content="MaCarte – Cartes de visite numériques et imprimables" />
+    <meta property="og:description" content="Créez votre carte de visite numérique avec QR code et téléchargez un design prêt à imprimer." />
+    <meta property="og:image" content="https://www.macarte.pro/cards.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Aperçu de cartes de visite créées avec MaCarte" />
+
+    <!-- X (Twitter) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MaCarte – Cartes de visite numériques et imprimables" />
+    <meta name="twitter:description" content="Créez votre carte de visite numérique avec QR code et téléchargez un design prêt à imprimer." />
+    <meta name="twitter:image" content="https://www.macarte.pro/cards.jpg" />
+
+    <!-- Données structurées pour Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "MaCarte",
+          "url": "https://www.macarte.pro/",
+          "logo": "https://www.macarte.pro/cards.jpg"
+        },
+        {
+          "@type": "WebSite",
+          "name": "MaCarte",
+          "url": "https://www.macarte.pro/",
+          "inLanguage": "fr"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "MaCarte",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Application web pour créer des cartes de visite numériques avec QR code et des cartes imprimables en PDF."
+        }
+      ]
+    }
+    </script>
+    <!-- ===== FIN SEO ===== -->
+
     <!-- Theme pre-load to avoid flash of incorrect theme -->
     <script src="%PUBLIC_URL%/init-theme.js"></script>
     <style>
@@ -27,7 +80,11 @@
     </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <h1>MaCarte – Cartes de visite numériques et imprimables</h1>
+      <p>Créez votre carte de visite avec QR code, partagez-la en un scan et téléchargez un design prêt à imprimer en PDF.</p>
+      <p>Veuillez activer JavaScript pour utiliser cette application.</p>
+    </noscript>
     <div id="root"></div>
   </body>
 </html>

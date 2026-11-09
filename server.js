@@ -1864,6 +1864,11 @@ async function injectMetaTags(html, cardIdentifier, displayIdentifier) {
     });
   }
   if (!cardRow) return html;
+  // Retire les balises SEO génériques de l'accueil avant d'injecter celles de la carte
+  html = html
+    .replace(/<meta\s+(property="og:|name="twitter:|name="description"|name="robots"|name="googlebot")[^>]*>\s*/gi, '')
+    .replace(/<link\s+rel="canonical"[^>]*>\s*/gi, '')
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/gi, '');
   try {
     const cardData = JSON.parse(cardRow.data);
     const privacy = cardData.privacy || {};
@@ -1887,7 +1892,7 @@ async function injectMetaTags(html, cardIdentifier, displayIdentifier) {
     const updateTimestamp = cardRow.updated_at ? new Date(cardRow.updated_at).getTime() : Date.now();
     const previewUrl = `${APP_URL}/api/cards/${previewIdentifier}/preview.png?v=${updateTimestamp}`;
     const cardUrl = `${APP_URL}/${displayIdentifier}`;
-    const metaTags = `<title>${fullName} - Digital Business Card</title><meta name="description" content="${description}"><meta property="og:url" content="${escapeXml(cardUrl)}"><meta property="og:title" content="${fullName}"><meta property="og:description" content="${description}"><meta property="og:image" content="${escapeXml(previewUrl)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta property="og:type" content="profile"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${fullName}"><meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${escapeXml(previewUrl)}"><meta name="robots" content="index, follow">`;
+    const metaTags = `<title>${fullName} - Digital Business Card</title><meta name="description" content="${description}"><meta property="og:url" content="${escapeXml(cardUrl)}"><meta property="og:title" content="${fullName}"><meta property="og:description" content="${description}"><meta property="og:image" content="${escapeXml(previewUrl)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta property="og:type" content="profile"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${fullName}"><meta name="twitter:description" content="${description}"><meta name="twitter:image" content="${escapeXml(previewUrl)}"> <link rel="canonical" href="${escapeXml(cardUrl)}"> <meta name="robots" content="index, follow">`;
     html = html.replace(/<title>.*?<\/title>/i, '');
     return html.replace('</head>', metaTags + '</head>');
   } catch (err) { console.error('[Meta Tags] Error parsing card data:', err.message); return html; }
@@ -1910,6 +1915,8 @@ app.get('*', publicReadLimiter, async (req, res, next) => {
     }
     html = html.replace(/<script(\s|>)/gi, `<script nonce="${res.locals.nonce}"$1`);
     html = html.replace(/%PUBLIC_URL%/g, '');
+    const canonicalUrl = `${APP_URL}${req.path === '/' ? '/' : req.path.replace(/\/$/, '')}`;
+    html = html.replace(/<link\s+rel="canonical"[^>]*>/i, `<link rel="canonical" href="${canonicalUrl}" />`);
     res.set({ 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0', 'Content-Type': 'text/html; charset=utf-8' });
     res.send(html);
   } catch (err) {
