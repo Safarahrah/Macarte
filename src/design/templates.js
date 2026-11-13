@@ -393,7 +393,7 @@ const OTHER = {
       R(c, 0, 0, 0.3, 1, '#c2410c'),
       Ic(c, 0.15, 0.5, 0.45, 'Gift', '#ffffff', { sw: 1.4 }),
       T(c, 0.35, 0.12, 0.6, 0.15, 'BON CADEAU', { weight: 800, color: '#9a3412', ls: 0.1 }),
-      T(c, 0.35, 0.36, 0.6, 0.25, '50 €', { weight: 900, color: '#c2410c' }),
+      T(c, 0.35, 0.36, 0.6, 0.25, '$50', { weight: 900, color: '#c2410c' }),
       T(c, 0.35, 0.7, 0.6, 0.07, 'Offert à : ______________\nValable jusqu’au : ________', { color: '#7c2d12', lh: 1.6 })
     ] }]
   }],
@@ -421,7 +421,7 @@ const OTHER = {
         T(c, 0.1, y, 0.8, 0.035, label, { weight: 700, color: '#fbbf24', ls: 0.2 }),
         L(c, 0.1, y + 0.045, 0.8, '#57534e', { t: 0.002 }),
         T(c, 0.1, y + 0.06, 0.62, 0.026, 'Nom du plat\nNom du plat\nNom du plat', { color: '#f5f5f4', lh: 1.9 }),
-        T(c, 0.72, y + 0.06, 0.18, 0.026, '12 €\n14 €\n9 €', { color: '#f5f5f4', align: 'right', lh: 1.9 })
+        T(c, 0.72, y + 0.06, 0.18, 0.026, '$12\n$14\n$9', { color: '#f5f5f4', align: 'right', lh: 1.9 })
       ])
     ] }]
   }],
@@ -438,9 +438,9 @@ const OTHER = {
       T(c, 0.72, 0.328, 0.18, 0.02, 'Total', { weight: 700, align: 'right' }),
       T(c, 0.1, 0.38, 0.5, 0.02, 'Prestation 1\nPrestation 2\nPrestation 3', { lh: 2 }),
       T(c, 0.6, 0.38, 0.1, 0.02, '1\n2\n1', { lh: 2, align: 'right' }),
-      T(c, 0.72, 0.38, 0.18, 0.02, '500,00 €\n300,00 €\n150,00 €', { lh: 2, align: 'right' }),
+      T(c, 0.72, 0.38, 0.18, 0.02, '$500.00\n$300.00\n$150.00', { lh: 2, align: 'right' }),
       L(c, 0.55, 0.52, 0.37, '#c7d2fe', { t: 0.003 }),
-      T(c, 0.55, 0.54, 0.37, 0.026, 'Total TTC : 950,00 €', { weight: 800, align: 'right', color: '#4f46e5' }),
+      T(c, 0.55, 0.54, 0.37, 0.026, 'Total TTC : $950.00', { weight: 800, align: 'right', color: '#4f46e5' }),
       T(c, 0.08, 0.88, 0.84, 0.018, 'Conditions de paiement : virement à 30 jours. IBAN FR76 0000 0000 0000.', { color: '#6b7280' })
     ] }]
   }],

@@ -2,14 +2,19 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { MODULE_LIST } from '../shared/modules';
 import { api } from './api';
+import LanguageSwitcher from '../../LanguageSwitcher';
 
-export const CATEGORIES = [
-  { key: 'digital_card', label: 'Cartes numériques', description: 'Cartes de visite digitales avec page publique, QR code et vCard.', icon: 'Contact', to: '/people' },
-  { key: 'printable_card', label: 'Cartes imprimables', description: 'Éditeur recto-verso avec exports PDF, JPG, PNG et SVG.', icon: 'Printer', to: '/studio/imprimables' },
-  ...MODULE_LIST.map((m) => ({ key: m.type, label: m.label, description: m.description, icon: m.icon, to: `/studio/${m.slug}` }))
-];
+export function useCategories() {
+  const { t } = useTranslation();
+  return [
+    { key: 'digital_card', label: t('nav.digitalCard'), description: t('nav.digitalCardDesc'), icon: 'Contact', to: '/people' },
+    { key: 'printable_card', label: t('nav.printableCard'), description: t('nav.printableCardDesc'), icon: 'Printer', to: '/studio/imprimables' },
+    ...MODULE_LIST.map((m) => ({ key: m.type, label: m.label, description: m.description, icon: m.icon, to: `/studio/${m.slug}` }))
+  ];
+}
 
 export function Icon({ name, ...props }) {
   const C = Icons[name] || Icons.Square;
@@ -17,7 +22,9 @@ export function Icon({ name, ...props }) {
 }
 
 export default function StudioLayout({ title, subtitle, actions, children, back, wide }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const CATEGORIES = useCategories();
   useEffect(() => { if (title) document.title = `${title} · Macarte`; }, [title]);
   const logout = async () => {
     try { await api('POST', '/api/logout'); } catch (e) { /* ignore */ }
@@ -40,9 +47,12 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
               </Link>
             ))}
           </nav>
-          <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm hover:bg-error/5 hover:text-error" title="Se déconnecter">
-            <Icons.LogOut className="h-4 w-4" /><span className="hidden md:inline">Déconnexion</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher className="text-text-muted dark:text-text-muted-dark hover:text-action dark:hover:text-action-dark" />
+            <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm hover:bg-error/5 hover:text-error" title={t('nav.logout')}>
+              <Icons.LogOut className="h-4 w-4" /><span className="hidden md:inline">{t('nav.logout')}</span>
+            </button>
+          </div>
         </div>
       </header>
       <main className={`mx-auto px-4 py-8 md:px-8 ${wide ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
@@ -50,7 +60,7 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               {back && (
-                <button type="button" onClick={() => navigate(back)} className="mt-1 rounded-full p-2 text-text-muted dark:text-text-muted-dark hover:bg-surface dark:hover:bg-surface-dark" aria-label="Retour">
+                <button type="button" onClick={() => navigate(back)} className="mt-1 rounded-full p-2 text-text-muted dark:text-text-muted-dark hover:bg-surface dark:hover:bg-surface-dark" aria-label={t('nav.back')}>
                   <Icons.ArrowLeft className="h-5 w-5" />
                 </button>
               )}
@@ -68,10 +78,12 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
   );
 }
 
-export function Loading({ label = 'Chargement…' }) {
+export function Loading({ label }) {
+  const { t } = useTranslation();
+  const displayLabel = label || t('common.loading');
   return (
     <div className="flex items-center justify-center gap-2 py-24 text-sm text-text-muted dark:text-text-muted-dark">
-      <Icons.Loader2 className="h-4 w-4 animate-spin" /> {label}
+      <Icons.Loader2 className="h-4 w-4 animate-spin" /> {displayLabel}
     </div>
   );
 }

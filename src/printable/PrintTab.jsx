@@ -1213,7 +1213,7 @@ export default function PrintTab({ data, slug, csrfToken, initialDesignId = null
         {!isPaid && (
           <button type="button" disabled={busy} onClick={handleUnlock} className="ui-btn bg-action dark:bg-action-dark text-white dark:text-[#04211d] hover:bg-action-hover dark:hover:bg-action-hover-dark">
             {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-            Débloquer ma carte — {price ? `${price}€` : 'Chargement...'}
+            Débloquer ma carte — {price ? `$${price}` : 'Chargement...'}
           </button>
         )}
         <button type="button" disabled={busy} onClick={saveLayout} className="ui-btn ui-btn-primary">

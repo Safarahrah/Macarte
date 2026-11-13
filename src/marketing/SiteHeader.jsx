@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, LayoutDashboard } from 'lucide-react';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 const NAV_LINKS = [
   { to: '/#features', label: 'Fonctionnalités' },
@@ -77,6 +78,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           >
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+          <LanguageSwitcher className="text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark" />
           {isAuthenticated ? (
             <Link to={dashboardHref} className="ui-btn ui-btn-primary">
               <LayoutDashboard className="w-4 h-4" /> Tableau de bord
@@ -117,6 +119,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               {darkMode ? 'Thème clair' : 'Thème sombre'}
             </button>
+            <LanguageSwitcher className="w-full justify-start text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark" />
             {isAuthenticated ? (
               <Link to={dashboardHref} className="ui-btn ui-btn-primary ui-btn-block">
                 <LayoutDashboard className="w-4 h-4" /> Tableau de bord

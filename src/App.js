@@ -980,6 +980,23 @@ const [settings, setSettings] = useState({
     return null;
   };
 
+  // Check setup status without redirecting on failure (for public routes)
+  const checkSetupStatusSafe = async () => {
+    try {
+      const res = await fetch(`${API_ENDPOINT}/setup/status`, {
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSetupStatus(data);
+        return data;
+      }
+    } catch (e) {
+      console.error('Failed to check setup status:', e);
+    }
+    return null;
+  };
+
   // Router Logic - handle route changes and set view based on route
   useEffect(() => {
     const path = location.pathname;
@@ -1041,7 +1058,7 @@ const [settings, setSettings] = useState({
           // Setup already complete, redirect to login
           navigate('/login', { replace: true });
         } else {
-          // Setup not complete, show wizard
+          // Setup not complete or API failed, show wizard
           setView('setup-wizard');
           document.title = `Configuration · ${APP_NAME}`;
         }
@@ -1069,6 +1086,51 @@ const [settings, setSettings] = useState({
         setView('admin-login');
         document.title = `Connexion · ${APP_NAME}`;
       });
+    } else if (path === '/en') {
+      // English homepage - treat like / for landing page
+      fetchCsrfToken();
+      checkSetupStatusSafe().then((status) => {
+        const demoModeActive = status?.demoMode || isDemoMode;
+        if (!demoModeActive) {
+          if (status !== null && (!status.setupComplete || status.userCount === 0)) {
+            navigate('/setup', { replace: true });
+            document.title = 'Initial Setup';
+          } else {
+            checkAuth().catch(() => {});
+            setView('home');
+            document.title = `${APP_NAME} — Business cards with QR code`;
+          }
+        } else {
+          navigate('/people', { replace: true });
+        }
+      }).catch((e) => {
+        console.error('Setup status check failed:', e);
+        checkAuth().catch(() => {});
+        setView('home');
+        document.title = `${APP_NAME} — Business cards with QR code`;
+      });
+      return;
+    } else if (path === '/templates') {
+      // Templates page - public, show templates
+      fetchCsrfToken();
+      checkAuth().catch(() => {});
+      setView('templates');
+      document.title = `Templates · ${APP_NAME}`;
+      return;
+    } else if (path.startsWith('/invite/')) {
+      // Invitation page - handle separately
+      fetchCsrfToken();
+      checkAuth().then((authResult) => {
+        if (authResult.isAuthenticated) {
+          navigate('/people', { replace: true });
+        } else {
+          setView('loading');
+          // Let the invitation component handle the flow
+        }
+      }).catch(() => {
+        setView('loading');
+      });
+      return;
     } else if (path === '/register') {
       setView('loading');
       fetchCsrfToken();
@@ -1110,10 +1172,12 @@ const [settings, setSettings] = useState({
         // but configured installs now show the landing page instead of a hard
         // redirect to the dashboard.
         if (path === '/' && !demoModeActive) {
-          if (status === null || !status.setupComplete || status.userCount === 0) {
+          if (status !== null && (!status.setupComplete || status.userCount === 0)) {
+            // Only redirect to setup if we have valid status and setup is incomplete
             navigate('/setup', { replace: true });
             document.title = 'Initial Setup';
           } else {
+            // If status is null (API failed) or setup is complete, show landing page
             // Refresh auth state so the header can offer the dashboard link.
             checkAuth().catch(() => {});
             setView('home');
@@ -1148,17 +1212,13 @@ const [settings, setSettings] = useState({
         }
 
         // Normal mode: continue with regular auth flow
-        // (status already checked above, setupComplete must be true to get here)
-        if (status === null) {
-          // If check failed (server not running, network error, etc.), default to setup wizard
-          navigate('/setup', { replace: true });
-          document.title = "Initial Setup";
-        } else if (!status.setupComplete || status.userCount === 0) {
+        // Only redirect to setup if we have valid status indicating incomplete setup
+        if (status !== null && (!status.setupComplete || status.userCount === 0)) {
           // Setup not complete or no users exist, show setup wizard
           navigate('/setup', { replace: true });
           document.title = "Initial Setup";
         } else {
-          // Setup complete, check authentication
+          // If status is null (API failed) or setup is complete, check authentication
           if (path === '/' || path === '/admin') {
             // Redirect root/admin to /people (explicit redirect)
             navigate('/people', { replace: true });
@@ -1192,10 +1252,18 @@ const [settings, setSettings] = useState({
           });
         }
       }).catch((e) => {
-        // If promise rejects, default to setup wizard
+        // If promise rejects, do NOT redirect to setup for public routes
+        // Just log the error and continue with current view
         console.error('Setup status check failed:', e);
-        navigate('/setup', { replace: true });
-        document.title = "Initial Setup";
+        // For /, show landing page even if API fails
+        if (path === '/') {
+          checkAuth().catch(() => {});
+          setView('home');
+          document.title = `${APP_NAME} — Cartes de visite avec QR code`;
+        } else if (path === '/people' || path === '/admin') {
+          // For protected routes, redirect to login
+          navigate('/login', { replace: true });
+        }
       });
     }
   }, [location.pathname, navigate]);
@@ -2723,6 +2791,7 @@ const [settings, setSettings] = useState({
         <Route path="/studio/:module" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/studio/:module/:id" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/" element={isAuthenticated ? renderAdminViews() : <Landing />} />
+        <Route path="/en" element={<Landing lang="en" />} />
         {/* Invitation acceptance route - must come before public card routes */}
         <Route path="/invite/:token" element={
           <InvitationAcceptance

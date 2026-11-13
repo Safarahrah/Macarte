@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, Search, Sparkles, Star, TrendingUp, Lock, Download, Image as ImageIcon } from 'lucide-react';
-import StudioLayout, { CATEGORIES, Icon, Loading } from './StudioLayout';
+import StudioLayout, { useCategories, Icon, Loading } from './StudioLayout';
 import { api, formatDate, useSession } from './api';
 import { getModule } from '../shared/modules';
 
@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const CATEGORIES = useCategories();
 
   useEffect(() => {
     if (!user) return;
