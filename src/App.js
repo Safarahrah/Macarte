@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import flags from 'country-flag-icons/react/3x2';
+import { useTranslation } from 'react-i18next';
 import {
   Camera, Upload, Save, Share2, Phone, Mail, Globe,
   Linkedin, Twitter, Instagram, Github, Edit3, Eye,
@@ -66,6 +67,7 @@ function getPasswordStrength(password) {
 }
 
 function MacarteMark({ className = '' }) {
+  const { t } = useTranslation();
   return (
     <div className={`macarte-mark inline-flex items-center gap-2 ${className}`}>
       <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-teal-700 text-white shadow-sm">
@@ -739,6 +741,7 @@ function VersionBadge() {
 }
 
 export default function App() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   // Note: useParams() doesn't work at App level (Routes are children), so we extract params from location.pathname
@@ -2112,45 +2115,45 @@ const [settings, setSettings] = useState({
       {view === 'setup-wizard' && (
         <>
           <AuthShell
-            title="Configuration initiale"
-            subtitle="Créez votre organisation et le premier compte administrateur Macarte."
+            title={t('setup.title')}
+            subtitle={t('setup.subtitle')}
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                Déjà configuré ?{' '}
-                <button type="button" onClick={() => navigate('/login')} className="font-medium text-action dark:text-action-dark">Se connecter</button>
+                {t('setup.alreadyConfigured')}{' '}
+                <button type="button" onClick={() => navigate('/login')} className="font-medium text-action dark:text-action-dark">{t('auth.login')}</button>
               </p>
             }
           >
             <form onSubmit={handleSetup} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Organisation</label>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">{t('setup.orgLabel')}</label>
                 <input
                   type="text"
                   value={setupData.organisationName}
                   onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
-                  placeholder="Mon entreprise"
+                  placeholder={t('setup.orgPlaceholder')}
                   className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
                   required
                   autoFocus
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Email administrateur</label>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">{t('setup.adminEmail')}</label>
                 <input
                   type="email"
                   value={setupData.adminEmail}
                   onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })}
-                  placeholder="vous@exemple.com"
+                  placeholder="you@example.com"
                   className="w-full px-5 py-3 rounded-input border border-border dark:border-border-dark bg-input-bg dark:bg-input-bg-dark text-text-primary dark:text-text-primary-dark focus:outline-none focus:ring-2 focus:ring-focus-ring dark:focus:ring-focus-ring-dark"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">Mot de passe</label>
+                <label className="block text-sm font-medium text-text-primary dark:text-text-secondary-dark mb-2">{t('setup.passwordLabel')}</label>
                 <PasswordField
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractères min."
+                  placeholder={t('setup.passwordPlaceholder')}
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2175,16 +2178,16 @@ const [settings, setSettings] = useState({
       {view === 'admin-login' && (
         <>
           <AuthShell
-            title="Connexion"
-            subtitle="Accédez à votre espace Macarte."
+            title={t('auth.login')}
+            subtitle={t('auth.loginSubtitle')}
             footer={
               <div className="mt-6 space-y-3 text-center text-sm">
                 <button type="button" onClick={() => { setForgotMode(!forgotMode); setError(''); setForgotMessage(''); }} className="text-text-muted dark:text-text-muted-dark hover:text-text-primary">
-                  Mot de passe oublié ?
+                  {t('auth.forgotPassword')}
                 </button>
                 <p className="text-text-muted dark:text-text-muted-dark">
-                  Nouveau sur Macarte ?{' '}
-                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">Créer un compte</button>
+                  {t('auth.noAccount')}{' '}
+                  <button type="button" onClick={() => { setError(''); navigate('/register'); }} className="font-medium text-action dark:text-action-dark">{t('auth.register')}</button>
                 </p>
               </div>
             }
@@ -2192,8 +2195,8 @@ const [settings, setSettings] = useState({
             {forgotMode ? (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div>
-                  <label htmlFor="forgot-email" className="ui-label">Adresse email</label>
-                  <input id="forgot-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" autoComplete="email" className="ui-input" autoFocus required />
+                  <label htmlFor="forgot-email" className="ui-label">{t('auth.email')}</label>
+                  <input id="forgot-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" className="ui-input" autoFocus required />
                 </div>
                 {error && (
                   <div className="flex items-start gap-2 rounded-input bg-error-bg dark:bg-error-bg-dark text-error-text dark:text-error-text-dark text-sm px-3 py-2.5">
@@ -2203,16 +2206,16 @@ const [settings, setSettings] = useState({
                 {forgotMessage && (
                   <div className="rounded-input bg-success-bg dark:bg-success-bg-dark text-success-text dark:text-success-text-dark text-sm px-3 py-2.5">{forgotMessage}</div>
                 )}
-                <button type="submit" className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">Envoyer le lien</button>
+                <button type="submit" className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">{t('auth.sendResetLink')}</button>
               </form>
             ) : (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label htmlFor="login-email" className="ui-label">Email</label>
-                  <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vous@exemple.com" autoComplete="email" className="ui-input" autoFocus required />
+                  <label htmlFor="login-email" className="ui-label">{t('auth.email')}</label>
+                  <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" className="ui-input" autoFocus required />
                 </div>
                 <div>
-                  <label htmlFor="login-password" className="ui-label">Mot de passe</label>
+                  <label htmlFor="login-password" className="ui-label">{t('auth.password')}</label>
                   <PasswordField
                     id="login-password"
                     value={password}
@@ -2230,7 +2233,7 @@ const [settings, setSettings] = useState({
                 )}
                 <button type="submit" disabled={isLoggingIn} className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block">
                   {isLoggingIn && <RefreshCw className="w-4 h-4 animate-spin" />}
-                  {isLoggingIn ? 'Connexion…' : 'Se connecter'}
+                  {isLoggingIn ? t('auth.sending') : t('auth.login')}
                 </button>
               </form>
             )}
@@ -2242,49 +2245,49 @@ const [settings, setSettings] = useState({
       {view === 'admin-register' && (
         <>
           <AuthShell
-            title="Créer un compte"
-            subtitle="Inscrivez-vous pour créer votre organisation et vos cartes Macarte."
+            title={t('auth.register')}
+            subtitle={t('auth.registerSubtitle')}
             footer={
               <p className="text-center text-sm text-text-muted dark:text-text-muted-dark mt-6">
-                Vous avez déjà un compte ?{' '}
-                <button type="button" onClick={() => { setError(''); navigate('/login'); }} className="font-medium text-action dark:text-action-dark">Se connecter</button>
+                {t('auth.hasAccount')}{' '}
+                <button type="button" onClick={() => { setError(''); navigate('/login'); }} className="font-medium text-action dark:text-action-dark">{t('auth.login')}</button>
               </p>
             }
           >
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label htmlFor="reg-org" className="ui-label">Nom de l’organisation</label>
+                <label htmlFor="reg-org" className="ui-label">{t('auth.orgName')}</label>
                 <input
                   id="reg-org"
                   type="text"
                   value={setupData.organisationName}
                   onChange={e => setSetupData({ ...setupData, organisationName: e.target.value })}
-                  placeholder="Studio, équipe ou votre nom"
+                  placeholder={t('auth.orgPlaceholder')}
                   className="ui-input"
                   required
                   autoFocus
                 />
               </div>
               <div>
-                <label htmlFor="reg-email" className="ui-label">Email</label>
+                <label htmlFor="reg-email" className="ui-label">{t('auth.email')}</label>
                 <input
                   id="reg-email"
                   type="email"
                   value={setupData.adminEmail}
                   onChange={e => setSetupData({ ...setupData, adminEmail: e.target.value })}
-                  placeholder="vous@exemple.com"
+                  placeholder="you@example.com"
                   autoComplete="email"
                   className="ui-input"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="reg-password" className="ui-label">Mot de passe</label>
+                <label htmlFor="reg-password" className="ui-label">{t('auth.password')}</label>
                 <PasswordField
                   id="reg-password"
                   value={setupData.adminPassword}
                   onChange={e => setSetupData({ ...setupData, adminPassword: e.target.value })}
-                  placeholder="8 caractères, lettre + chiffre"
+                  placeholder={t('auth.passwordPlaceholder')}
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2292,12 +2295,12 @@ const [settings, setSettings] = useState({
                 <div className="mt-2"><PasswordStrength password={setupData.adminPassword} /></div>
               </div>
               <div>
-                <label htmlFor="reg-password-confirm" className="ui-label">Confirmer le mot de passe</label>
+                <label htmlFor="reg-password-confirm" className="ui-label">{t('auth.confirmPassword')}</label>
                 <PasswordField
                   id="reg-password-confirm"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  placeholder="Répétez le mot de passe"
+                  placeholder={t('auth.confirmPasswordPlaceholder')}
                   autoComplete="new-password"
                   show={showPassword}
                   onToggle={() => setShowPassword(!showPassword)}
@@ -2314,7 +2317,7 @@ const [settings, setSettings] = useState({
                 className="ui-btn ui-btn-primary ui-btn-lg ui-btn-block"
               >
                 {isSettingUp ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {isSettingUp ? 'Création du compte…' : 'Créer mon compte'}
+                {isSettingUp ? t('auth.creating') : t('auth.createAccount')}
               </button>
             </form>
           </AuthShell>

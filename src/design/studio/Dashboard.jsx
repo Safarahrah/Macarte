@@ -1,12 +1,14 @@
 // src/design/studio/Dashboard.jsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Clock, Search, Sparkles, Star, TrendingUp, Lock, Download, Image as ImageIcon } from 'lucide-react';
 import StudioLayout, { useCategories, Icon, Loading } from './StudioLayout';
 import { api, formatDate, useSession } from './api';
 import { getModule } from '../shared/modules';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user, loading } = useSession();
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState('');
@@ -23,10 +25,10 @@ export default function Dashboard() {
 
   // Quick action shortcuts - most common use cases
   const quickActions = [
-    { key: 'digital_card', label: 'Carte de visite', icon: 'Contact', color: 'from-violet-500 to-purple-600', to: '/people' },
-    { key: 'printable_card', label: 'Carte imprimable', icon: 'Printer', color: 'from-cyan-500 to-teal-600', to: '/studio/imprimables' },
-    { key: 'logo', label: 'Créer un logo', icon: 'Gem', color: 'from-orange-500 to-amber-600', to: '/studio/logos' },
-    { key: 'flyer', label: 'Concevoir un flyer', icon: 'FileText', color: 'from-blue-500 to-indigo-600', to: '/studio/flyers' },
+    { key: 'digital_card', label: t('dashboard.quickActions.digitalCard'), icon: 'Contact', color: 'from-violet-500 to-purple-600', to: '/people' },
+    { key: 'printable_card', label: t('dashboard.quickActions.printableCard'), icon: 'Printer', color: 'from-cyan-500 to-teal-600', to: '/studio/imprimables' },
+    { key: 'logo', label: t('dashboard.quickActions.logo'), icon: 'Gem', color: 'from-orange-500 to-amber-600', to: '/studio/logos' },
+    { key: 'flyer', label: t('dashboard.quickActions.flyer'), icon: 'FileText', color: 'from-blue-500 to-indigo-600', to: '/studio/flyers' },
   ];
 
   const recentProjects = (summary && summary.recent) || [];
@@ -44,7 +46,7 @@ export default function Dashboard() {
     : recentProjects;
 
   return (
-    <StudioLayout title="Bienvenue sur Macarte" subtitle="Créez des designs professionnels en quelques clics.">
+    <StudioLayout title={t('dashboard.title')} subtitle={t('dashboard.subtitle')}>
       {error && <p className="mb-6 rounded-lg bg-error-bg dark:bg-error-bg-dark px-4 py-3 text-sm text-error-text dark:text-error-text-dark">{error}</p>}
 
       {/* Hero Section - Modern Midjourney-style */}
@@ -56,13 +58,13 @@ export default function Dashboard() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-6 h-6 text-cyan-300" />
-            <span className="text-sm font-medium text-cyan-200 uppercase tracking-wider">Studio de création</span>
+            <span className="text-sm font-medium text-cyan-200 uppercase tracking-wider">{t('dashboard.studio')}</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
-            Bonjour, {user?.email?.split('@')[0] || 'créateur'}
+            {t('dashboard.greeting')}, {user?.email?.split('@')[0] || t('dashboard.creator')}
           </h1>
           <p className="text-lg text-white/80 max-w-2xl mb-8">
-            Transformez vos idées en designs professionnels. Logos, flyers, affiches, publications sociales et plus encore.
+            {t('dashboard.heroDescription')}
           </p>
 
           {/* Search bar integrated in hero */}
@@ -70,7 +72,7 @@ export default function Dashboard() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" />
             <input
               type="text"
-              placeholder="Rechercher un projet..."
+              placeholder={t('dashboard.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition"
@@ -82,7 +84,7 @@ export default function Dashboard() {
       {/* Quick Actions - Modern Card Grid */}
       <section className="mb-10">
         <h2 className="mb-6 text-2xl font-bold text-text-primary dark:text-text-primary-dark flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-action" /> Créations populaires
+          <TrendingUp className="h-6 w-6 text-action" /> {t('dashboard.popularCreations')}
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((action) => (
@@ -106,7 +108,7 @@ export default function Dashboard() {
       {/* All Categories - Modern Grid */}
       <section className="mb-10">
         <h2 className="mb-6 text-2xl font-bold text-text-primary dark:text-text-primary-dark flex items-center gap-2">
-          <Star className="h-6 w-6 text-accent" /> Tous les outils
+          <Star className="h-6 w-6 text-accent" /> {t('dashboard.allTools')}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {CATEGORIES.map((c) => (
@@ -129,7 +131,7 @@ export default function Dashboard() {
                 <h2 className="font-bold text-text-primary dark:text-text-primary-dark mb-1">{c.label}</h2>
                 <p className="text-sm text-text-muted dark:text-text-muted-dark mb-3 line-clamp-2">{c.description}</p>
                 <div className="flex items-center gap-1 text-sm font-medium text-action">
-                  <span>Créer</span>
+                  <span>{t('dashboard.create')}</span>
                   <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
                 </div>
               </div>
@@ -142,8 +144,8 @@ export default function Dashboard() {
       {filteredProjects.length > 0 && (
         <section>
           <h2 className="mb-6 text-2xl font-bold text-text-primary dark:text-text-primary-dark flex items-center gap-2">
-            <Clock className="h-6 w-6 text-accent" /> Créations récentes
-            {searchQuery && <span className="text-sm text-text-muted dark:text-text-muted-dark font-normal">({filteredProjects.length} résultat{filteredProjects.length > 1 ? 's' : ''})</span>}
+            <Clock className="h-6 w-6 text-accent" /> {t('dashboard.recentCreations')}
+            {searchQuery && <span className="text-sm text-text-muted dark:text-text-muted-dark font-normal">({filteredProjects.length} {filteredProjects.length > 1 ? t('dashboard.results') : t('dashboard.result')})</span>}
           </h2>
           {filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -176,12 +178,12 @@ export default function Dashboard() {
                         {isPaid ? (
                           <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-medium">
                             <Download className="h-3 w-3" />
-                            <span>Payé</span>
+                            <span>{t('dashboard.paid')}</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/90 backdrop-blur-sm text-white text-xs font-medium">
                             <Lock className="h-3 w-3" />
-                            <span>4.99 $</span>
+                            <span>{t('dashboard.lockedPrice')}</span>
                           </div>
                         )}
                       </div>
@@ -189,7 +191,7 @@ export default function Dashboard() {
                       {/* Hover overlay with action */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="px-4 py-2 rounded-full bg-white/90 backdrop-blur-sm text-text-primary text-sm font-medium shadow-lg">
-                          Ouvrir
+                          {t('dashboard.open')}
                         </div>
                       </div>
                     </div>
@@ -214,7 +216,7 @@ export default function Dashboard() {
           ) : (
             <div className="text-center py-16">
               <ImageIcon className="h-16 w-16 text-text-muted-subtle mx-auto mb-4" />
-              <p className="text-text-muted dark:text-text-muted-dark">Aucun projet ne correspond à votre recherche.</p>
+              <p className="text-text-muted dark:text-text-muted-dark">{t('dashboard.noResults')}</p>
             </div>
           )}
         </section>

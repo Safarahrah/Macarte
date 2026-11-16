@@ -1,6 +1,7 @@
 // src/pages/HomePage.jsx
 import React, { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   QrCode,
@@ -19,35 +20,36 @@ import { TEMPLATES } from '../printable/shared/templates';
 
 const SHOWCASE_IDS = ['minimal', 'corporate-bold', 'modern', 'luxury-gold', 'tech', 'editorial', 'neon', 'nordic'];
 
-const STEPS = [
-  {
-    icon: MousePointerClick,
-    title: 'Choisissez un modèle',
-    text: 'Parcourez une galerie de modèles professionnels ou importez votre propre carte comme fond.'
-  },
-  {
-    icon: Palette,
-    title: 'Personnalisez',
-    text: 'Ajoutez textes, logo, image et QR code. Déplacez, redimensionnez et ajustez chaque élément.'
-  },
-  {
-    icon: Printer,
-    title: 'Imprimez ou partagez',
-    text: 'Exportez un fichier prêt à imprimer (avec fond perdu) ou partagez votre carte digitale par QR.'
-  }
-];
-
-const FEATURES = [
-  { icon: QrCode, title: 'QR code scannable', text: 'URL, téléphone, email ou vCard — vérifié pour rester lisible à l’impression.' },
-  { icon: Upload, title: 'Importez votre carte', text: 'Utilisez votre propre visuel PNG/JPG/WebP comme fond, puis ajoutez vos éléments.' },
-  { icon: Palette, title: 'Éditeur complet', text: 'Police, taille, gras, italique, couleur, alignement et espacement, en direct.' },
-  { icon: Printer, title: 'Export pro', text: 'PNG haute résolution et format avec 3 mm de fond perdu, prêt pour l’imprimeur.' },
-  { icon: Smartphone, title: 'Responsive & PWA', text: 'Une interface pensée pour le mobile, utilisable même hors ligne.' },
-  { icon: ShieldCheck, title: 'Auto-hébergeable', text: 'Vos données restent chez vous. Aucun service tiers requis.' }
-];
-
 export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, appVersion, githubUrl }) {
+  const { t } = useTranslation();
   const location = useLocation();
+
+  const STEPS = [
+    {
+      icon: MousePointerClick,
+      title: t('home.steps.choose.title'),
+      text: t('home.steps.choose.text')
+    },
+    {
+      icon: Palette,
+      title: t('home.steps.customize.title'),
+      text: t('home.steps.customize.text')
+    },
+    {
+      icon: Printer,
+      title: t('home.steps.print.title'),
+      text: t('home.steps.print.text')
+    }
+  ];
+
+  const FEATURES = [
+    { icon: QrCode, title: t('home.features.qr.title'), text: t('home.features.qr.text') },
+    { icon: Upload, title: t('home.features.import.title'), text: t('home.features.import.text') },
+    { icon: Palette, title: t('home.features.editor.title'), text: t('home.features.editor.text') },
+    { icon: Printer, title: t('home.features.export.title'), text: t('home.features.export.text') },
+    { icon: Smartphone, title: t('home.features.responsive.title'), text: t('home.features.responsive.text') },
+    { icon: ShieldCheck, title: t('home.features.selfHosted.title'), text: t('home.features.selfHosted.text') }
+  ];
 
   // Smooth-scroll to anchors (react-router does not do it automatically).
   useEffect(() => {
@@ -84,27 +86,26 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
         <div className="ui-container relative py-16 md:py-24 grid items-center gap-12 lg:grid-cols-2">
           <div className="ui-fade-up">
             <span className="ui-badge bg-gradient-to-r from-action/10 to-accent/10 text-action dark:text-action-dark border-action/20">
-              <Sparkles className="w-3.5 h-3.5" /> Cartes de visite avec QR code
+              <Sparkles className="w-3.5 h-3.5" /> {t('home.hero.badge')}
             </span>
             <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] leading-[1.08] font-bold text-text-primary dark:text-text-primary-dark">
-              Créez votre carte d'affaires professionnelle en quelques minutes.
+              {t('home.hero.title')}
             </h1>
             <p className="mt-5 text-lg text-text-muted dark:text-text-muted-dark leading-relaxed max-w-xl">
-              Modèles modernes, éditeur intuitif, QR code scannable et export prêt à imprimer.
-              Votre carte, votre identité.
+              {t('home.hero.subtitle')}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link to={primaryHref} className="ui-btn ui-btn-primary ui-btn-lg bg-gradient-to-r from-action to-accent hover:from-action-hover hover:to-accent-hover shadow-md">
-                Créer ma carte <ArrowRight className="w-4 h-4" />
+                {t('home.hero.createCard')} <ArrowRight className="w-4 h-4" />
               </Link>
               <Link to="/templates" className="ui-btn ui-btn-secondary ui-btn-lg">
-                Voir les modèles
+                {t('home.hero.seeTemplates')}
               </Link>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-muted dark:text-text-muted-dark">
-              <li className="flex items-center gap-2"><QrCode className="w-4 h-4 text-action dark:text-action-dark" /> QR scannable</li>
-              <li className="flex items-center gap-2"><Printer className="w-4 h-4 text-accent dark:text-accent-dark" /> Export imprimable</li>
-              <li className="flex items-center gap-2"><Smartphone className="w-4 h-4 text-coral dark:text-coral-dark" /> 100 % responsive</li>
+              <li className="flex items-center gap-2"><QrCode className="w-4 h-4 text-action dark:text-action-dark" /> {t('home.hero.feature1')}</li>
+              <li className="flex items-center gap-2"><Printer className="w-4 h-4 text-accent dark:text-accent-dark" /> {t('home.hero.feature2')}</li>
+              <li className="flex items-center gap-2"><Smartphone className="w-4 h-4 text-coral dark:text-coral-dark" /> {t('home.hero.feature3')}</li>
             </ul>
           </div>
 
@@ -126,8 +127,8 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
                   <QrCode className="w-4 h-4" />
                 </span>
                 <div className="leading-tight">
-                  <p className="text-xs font-semibold text-text-primary dark:text-text-primary-dark">Scan instantané</p>
-                  <p className="text-[11px] text-text-muted dark:text-text-muted-dark">Ouvre votre carte digitale</p>
+                  <p className="text-xs font-semibold text-text-primary dark:text-text-primary-dark">{t('home.qrCard.title')}</p>
+                  <p className="text-[11px] text-text-muted dark:text-text-muted-dark">{t('home.qrCard.subtitle')}</p>
                 </div>
               </div>
             </div>
@@ -140,11 +141,11 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
         <div className="ui-container">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
-              <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Des modèles pensés pour être remarqués</h2>
-              <p className="mt-2 text-text-muted dark:text-text-muted-dark">Minimal, Corporate, Luxury, Creative, Healthcare, Technology — changez de style en un clic.</p>
+              <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">{t('home.templates.title')}</h2>
+              <p className="mt-2 text-text-muted dark:text-text-muted-dark">{t('home.templates.subtitle')}</p>
             </div>
             <Link to="/templates" className="ui-btn ui-btn-secondary shrink-0">
-              Tous les modèles <ArrowRight className="w-4 h-4" />
+              {t('home.templates.allTemplates')} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -171,8 +172,8 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       <section id="how" className="py-16 md:py-24">
         <div className="ui-container">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Comment ça fonctionne</h2>
-            <p className="mt-3 text-text-muted dark:text-text-muted-dark">Trois étapes, aucune compétence en design requise.</p>
+            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">{t('home.howItWorks.title')}</h2>
+            <p className="mt-3 text-text-muted dark:text-text-muted-dark">{t('home.howItWorks.subtitle')}</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {STEPS.map((s, i) => (
@@ -195,8 +196,8 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
       <section id="features" className="py-16 md:py-24 border-y border-border-subtle dark:border-border-dark bg-card dark:bg-card-dark">
         <div className="ui-container">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">Tout ce qu'il faut pour une carte impeccable</h2>
-            <p className="mt-3 text-text-muted dark:text-text-muted-dark">Des outils simples, un rendu professionnel.</p>
+            <h2 className="font-display text-3xl font-bold text-text-primary dark:text-text-primary-dark">{t('home.features.title')}</h2>
+            <p className="mt-3 text-text-muted dark:text-text-muted-dark">{t('home.features.subtitle')}</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
@@ -220,22 +221,22 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-action via-action to-accent px-6 py-14 sm:px-12 text-center text-white shadow-floating">
             <div className="absolute inset-0 opacity-20 ui-hero-grid" aria-hidden="true" />
             <div className="relative">
-              <h2 className="font-display text-3xl sm:text-4xl font-bold">Prêt à créer votre carte ?</h2>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold">{t('home.cta.title')}</h2>
               <p className="mt-3 text-white/90 max-w-xl mx-auto">
-                Choisissez un modèle ou importez votre visuel, ajoutez votre QR code et téléchargez un fichier prêt à imprimer.
+                {t('home.cta.subtitle')}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
                   to={primaryHref}
                   className="ui-btn ui-btn-lg bg-white text-action hover:bg-white/90 shadow-lifted"
                 >
-                  Créer ma carte <ArrowRight className="w-4 h-4" />
+                  {t('home.cta.createCard')} <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   to="/templates"
                   className="ui-btn ui-btn-lg border border-white/40 text-white hover:bg-white/10"
                 >
-                  Voir les modèles
+                  {t('home.cta.seeTemplates')}
                 </Link>
               </div>
             </div>

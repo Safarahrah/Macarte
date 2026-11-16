@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const s = {
   page: { fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a', background: '#ffffff', minHeight: '100vh' },
@@ -23,50 +24,50 @@ const s = {
 };
 
 export default function Landing() {
+  const { t } = useTranslation();
   return (
     <div style={s.page}>
       <header style={s.nav}>
         <Link to="/" style={s.logo}>MaCarte</Link>
         <nav style={s.navLinks}>
-          <Link to="/templates" style={s.link}>Modèles</Link>
-          <Link to="/login" style={s.link}>Connexion</Link>
-          <Link to="/register" style={s.btn}>Créer ma carte</Link>
+          <Link to="/templates" style={s.link}>{t('landing.templatesTitle')}</Link>
+          <Link to="/login" style={s.link}>{t('auth.login')}</Link>
+          <Link to="/register" style={s.btn}>{t('auth.register')}</Link>
         </nav>
       </header>
 
       <main>
         <section style={s.hero}>
           <div style={s.heroText}>
-            <h1 style={s.h1}>Votre carte de visite numérique avec QR code</h1>
+            <h1 style={s.h1}>{t('landing.heroTitle')}</h1>
             <p style={s.lead}>
-              Créez votre carte professionnelle, partagez-la en un scan et téléchargez
-              un design prêt à imprimer en PDF. Simple, rapide et élégant.
+              {t('landing.heroDescription')}
             </p>
             <div style={s.cta}>
-              <Link to="/register" style={s.btn}>Commencer gratuitement</Link>
-              <Link to="/templates" style={s.btnLight}>Voir les modèles</Link>
+              <Link to="/register" style={s.btn}>{t('landing.getStartedFree')}</Link>
+              <Link to="/templates" style={s.btnLight}>{t('landing.seeTemplates')}</Link>
             </div>
           </div>
-          <img src="/cards.jpg" alt="Cartes de visite créées avec MaCarte" style={s.img} width="1200" height="630" />
+          <img src="/cards.jpg" alt={t('landing.cardsAlt')} style={s.img} width="1200" height="630" />
         </section>
 
         <section style={s.features}>
           <div style={s.card}>
-            <h2 style={s.h2}>Carte numérique</h2>
-            <p style={s.p}>Une page personnelle avec vos coordonnées, vos liens et vos réseaux, accessible partout.</p>
+            <h2 style={s.h2}>{t('landing.digitalCard')}</h2>
+            <p style={s.p}>{t('landing.digitalCardDesc')}</p>
           </div>
           <div style={s.card}>
-            <h2 style={s.h2}>QR code intégré</h2>
-            <p style={s.p}>Vos contacts scannent le code et enregistrent vos informations en quelques secondes.</p>
+            <h2 style={s.h2}>{t('landing.qrCode')}</h2>
+            <p style={s.p}>{t('landing.qrCodeDesc')}</p>
           </div>
           <div style={s.card}>
-            <h2 style={s.h2}>Prêt à imprimer</h2>
-            <p style={s.p}>Choisissez parmi nos modèles professionnels et exportez en PNG, SVG ou PDF.</p>
+            <h2 style={s.h2}>{t('landing.printReady')}</h2>
+            <p style={s.p}>{t('landing.printReadyDesc')}</p>
           </div>
         </section>
       </main>
 
-      <footer style={s.footer}>© {new Date().getFullYear()} MaCarte. Tous droits réservés.</footer>
+      <footer style={s.footer}>© {new Date().getFullYear()} MaCarte. {t('common.allRightsReserved')}</footer>
     </div>
   );
 }

@@ -4,12 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, LayoutDashboard } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
-
-const NAV_LINKS = [
-  { to: '/#features', label: 'Fonctionnalités' },
-  { to: '/#how', label: 'Comment ça marche' },
-  { to: '/templates', label: 'Modèles' }
-];
+import { useTranslation } from 'react-i18next';
 
 export function BrandMark({ className = '' }) {
   return (
@@ -25,9 +20,16 @@ export function BrandMark({ className = '' }) {
 }
 
 export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  const NAV_LINKS = [
+    { to: '/#features', label: t('landing.featuresTitle') },
+    { to: '/#how', label: t('landing.howItWorksTitle') },
+    { to: '/templates', label: t('landing.templatesTitle') }
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -43,7 +45,6 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
   const dashboardHref = '/people';
 
   return (
-
     <header
       className={`sticky top-0 z-40 transition-all duration-200 ${
         scrolled
@@ -51,9 +52,8 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           : 'bg-transparent border-b border-transparent'
       }`}
     >
-
       <div className="ui-container flex h-16 items-center justify-between gap-4">
-        <Link to="/" className="shrink-0" aria-label="Macarte — accueil">
+        <Link to="/" className="shrink-0" aria-label={`Macarte — ${t('landing.homepage')}`}>
           <BrandMark />
         </Link>
 
@@ -73,7 +73,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           <button
             type="button"
             onClick={toggleDarkMode}
-            aria-label="Basculer le thème"
+            aria-label={t('common.settings')}
             className="ui-btn ui-btn-ghost !px-2.5"
           >
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -81,12 +81,12 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           <LanguageSwitcher className="text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark" />
           {isAuthenticated ? (
             <Link to={dashboardHref} className="ui-btn ui-btn-primary">
-              <LayoutDashboard className="w-4 h-4" /> Tableau de bord
+              <LayoutDashboard className="w-4 h-4" /> {t('nav.dashboard')}
             </Link>
           ) : (
             <>
-              <Link to="/login" className="ui-btn ui-btn-ghost">Connexion</Link>
-              <Link to="/register" className="ui-btn ui-btn-primary">Créer ma carte</Link>
+              <Link to="/login" className="ui-btn ui-btn-ghost">{t('auth.login')}</Link>
+              <Link to="/register" className="ui-btn ui-btn-primary">{t('auth.register')}</Link>
             </>
           )}
         </div>
@@ -95,7 +95,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           type="button"
           className="md:hidden ui-btn ui-btn-ghost !px-2.5"
           onClick={() => setOpen((v) => !v)}
-          aria-label="Ouvrir le menu"
+          aria-label={t('common.menu')}
           aria-expanded={open}
         >
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -117,17 +117,17 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
             <div className="h-px bg-border-subtle dark:bg-border-dark my-2" />
             <button type="button" onClick={toggleDarkMode} className="ui-btn ui-btn-secondary justify-start">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              {darkMode ? 'Thème clair' : 'Thème sombre'}
+              {darkMode ? t('common.lightTheme') : t('common.darkTheme')}
             </button>
             <LanguageSwitcher className="w-full justify-start text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark" />
             {isAuthenticated ? (
               <Link to={dashboardHref} className="ui-btn ui-btn-primary ui-btn-block">
-                <LayoutDashboard className="w-4 h-4" /> Tableau de bord
+                <LayoutDashboard className="w-4 h-4" /> {t('nav.dashboard')}
               </Link>
             ) : (
               <>
-                <Link to="/login" className="ui-btn ui-btn-secondary ui-btn-block">Connexion</Link>
-                <Link to="/register" className="ui-btn ui-btn-primary ui-btn-block">Créer ma carte</Link>
+                <Link to="/login" className="ui-btn ui-btn-secondary ui-btn-block">{t('auth.login')}</Link>
+                <Link to="/register" className="ui-btn ui-btn-primary ui-btn-block">{t('auth.register')}</Link>
               </>
             )}
           </div>

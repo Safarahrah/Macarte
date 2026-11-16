@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, Crown, ArrowRight } from 'lucide-react';
 import SiteHeader from '../marketing/SiteHeader';
 import SiteFooter from '../marketing/SiteFooter';
@@ -15,10 +16,12 @@ const GALLERY_TEMPLATES = PUBLIC_TEMPLATES.map((t) => ({
 }));
 
 export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticated, appVersion, githubUrl }) {
+  const { t } = useTranslation();
+  
   useEffect(() => {
     window.scrollTo({ top: 0 });
-    document.title = 'Modèles · Macarte';
-  }, []);
+    document.title = `${t('templates.title')} · Macarte`;
+  }, [t]);
 
   // Demo configs are built lazily, only for the tiles actually shown.
   const configs = useMemo(() => new Map(), []);
@@ -38,14 +41,13 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
         <div className="absolute inset-0 ui-hero-grid pointer-events-none" aria-hidden="true" />
         <div className="ui-container relative py-12 md:py-16">
           <span className="ui-badge">
-            <Sparkles className="w-3.5 h-3.5" /> {PUBLIC_TEMPLATES.length} modèles inclus
+            <Sparkles className="w-3.5 h-3.5" /> {PUBLIC_TEMPLATES.length} {t('templates.templatesIncluded')}
           </span>
           <h1 className="mt-4 font-display text-3xl sm:text-4xl font-bold text-text-primary dark:text-text-primary-dark">
-            Choisissez votre modèle
+            {t('templates.chooseTemplate')}
           </h1>
           <p className="mt-3 max-w-2xl text-text-muted dark:text-text-muted-dark">
-            Classés par style et par industrie — chaque modèle est
-            entièrement personnalisable : textes, couleurs, logo, QR code et export prêt à imprimer.
+            {t('templates.description')}
           </p>
 
         </div>
@@ -58,7 +60,7 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
             templates={GALLERY_TEMPLATES}
             styles={CARD_STYLES}
             industries={CARD_INDUSTRIES}
-            placeholder="Rechercher un modèle (ex. luxe, barbier, immobilier…)"
+            placeholder={t('templates.searchPlaceholder')}
             gridClass="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             renderTile={(t) => (
               <article key={t.id} className="group ui-card overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-1 hover:shadow-lifted">
@@ -79,7 +81,7 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
                     <p className="mt-2 text-sm text-text-muted dark:text-text-muted-dark leading-relaxed flex-1">{t.description}</p>
                   )}
                   <Link to={primaryHref} className="ui-btn ui-btn-primary mt-3 ui-btn-block">
-                    Utiliser ce modèle <ArrowRight className="w-4 h-4" />
+                    {t('templates.useTemplate')} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </article>

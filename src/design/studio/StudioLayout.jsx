@@ -49,7 +49,7 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
           </nav>
           <div className="flex items-center gap-2">
             <LanguageSwitcher className="text-text-muted dark:text-text-muted-dark hover:text-action dark:hover:text-action-dark" />
-            <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm hover:bg-error/5 hover:text-error" title={t('nav.logout')}>
+            <button type="button" onClick={logout} className="ui-btn ui-btn-ghost text-sm hover:bg-error/5 hover:text-error flex items-center gap-2" title={t('nav.logout')}>
               <Icons.LogOut className="h-4 w-4" /><span className="hidden md:inline">{t('nav.logout')}</span>
             </button>
           </div>

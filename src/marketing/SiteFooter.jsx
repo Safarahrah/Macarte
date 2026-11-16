@@ -2,28 +2,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BrandMark } from './SiteHeader';
-
-const COLUMNS = [
-  {
-    title: 'Produit',
-    links: [
-      { to: '/templates', label: 'Modèles' },
-      { to: '/#features', label: 'Fonctionnalités' },
-      { to: '/#how', label: 'Comment ça marche' }
-    ]
-  },
-  {
-    title: 'Compte',
-    links: [
-      { to: '/login', label: 'Connexion' },
-      { to: '/register', label: 'Créer un compte' },
-      { to: '/settings', label: 'Organisation' }
-    ]
-  }
-];
+import { useTranslation } from 'react-i18next';
 
 export default function SiteFooter({ appVersion, githubUrl }) {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
+
+  const COLUMNS = [
+    {
+      title: t('landing.product'),
+      links: [
+        { to: '/templates', label: t('landing.templatesTitle') },
+        { to: '/#features', label: t('landing.featuresTitle') },
+        { to: '/#how', label: t('landing.howItWorksTitle') }
+      ]
+    },
+    {
+      title: t('landing.account'),
+      links: [
+        { to: '/login', label: t('auth.login') },
+        { to: '/register', label: t('auth.register') },
+        { to: '/settings', label: t('landing.organization') }
+      ]
+    }
+  ];
+
   return (
     <footer className="border-t border-border-subtle dark:border-border-dark bg-card dark:bg-card-dark">
       <div className="ui-container py-12">
@@ -31,7 +34,7 @@ export default function SiteFooter({ appVersion, githubUrl }) {
           <div>
             <BrandMark />
             <p className="mt-4 max-w-xs text-sm text-text-muted dark:text-text-muted-dark leading-relaxed">
-              Créez, personnalisez et imprimez des cartes de visite professionnelles avec QR code, en quelques minutes.
+              {t('landing.footerDescription')}
             </p>
           </div>
           {COLUMNS.map((col) => (
@@ -63,7 +66,7 @@ export default function SiteFooter({ appVersion, githubUrl }) {
               rel="noreferrer"
               className="text-xs font-medium text-text-muted dark:text-text-muted-dark hover:text-action dark:hover:text-action-dark"
             >
-              Code source sur GitHub
+              {t('landing.sourceCode')}
             </a>
           )}
         </div>
