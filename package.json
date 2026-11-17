@@ -70,6 +70,7 @@
     "watch:build": "nodemon --watch src --ext js,jsx,css --exec \"npm run build\" --ignore build",
     "watch:server": "nodemon --watch server.js --exec \"node server.js\" --ignore build --ignore src",
     "dev": "concurrently \"npm run watch:build\" \"npm run watch:server\" --names \"BUILD,SERVER\" --prefix-colors \"cyan,yellow\"",
+    "dev:full": "concurrently \"cross-env PORT=3001 npm start\" \"cross-env PORT=3000 npm run serve\" --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,yellow\"",
     "test:designs": "node scripts/test-designs-api.js"
   },
   "browserslist": {
@@ -87,6 +88,8 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "http-proxy-middleware": "^4.2.2",
     "nodemon": "^3.1.11",
     "postcss": "^8.4.47",
     "react-scripts": "5.0.1",

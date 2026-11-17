@@ -93,6 +93,22 @@ const resources = {
           luxury: 'Luxe',
           modern: 'Moderne',
           classic: 'Classique'
+        },
+        // Pocket templates
+        pockets: {
+          corporate: 'Corporate',
+          elegant: 'Élégant',
+          grayLight: 'Gris clair',
+          grayDark: 'Gris foncé',
+          brownDark: 'Brun foncé',
+          cream: 'Crème',
+          forestGreen: 'Vert forêt',
+          black: 'Noir',
+          purple: 'Mauve',
+          bluePale: 'Bleu pâle',
+          blueDark: 'Bleu foncé',
+          yellow: 'Jaune',
+          aqua: 'Vert d\'eau'
         }
       },
       // Editor
@@ -521,6 +537,22 @@ const resources = {
           luxury: 'Luxury',
           modern: 'Modern',
           classic: 'Classic'
+        },
+        // Pocket templates
+        pockets: {
+          corporate: 'Corporate',
+          elegant: 'Elegant',
+          grayLight: 'Light gray',
+          grayDark: 'Dark gray',
+          brownDark: 'Dark brown',
+          cream: 'Cream',
+          forestGreen: 'Forest green',
+          black: 'Black',
+          purple: 'Purple',
+          bluePale: 'Pale blue',
+          blueDark: 'Dark blue',
+          yellow: 'Yellow',
+          aqua: 'Aqua'
         }
       },
       // Editor

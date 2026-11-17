@@ -207,6 +207,268 @@ const POCKETS = [
       ] },
       { background: bg('#faf7f2'), elements: [R(c, 0, 0.68, 1, 0.32, c.accent)] }
     ]
+  },
+  {
+    id: 'pocket-gray-light', name: 'Gris clair', tags: ['minimaliste', 'moderne', 'gris'],
+    palette: { brand: '#9ca3af', accent: '#e2e8f0', ink: '#1e293b' },
+    build: (c) => [
+      { background: bg('#f8fafc'), elements: [
+        Img(c, 0.1, 0.08, 0.8, 0.5),
+        T(c, 0.1, 0.62, 0.8, 0.04, 'PRÉSENTATION', { weight: 700, ls: 0.2, color: c.brand }),
+        T(c, 0.1, 0.68, 0.8, 0.08, 'Votre titre ici', { weight: 800, color: c.ink }),
+        T(c, 0.1, 0.8, 0.8, 0.03, 'Description courte de votre projet.', { lh: 1.4, color: '#64748b' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.91, 0.8, 0.026, 'Contact · 01 23 45 67 89', { align: 'center', color: '#ffffff' })
+      ] },
+      { background: bg('#f1f5f9'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Contenu', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Présentez vos services et produits.', { lh: 1.6, color: '#475569' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.7, 1, 0.3, c.brand),
+        T(c, 0.1, 0.82, 0.8, 0.035, 'Informations', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-gray-dark', name: 'Gris foncé', tags: ['sombre', 'corporate', 'gris'],
+    palette: { brand: '#374151', accent: '#94a3b8', ink: '#1e293b' },
+    build: (c) => [
+      { background: bg(c.brand), elements: [
+        Sq(c, 0.15, 0.15, 0.3, c.accent, { shape: 'ellipse', opacity: 0.3 }),
+        T(c, 0.1, 0.35, 0.8, 0.08, 'VOTRE MARQUE', { weight: 800, align: 'center', color: '#ffffff', ls: 0.1 }),
+        T(c, 0.1, 0.47, 0.8, 0.035, 'Votre slogan', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.85, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.88, 1, 0.12, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Contactez-nous', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#f3f4f6'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Services', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Détail de vos offres.', { lh: 1.6, color: '#4b5563' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'Contact', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-brown-dark', name: 'Brun foncé', tags: ['nature', 'terracotta', 'chaleureux'],
+    palette: { brand: '#78350f', accent: '#d97706', ink: '#fbbf24' },
+    build: (c) => [
+      { background: bg(c.brand, grad(c.brand, '#92400e', 160)), elements: [
+        Sq(c, 0.85, 0.15, 0.4, c.accent, { shape: 'ellipse', opacity: 0.5 }),
+        T(c, 0.1, 0.4, 0.8, 0.08, 'VOTRE NOM', { weight: 800, align: 'center', color: '#ffffff', ls: 0.08 }),
+        T(c, 0.1, 0.52, 0.8, 0.035, 'Qualité artisanale', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#fef3c7'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Coordonnées', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#fffbeb'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Histoire', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Votre histoire et vos valeurs.', { lh: 1.6, color: '#78350f' })
+      ] },
+      { background: bg('#fef3c7'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'En savoir plus', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-cream', name: 'Crème', tags: ['chaleureux', 'naturel', 'doux'],
+    palette: { brand: '#fef3c7', accent: '#fef08a', ink: '#1c1917' },
+    build: (c) => [
+      { background: bg('#fffbeb'), elements: [
+        Img(c, 0.1, 0.08, 0.8, 0.5),
+        T(c, 0.1, 0.62, 0.8, 0.04, 'BIENVENUE', { weight: 700, ls: 0.2, color: c.brand }),
+        T(c, 0.1, 0.68, 0.8, 0.08, 'Votre entreprise', { weight: 800, color: c.ink }),
+        T(c, 0.1, 0.8, 0.8, 0.03, 'Description de votre activité.', { lh: 1.4, color: '#78716c' })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.85, 0.8, 0.035, 'Contact', { align: 'center', color: c.ink, weight: 700 })
+      ] },
+      { background: bg('#fef9c3'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Offres', { weight: 700, color: c.ink }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos produits et services.', { lh: 1.6, color: '#57534e' })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.75, 0.8, 0.05, 'Appel à l\'action', { align: 'center', color: c.ink, weight: 700 })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-forest-green', name: 'Vert forêt', tags: ['nature', 'écologie', 'frais'],
+    palette: { brand: '#14532d', accent: '#a3e635', ink: '#14532d' },
+    build: (c) => [
+      { background: bg(c.brand, grad(c.brand, '#166534', 160)), elements: [
+        Sq(c, 0.5, 0.25, 0.6, c.accent, { shape: 'ellipse', opacity: 0.3 }),
+        Ic(c, 0.5, 0.25, 0.25, 'Leaf', '#ffffff', { sw: 1.5 }),
+        T(c, 0.1, 0.55, 0.8, 0.08, 'VOTRE NOM', { weight: 800, align: 'center', color: '#ffffff', ls: 0.08 }),
+        T(c, 0.1, 0.68, 0.8, 0.035, 'Nature et qualité', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#f7fee7'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Nous contacter', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#ecfccb'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Engagements', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos engagements écologiques.', { lh: 1.6, color: '#365314' })
+      ] },
+      { background: bg('#f7fee7'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'Découvrir', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-black', name: 'Noir', tags: ['luxe', 'minimaliste', 'premium'],
+    palette: { brand: '#000000', accent: '#ffffff', ink: '#ffffff' },
+    build: (c) => [
+      { background: bg(c.brand), elements: [
+        R(c, 0.08, 0.08, 0.84, 0.84, 'transparent', { stroke: '#ffffff', sw: 0.003 }),
+        T(c, 0.1, 0.4, 0.8, 0.08, 'MARQUE', { weight: 800, align: 'center', color: '#ffffff', ls: 0.15 }),
+        T(c, 0.1, 0.52, 0.8, 0.035, 'Premium', { align: 'center', color: '#ffffff', opacity: 0.7 }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.6 })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.85, 0.8, 0.035, 'Contact', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#fafafa'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'À propos', { weight: 700, color: '#000000' }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Présentation de votre marque.', { lh: 1.6, color: '#404040' })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.8, 0.8, 0.05, 'Informations', { align: 'center', color: '#ffffff', weight: 700 })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-purple', name: 'Mauve', tags: ['créatif', 'moderne', 'violet'],
+    palette: { brand: '#581c87', accent: '#f0abfc', ink: '#ffffff' },
+    build: (c) => [
+      { background: bg(c.brand, grad(c.brand, '#7e22ce', 160)), elements: [
+        Sq(c, 0.1, 0.1, 0.35, c.accent, { shape: 'ellipse', opacity: 0.5 }),
+        Sq(c, 0.9, 0.9, 0.35, c.accent, { shape: 'ellipse', opacity: 0.3 }),
+        T(c, 0.1, 0.4, 0.8, 0.08, 'VOTRE NOM', { weight: 800, align: 'center', color: '#ffffff', ls: 0.08 }),
+        T(c, 0.1, 0.52, 0.8, 0.035, 'Créativité', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#fae8ff'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Contact', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#f5d0fe'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Portfolio', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos réalisations.', { lh: 1.6, color: '#6b21a8' })
+      ] },
+      { background: bg('#fae8ff'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'Voir', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-blue-pale', name: 'Bleu pâle', tags: ['frais', 'calme', 'professionnel'],
+    palette: { brand: '#0369a1', accent: '#38bdf8', ink: '#0c4a6e' },
+    build: (c) => [
+      { background: bg('#f0f9ff'), elements: [
+        Img(c, 0.1, 0.08, 0.8, 0.5),
+        T(c, 0.1, 0.62, 0.8, 0.04, 'PRÉSENTATION', { weight: 700, ls: 0.2, color: c.brand }),
+        T(c, 0.1, 0.68, 0.8, 0.08, 'Votre titre', { weight: 800, color: c.ink }),
+        T(c, 0.1, 0.8, 0.8, 0.03, 'Description de votre offre.', { lh: 1.4, color: '#075985' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Contact', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#e0f2fe'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Services', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Détail de vos services.', { lh: 1.6, color: '#0c4a6e' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'En savoir plus', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-blue-dark', name: 'Bleu foncé', tags: ['corporate', 'sérieux', 'professionnel'],
+    palette: { brand: '#1e3a8a', accent: '#3b82f6', ink: '#ffffff' },
+    build: (c) => [
+      { background: bg(c.brand, grad(c.brand, '#1e40af', 160)), elements: [
+        Sq(c, 0.5, 0.3, 0.35, c.accent, { shape: 'ellipse', opacity: 0.4 }),
+        Ic(c, 0.5, 0.3, 0.18, 'Building2', '#ffffff', { sw: 1.5 }),
+        T(c, 0.1, 0.55, 0.8, 0.08, 'VOTRE SOCIÉTÉ', { weight: 800, align: 'center', color: '#ffffff', ls: 0.08 }),
+        T(c, 0.1, 0.68, 0.8, 0.035, 'Professionnel', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Nous contacter', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#eff6ff'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Expertise', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos domaines d\'expertise.', { lh: 1.6, color: '#1e3a8a' })
+      ] },
+      { background: bg('#ffffff'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'Contact', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-yellow', name: 'Jaune', tags: ['ludique', 'vif', 'optimiste'],
+    palette: { brand: '#854d0e', accent: '#fbbf24', ink: '#1c1917' },
+    build: (c) => [
+      { background: bg('#fef3c7'), elements: [
+        Sq(c, 0.85, 0.15, 0.35, c.accent, { shape: 'star', points: 8, inner: 0.6, opacity: 0.7 }),
+        T(c, 0.1, 0.4, 0.8, 0.08, 'VOTRE NOM', { weight: 800, align: 'center', color: c.brand, ls: 0.08 }),
+        T(c, 0.1, 0.52, 0.8, 0.035, 'Énergie positive', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: c.brand, opacity: 0.8 })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.85, 0.8, 0.035, 'Contact', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#fef9c3'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Promotions', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos offres spéciales.', { lh: 1.6, color: '#713f12' })
+      ] },
+      { background: bg(c.brand), elements: [
+        T(c, 0.1, 0.75, 0.8, 0.05, 'Appel à l\'action', { align: 'center', color: '#ffffff', weight: 700 })
+      ] }
+    ]
+  },
+  {
+    id: 'pocket-aqua', name: 'Vert d\'eau', tags: ['frais', 'nature', 'aquatique'],
+    palette: { brand: '#0d9488', accent: '#2dd4bf', ink: '#134e4a' },
+    build: (c) => [
+      { background: bg(c.brand, grad(c.brand, '#14b8a6', 160)), elements: [
+        Sq(c, 0.5, 0.25, 0.5, c.accent, { shape: 'ellipse', opacity: 0.35 }),
+        Ic(c, 0.5, 0.25, 0.22, 'Droplets', '#ffffff', { sw: 1.5 }),
+        T(c, 0.1, 0.55, 0.8, 0.08, 'VOTRE NOM', { weight: 800, align: 'center', color: '#ffffff', ls: 0.08 }),
+        T(c, 0.1, 0.68, 0.8, 0.035, 'Fraîcheur naturelle', { align: 'center', color: c.accent }),
+        T(c, 0.1, 0.88, 0.8, 0.03, 'www.votresite.com', { align: 'center', color: '#ffffff', opacity: 0.8 })
+      ] },
+      { background: bg('#ccfbf1'), elements: [
+        R(c, 0, 0.85, 1, 0.15, c.brand),
+        T(c, 0.1, 0.92, 0.8, 0.028, 'Contact', { align: 'center', color: '#ffffff', weight: 700 })
+      ] },
+      { background: bg('#99f6e4'), elements: [
+        T(c, 0.12, 0.15, 0.76, 0.05, 'Valeurs', { weight: 700, color: c.brand }),
+        T(c, 0.12, 0.24, 0.76, 0.03, 'Vos valeurs et engagements.', { lh: 1.6, color: '#0f766e' })
+      ] },
+      { background: bg('#ccfbf1'), elements: [
+        R(c, 0, 0.72, 1, 0.28, c.brand),
+        T(c, 0.1, 0.83, 0.8, 0.035, 'Découvrir', { color: '#ffffff', weight: 700, align: 'center' })
+      ] }
+    ]
   }
 ];
 

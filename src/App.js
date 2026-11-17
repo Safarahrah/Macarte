@@ -13,7 +13,8 @@ import {
   Plus, Trash2, ArrowLeft, Users, ExternalLink, RefreshCw,
   Download, FileText, Calendar, Video, Music, ShoppingCart,
   Link as LinkIcon, Youtube, Facebook, MessageCircle, Sun, Moon,
-  ChevronUp, ChevronDown, GripVertical, Settings, LayoutGrid
+  ChevronUp, ChevronDown, GripVertical, Settings, LayoutGrid,
+  ChevronDown as ChevronDownIcon, Image as ImageIcon, Palette, Shield, Printer
 } from 'lucide-react';
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -3747,9 +3748,23 @@ function SortableLinkItem({ link, children }) {
   return children({ setNodeRef, style, attributes, listeners });
 }
 
+function getTabIcon(tab) {
+  const icons = {
+    details: <User className="w-5 h-5" />,
+    links: <LinkIcon className="w-5 h-5" />,
+    images: <ImageIcon className="w-5 h-5" />,
+    style: <Palette className="w-5 h-5" />,
+    sharing: <Share2 className="w-5 h-5" />,
+    privacy: <Shield className="w-5 h-5" />,
+    print: <Printer className="w-5 h-5" />
+  };
+  return icons[tab] || <Settings className="w-5 h-5" />;
+}
+
 function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, showAlert, darkMode, toggleDarkMode, isSaving, isSuccess, onLogout }) {
   const [activeTab, setActiveTab] = useState('details');
   const [isUploading, setIsUploading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 }
@@ -3882,10 +3897,41 @@ function EditorView({ data, setData, onBack, onSave, slug, settings, csrfToken, 
         </div>
 
         <div className="flex-1 p-6 space-y-8">
-           <div className="flex p-1 bg-surface dark:bg-surface-dark rounded-input mb-6">
+           {/* Desktop tabs */}
+           <div className="hidden lg:flex p-1 bg-surface dark:bg-surface-dark rounded-input mb-6">
               {['details', 'links', 'images', 'style', 'sharing', 'privacy', 'print'].map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 py-2 text-sm font-medium rounded-button capitalize transition-all ${activeTab === tab ? 'bg-card dark:bg-surface-dark shadow text-text-primary dark:text-text-primary-dark' : 'text-text-muted dark:text-text-muted-dark hover:text-text-primary dark:hover:text-text-primary-dark'}`}>{tab}</button>
               ))}
+           </div>
+
+           {/* Mobile dropdown */}
+           <div className="lg:hidden mb-6">
+              <div className="relative">
+                 <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-input text-left"
+                 >
+                    <div className="flex items-center gap-3">
+                       {getTabIcon(activeTab)}
+                       <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">{activeTab}</span>
+                    </div>
+                    <ChevronDownIcon className={`w-5 h-5 text-text-muted dark:text-text-muted-dark transition-transform ${mobileMenuOpen ? 'rotate-180' : ''}`} />
+                 </button>
+                 {mobileMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-input shadow-lg z-20 overflow-hidden">
+                       {['details', 'links', 'images', 'style', 'sharing', 'privacy', 'print'].map(tab => (
+                          <button
+                             key={tab}
+                             onClick={() => { setActiveTab(tab); setMobileMenuOpen(false); }}
+                             className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${activeTab === tab ? 'bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark' : 'text-text-muted dark:text-text-muted-dark hover:bg-surface dark:hover:bg-surface-dark'}`}
+                          >
+                             {getTabIcon(tab)}
+                             <span className="capitalize">{tab}</span>
+                          </button>
+                       ))}
+                    </div>
+                 )}
+              </div>
            </div>
 
            {activeTab === 'details' && (
