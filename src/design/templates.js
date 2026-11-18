@@ -158,7 +158,7 @@ const GENERIC = [
 // ---------- pocket folders ----------
 const POCKETS = [
   {
-    id: 'pocket-corporate', name: 'Corporate', tags: ['entreprise', 'moderne'],
+    id: 'pocket-corporate', name: 'Corporate', tags: ['entreprise', 'moderne'], popular: true,
     palette: { brand: '#1e3a8a', accent: '#38bdf8', ink: '#0f172a' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#0f172a', 160)), elements: [
@@ -189,7 +189,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-elegant', name: 'Élégant', tags: ['luxe', 'élégant'],
+    id: 'pocket-elegant', name: 'Élégant', tags: ['luxe', 'élégant'], popular: true,
     palette: { brand: '#111827', accent: '#d4a373', ink: '#111827' },
     build: (c) => [
       { background: bg(c.brand), elements: [
@@ -209,7 +209,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-gray-light', name: 'Gris clair', tags: ['minimaliste', 'moderne', 'gris'],
+    id: 'pocket-gray-light', name: 'Gris clair', tags: ['minimaliste', 'moderne', 'gris'], isNew: true,
     palette: { brand: '#9ca3af', accent: '#e2e8f0', ink: '#1e293b' },
     build: (c) => [
       { background: bg('#f8fafc'), elements: [
@@ -233,7 +233,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-gray-dark', name: 'Gris foncé', tags: ['sombre', 'corporate', 'gris'],
+    id: 'pocket-gray-dark', name: 'Gris foncé', tags: ['sombre', 'corporate', 'gris'], isNew: true,
     palette: { brand: '#374151', accent: '#94a3b8', ink: '#1e293b' },
     build: (c) => [
       { background: bg(c.brand), elements: [
@@ -257,7 +257,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-brown-dark', name: 'Brun foncé', tags: ['nature', 'terracotta', 'chaleureux'],
+    id: 'pocket-brown-dark', name: 'Brun foncé', tags: ['nature', 'terracotta', 'chaleureux'], isNew: true,
     palette: { brand: '#78350f', accent: '#d97706', ink: '#fbbf24' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#92400e', 160)), elements: [
@@ -281,7 +281,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-cream', name: 'Crème', tags: ['chaleureux', 'naturel', 'doux'],
+    id: 'pocket-cream', name: 'Crème', tags: ['chaleureux', 'naturel', 'doux'], isNew: true,
     palette: { brand: '#fef3c7', accent: '#fef08a', ink: '#1c1917' },
     build: (c) => [
       { background: bg('#fffbeb'), elements: [
@@ -303,7 +303,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-forest-green', name: 'Vert forêt', tags: ['nature', 'écologie', 'frais'],
+    id: 'pocket-forest-green', name: 'Vert forêt', tags: ['nature', 'écologie', 'frais'], popular: true,
     palette: { brand: '#14532d', accent: '#a3e635', ink: '#14532d' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#166534', 160)), elements: [
@@ -328,7 +328,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-black', name: 'Noir', tags: ['luxe', 'minimaliste', 'premium'],
+    id: 'pocket-black', name: 'Noir', tags: ['luxe', 'minimaliste', 'premium'], popular: true,
     palette: { brand: '#000000', accent: '#ffffff', ink: '#ffffff' },
     build: (c) => [
       { background: bg(c.brand), elements: [
@@ -350,7 +350,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-purple', name: 'Mauve', tags: ['créatif', 'moderne', 'violet'],
+    id: 'pocket-purple', name: 'Mauve', tags: ['créatif', 'moderne', 'violet'], isNew: true,
     palette: { brand: '#581c87', accent: '#f0abfc', ink: '#ffffff' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#7e22ce', 160)), elements: [
@@ -375,7 +375,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-blue-pale', name: 'Bleu pâle', tags: ['frais', 'calme', 'professionnel'],
+    id: 'pocket-blue-pale', name: 'Bleu pâle', tags: ['frais', 'calme', 'professionnel'], isNew: true,
     palette: { brand: '#0369a1', accent: '#38bdf8', ink: '#0c4a6e' },
     build: (c) => [
       { background: bg('#f0f9ff'), elements: [
@@ -399,7 +399,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-blue-dark', name: 'Bleu foncé', tags: ['corporate', 'sérieux', 'professionnel'],
+    id: 'pocket-blue-dark', name: 'Bleu foncé', tags: ['corporate', 'sérieux', 'professionnel'], popular: true,
     palette: { brand: '#1e3a8a', accent: '#3b82f6', ink: '#ffffff' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#1e40af', 160)), elements: [
@@ -424,7 +424,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-yellow', name: 'Jaune', tags: ['ludique', 'vif', 'optimiste'],
+    id: 'pocket-yellow', name: 'Jaune', tags: ['ludique', 'vif', 'optimiste'], isNew: true,
     palette: { brand: '#854d0e', accent: '#fbbf24', ink: '#1c1917' },
     build: (c) => [
       { background: bg('#fef3c7'), elements: [
@@ -446,7 +446,7 @@ const POCKETS = [
     ]
   },
   {
-    id: 'pocket-aqua', name: 'Vert d\'eau', tags: ['frais', 'nature', 'aquatique'],
+    id: 'pocket-aqua', name: 'Vert d\'eau', tags: ['frais', 'nature', 'aquatique'], isNew: true,
     palette: { brand: '#0d9488', accent: '#2dd4bf', ink: '#134e4a' },
     build: (c) => [
       { background: bg(c.brand, grad(c.brand, '#14b8a6', 160)), elements: [
