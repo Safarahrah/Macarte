@@ -62,11 +62,11 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
             industries={CARD_INDUSTRIES}
             placeholder={t('templates.searchPlaceholder')}
             gridClass="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            renderTile={(t) => (
-              <article key={t.id} className="group ui-card overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-1 hover:shadow-lifted">
+            renderTile={(tpl) => (
+              <article key={tpl.id} className="group ui-card overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-1 hover:shadow-lifted">
                 <div className="relative aspect-[1.586/1] overflow-hidden bg-white rounded-md">
-                  <CardSvgPreview config={configOf(t.id)} publicUrl="https://macarte.app/demo" />
-                  {t.isPremium && (
+                  <CardSvgPreview config={configOf(tpl.id)} publicUrl="https://macarte.app/demo" />
+                  {tpl.isPremium && (
                     <span className="absolute top-3 right-3 ui-badge !bg-amber-100 !text-amber-800 !border-amber-200">
                       <Crown className="w-3 h-3" /> Premium
                     </span>
@@ -74,11 +74,11 @@ export default function TemplatesPage({ darkMode, toggleDarkMode, isAuthenticate
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-display font-semibold text-text-primary dark:text-text-primary-dark">{t.name}</h2>
-                    <span className="ui-badge shrink-0">{getCategoryLabel(t.category)}</span>
+                    <h2 className="font-display font-semibold text-text-primary dark:text-text-primary-dark">{tpl.name}</h2>
+                    <span className="ui-badge shrink-0">{getCategoryLabel(tpl.category)}</span>
                   </div>
-                  {t.description && (
-                    <p className="mt-2 text-sm text-text-muted dark:text-text-muted-dark leading-relaxed flex-1">{t.description}</p>
+                  {tpl.description && (
+                    <p className="mt-2 text-sm text-text-muted dark:text-text-muted-dark leading-relaxed flex-1">{tpl.description}</p>
                   )}
                   <Link to={primaryHref} className="ui-btn ui-btn-primary mt-3 ui-btn-block">
                     {t('templates.useTemplate')} <ArrowRight className="w-4 h-4" />
