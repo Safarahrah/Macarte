@@ -742,9 +742,87 @@ function VersionBadge() {
 }
 
 export default function App() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Utility to update SEO meta tags dynamically
+  const updateMetaTags = useCallback((lang) => {
+    const isEn = lang === 'en';
+    const title = isEn ? `MaCarte — Business cards with QR code` : `MaCarte — Cartes de visite avec QR code`;
+    const description = isEn
+      ? 'Create your professional business card in minutes. Modern templates, intuitive editor, scannable QR code and print-ready export.'
+      : 'Créez votre carte d\'affaires professionnelle en quelques minutes. Modèles modernes, éditeur intuitif, QR code scannable et export prêt à imprimer.';
+
+    document.title = title;
+
+    // Update description
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.setAttribute('content', description);
+
+    // Update canonical
+    let canonical = document.querySelector('link[rel="canonical"]');
+    const canonicalUrl = isEn ? 'https://www.macarte.pro/en' : 'https://www.macarte.pro/';
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalUrl);
+
+    // Update OG tags
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', title);
+
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) ogDescription.setAttribute('content', description);
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+
+    const ogLocale = document.querySelector('meta[property="og:locale"]');
+    if (ogLocale) ogLocale.setAttribute('content', isEn ? 'en_CA' : 'fr_CA');
+
+    // Update Hreflang
+    let frHreflang = document.querySelector('link[hreflang="fr-CA"]');
+    if (!frHreflang) {
+      frHreflang = document.createElement('link');
+      frHreflang.setAttribute('rel', 'alternate');
+      frHreflang.setAttribute('hreflang', 'fr-CA');
+      document.head.appendChild(frHreflang);
+    }
+    frHreflang.setAttribute('href', 'https://www.macarte.pro/');
+
+    let enHreflang = document.querySelector('link[hreflang="en-CA"]');
+    if (!enHreflang) {
+      enHreflang = document.createElement('link');
+      enHreflang.setAttribute('rel', 'alternate');
+      enHreflang.setAttribute('hreflang', 'en-CA');
+      document.head.appendChild(enHreflang);
+    }
+    enHreflang.setAttribute('href', 'https://www.macarte.pro/en');
+
+    let xDefault = document.querySelector('link[hreflang="x-default"]');
+    if (!xDefault) {
+      xDefault = document.createElement('link');
+      xDefault.setAttribute('rel', 'alternate');
+      xDefault.setAttribute('hreflang', 'x-default');
+      document.head.appendChild(xDefault);
+    }
+    xDefault.setAttribute('href', 'https://www.macarte.pro/');
+  }, []);
+
+  // Handle path-based language and SEO
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/en') {
+      if (i18n.language !== 'en') i18n.changeLanguage('en');
+      updateMetaTags('en');
+    } else if (path === '/') {
+      if (i18n.language !== 'fr') i18n.changeLanguage('fr');
+      updateMetaTags('fr');
+    }
+  }, [location.pathname, i18n, updateMetaTags]);
   // Note: useParams() doesn't work at App level (Routes are children), so we extract params from location.pathname
   const [view, setView] = useState(() => {
     // Initialize view based on current path - don't default to 'loading' for public routes
@@ -1096,14 +1174,10 @@ const [settings, setSettings] = useState({
       checkSetupStatusSafe().then((status) => {
         const demoModeActive = status?.demoMode || isDemoMode;
         if (!demoModeActive) {
-          if (status !== null && (!status.setupComplete || status.userCount === 0)) {
-            navigate('/setup', { replace: true });
-            document.title = 'Initial Setup';
-          } else {
-            checkAuth().catch(() => {});
-            setView('home');
-            document.title = `${APP_NAME} — Business cards with QR code`;
-          }
+          // Public marketing page accessible even without setup
+          checkAuth().catch(() => {});
+          setView('home');
+          document.title = `${APP_NAME} — Business cards with QR code`;
         } else {
           navigate('/people', { replace: true });
         }
@@ -1172,21 +1246,13 @@ const [settings, setSettings] = useState({
         // Check if demo mode is active (from status response or isDemoMode state)
         const demoModeActive = status?.demoMode || isDemoMode;
 
-        // Public marketing homepage at "/". First-run setup is still honoured,
-        // but configured installs now show the landing page instead of a hard
-        // redirect to the dashboard.
+        // Public marketing homepage at "/".
         if (path === '/' && !demoModeActive) {
-          if (status !== null && (!status.setupComplete || status.userCount === 0)) {
-            // Only redirect to setup if we have valid status and setup is incomplete
-            navigate('/setup', { replace: true });
-            document.title = 'Initial Setup';
-          } else {
-            // If status is null (API failed) or setup is complete, show landing page
-            // Refresh auth state so the header can offer the dashboard link.
-            checkAuth().catch(() => {});
-            setView('home');
-            document.title = `${APP_NAME} — Cartes de visite avec QR code`;
-          }
+          // If status is null (API failed) or setup is complete, show landing page
+          // Refresh auth state so the header can offer the dashboard link.
+          checkAuth().catch(() => {});
+          setView('home');
+          document.title = `${APP_NAME} — Cartes de visite avec QR code`;
           return;
         }
 
@@ -2794,8 +2860,8 @@ const [settings, setSettings] = useState({
         <Route path="/dashboard" element={<Suspense fallback={null}><StudioDashboard /></Suspense>} />
         <Route path="/studio/:module" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/studio/:module/:id" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
-        <Route path="/" element={isAuthenticated ? renderAdminViews() : <Landing />} />
-        <Route path="/en" element={<Landing lang="en" />} />
+        <Route path="/" element={<Landing isAuthenticated={isAuthenticated} />} />
+        <Route path="/en" element={<Landing isAuthenticated={isAuthenticated} />} />
         {/* Invitation acceptance route - must come before public card routes */}
         <Route path="/invite/:token" element={
           <InvitationAcceptance

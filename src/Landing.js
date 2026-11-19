@@ -23,16 +23,28 @@ const s = {
   footer: { textAlign: 'center', padding: 32, color: '#64748b', fontSize: 14 },
 };
 
-export default function Landing() {
-  const { t } = useTranslation();
+export default function Landing({ isAuthenticated }) {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const homePath = isEn ? '/en' : '/';
+
   return (
     <div style={s.page}>
       <header style={s.nav}>
-        <Link to="/" style={s.logo}>MaCarte</Link>
+        <Link to={homePath} style={s.logo}>MaCarte</Link>
         <nav style={s.navLinks}>
           <Link to="/templates" style={s.link}>{t('landing.templatesTitle')}</Link>
-          <Link to="/login" style={s.link}>{t('auth.login')}</Link>
-          <Link to="/register" style={s.btn}>{t('auth.register')}</Link>
+          {isAuthenticated ? (
+            <Link to="/people" style={s.btn}>{t('nav.dashboard')}</Link>
+          ) : (
+            <>
+              <Link to="/login" style={s.link}>{t('auth.login')}</Link>
+              <Link to="/register" style={s.btn}>{t('auth.register')}</Link>
+            </>
+          )}
+          <Link to={isEn ? '/' : '/en'} style={s.link} className="ml-2 font-bold text-action">
+            {isEn ? 'FR' : 'EN'}
+          </Link>
         </nav>
       </header>
 
