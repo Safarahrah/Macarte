@@ -42,7 +42,7 @@ module.exports = (db) => {
            res.json({
         ...row,
         config: JSON.parse(row.config),
-        price: process.env.STRIPE_PRICE_AMOUNT || '9.99'
+        price: process.env.STRIPE_PRICE_AMOUNT || '4.99'
       });
     } catch (err) {
       console.error('[PRINTABLE] GET error:', err);

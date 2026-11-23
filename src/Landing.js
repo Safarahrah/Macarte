@@ -30,6 +30,9 @@ export default function Landing({ isAuthenticated }) {
 
   return (
     <div style={s.page}>
+<div style={{ background: '#0f766e', color: '#fff', textAlign: 'center', padding: '10px 16px', fontWeight: 700, letterSpacing: '0.5px', fontSize: 15 }}>
+  {t('landing.promoBanner')}
+</div>
       <header style={s.nav}>
         <Link to={homePath} style={s.logo}>MaCarte</Link>
         <nav style={s.navLinks}>

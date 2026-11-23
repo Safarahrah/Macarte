@@ -33,14 +33,14 @@ export default function StudioLayout({ title, subtitle, actions, children, back,
   return (
     <div className="min-h-screen bg-main dark:bg-main-dark">
       <header className="sticky top-0 z-30 border-b border-border-subtle dark:border-border-subtle-dark bg-card/95 dark:bg-card-dark/95 backdrop-blur shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-8">
+        <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 md:px-8">
           <Link to="/dashboard" className="flex items-center gap-2 font-semibold text-text-primary dark:text-text-primary-dark">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-action to-accent text-white shadow-md">
               <Icons.LayoutGrid className="h-5 w-5" />
             </span>
             <span className="hidden sm:inline font-display">Macarte Studio</span>
           </Link>
-          <nav className="ml-2 flex flex-1 items-center gap-1 overflow-x-auto text-sm" aria-label="Rubriques">
+          <nav className="ml-2 flex flex-1 flex-wrap items-center gap-1 text-sm" aria-label="Rubriques">
             {CATEGORIES.map((c) => (
               <Link key={c.key} to={c.to} className="whitespace-nowrap rounded-lg px-3 py-2 text-text-muted dark:text-text-muted-dark hover:bg-action/5 dark:hover:bg-action/10 hover:text-action dark:hover:text-action-dark transition-colors">
                 {c.label}

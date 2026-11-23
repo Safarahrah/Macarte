@@ -411,6 +411,7 @@ const resources = {
       // Landing
       landing: {
         heroTitle: 'Créez des cartes de visite professionnelles avec QR code',
+        promoBanner: 'BLACK FRIDAY — JUSQU\'À 90 % DE RABAIS',
         heroSubtitle: 'Gratuit, facile et sans compte requis. Commencez en quelques secondes.',
         heroDescription: 'Créez votre carte professionnelle, partagez-la en un scan et téléchargez un design prêt à imprimer en PDF. Simple, rapide et élégant.',
         getStarted: 'Commencer',
@@ -855,6 +856,7 @@ const resources = {
       // Landing
       landing: {
         heroTitle: 'Create professional business cards with QR code',
+        promoBanner: 'BLACK FRIDAY — UP TO 90% OFF',
         heroSubtitle: 'Free, easy and no account required. Get started in seconds.',
         heroDescription: 'Create your professional card, share it with one scan and download a print-ready design in PDF. Simple, fast and elegant.',
         getStarted: 'Get started',
