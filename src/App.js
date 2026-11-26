@@ -23,6 +23,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import PrintTab from './printable/PrintTab';
 import HomePage from './pages/HomePage';
 import TemplatesPage from './pages/TemplatesPage';
+import PublicCatalog from './pages/PublicCatalog';
 import CardSvgPreview, { sampleConfig } from './marketing/CardSvgPreview';
 
 const API_ENDPOINT = '/api';
@@ -2857,6 +2858,7 @@ const [settings, setSettings] = useState({
         <Route path="/users" element={renderAdminViews()} />
         <Route path="/cards" element={renderAdminViews()} />
         <Route path="/templates" element={renderTemplatesPage()} />
+        <Route path="/modeles/:module" element={<PublicCatalog />} />
         <Route path="/dashboard" element={<Suspense fallback={null}><StudioDashboard /></Suspense>} />
         <Route path="/studio/:module" element={<Suspense fallback={null}><StudioModule /></Suspense>} />
         <Route path="/studio/:module/:id" element={<Suspense fallback={null}><StudioModule /></Suspense>} />

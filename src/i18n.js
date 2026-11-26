@@ -109,6 +109,12 @@ const resources = {
           blueDark: 'Bleu foncé',
           yellow: 'Jaune',
           aqua: 'Vert d\'eau'
+        },
+        // Public catalog
+        publicCatalog: {
+          useTemplate: 'Utiliser ce modèle',
+          comingSoon: 'Bientôt disponible',
+          seeCardTemplates: 'Voir les modèles de cartes'
         }
       },
       // Editor
@@ -554,6 +560,12 @@ const resources = {
           blueDark: 'Dark blue',
           yellow: 'Yellow',
           aqua: 'Aqua'
+        },
+        // Public catalog
+        publicCatalog: {
+          useTemplate: 'Use this template',
+          comingSoon: 'Coming soon',
+          seeCardTemplates: 'See card templates'
         }
       },
       // Editor
