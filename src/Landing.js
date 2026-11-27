@@ -75,7 +75,7 @@ export default function Landing({ isAuthenticated }) {
           50% { transform: scale(1.05); }
         }
       `}</style>
-      <div style={{ background: 'rgba(30,27,75,0.85)', color: '#fff', textAlign: 'center', padding: '10px 16px', fontWeight: 700, letterSpacing: '0.5px', fontSize: 15, backdropFilter: 'blur(10px)', animation: 'pulse 3s ease-in-out infinite' }}>
+      <div style={{ background: 'rgba(30,27,75,0.85)', color: '#fff', textAlign: 'center', padding: '6px 12px', fontWeight: 700, letterSpacing: '0.5px', fontSize: 12, backdropFilter: 'blur(10px)', animation: 'pulse 3s ease-in-out infinite', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {t('landing.promoBanner')}
       </div>
       <header style={s.nav}>
@@ -95,12 +95,12 @@ export default function Landing({ isAuthenticated }) {
           </Link>
         </nav>
       </header>
-      <nav aria-label="Rubriques" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 4, padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.4)', fontSize: 14 }}>
-        <Link to="/templates" style={tabStyle}>
+      <nav aria-label="Rubriques" style={{ display: 'flex', flexWrap: 'nowrap', justifyContent: 'flex-start', gap: 4, padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.4)', fontSize: 14, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }} className="scrollbar-horizontal">
+        <Link to="/templates" style={{ ...tabStyle, flexShrink: 0 }}>
           {t('nav.printableCard')}
         </Link>
         {MODULE_LIST.map((m) => (
-          <Link key={m.type} to={isAuthenticated ? `/studio/${m.slug}` : `/modeles/${m.slug}`} style={tabStyle}>
+          <Link key={m.type} to={isAuthenticated ? `/studio/${m.slug}` : `/modeles/${m.slug}`} style={{ ...tabStyle, flexShrink: 0 }}>
             {m.label}
           </Link>
         ))}

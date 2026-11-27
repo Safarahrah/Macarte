@@ -60,7 +60,7 @@ export default function Dashboard() {
             <Sparkles className="w-6 h-6 text-cyan-300" />
             <span className="text-sm font-medium text-cyan-200 uppercase tracking-wider">{t('dashboard.studio')}</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4 py-6">
             {t('dashboard.greeting')}, {user?.email?.split('@')[0] || t('dashboard.creator')}
           </h1>
           <p className="text-lg text-white/80 max-w-2xl mb-8">

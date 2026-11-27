@@ -52,7 +52,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
           : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="ui-container flex h-16 items-center justify-between gap-4">
+      <div className="ui-container flex h-14 md:h-16 items-center justify-between gap-4 px-4">
         <Link to="/" className="shrink-0" aria-label={`Macarte — ${t('landing.homepage')}`}>
           <BrandMark />
         </Link>
@@ -93,7 +93,7 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
 
         <button
           type="button"
-          className="md:hidden ui-btn ui-btn-ghost !px-2.5"
+          className="md:hidden ui-btn ui-btn-ghost !px-2.5 min-h-[44px]"
           onClick={() => setOpen((v) => !v)}
           aria-label={t('common.menu')}
           aria-expanded={open}
@@ -109,25 +109,25 @@ export default function SiteHeader({ darkMode, toggleDarkMode, isAuthenticated }
               <Link
                 key={l.to}
                 to={l.to}
-                className="px-3 py-2.5 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark"
+                className="px-3 py-3 min-h-[44px] rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark"
               >
                 {l.label}
               </Link>
             ))}
             <div className="h-px bg-border-subtle dark:bg-border-dark my-2" />
-            <button type="button" onClick={toggleDarkMode} className="ui-btn ui-btn-secondary justify-start">
+            <button type="button" onClick={toggleDarkMode} className="ui-btn ui-btn-secondary justify-start min-h-[44px]">
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               {darkMode ? t('common.lightTheme') : t('common.darkTheme')}
             </button>
-            <LanguageSwitcher className="w-full justify-start text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark" />
+            <LanguageSwitcher className="w-full justify-start text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark min-h-[44px]" />
             {isAuthenticated ? (
-              <Link to={dashboardHref} className="ui-btn ui-btn-primary ui-btn-block">
+              <Link to={dashboardHref} className="ui-btn ui-btn-primary ui-btn-block min-h-[44px]">
                 <LayoutDashboard className="w-4 h-4" /> {t('nav.dashboard')}
               </Link>
             ) : (
               <>
-                <Link to="/login" className="ui-btn ui-btn-secondary ui-btn-block">{t('auth.login')}</Link>
-                <Link to="/register" className="ui-btn ui-btn-primary ui-btn-block">{t('auth.register')}</Link>
+                <Link to="/login" className="ui-btn ui-btn-secondary ui-btn-block min-h-[44px]">{t('auth.login')}</Link>
+                <Link to="/register" className="ui-btn ui-btn-primary ui-btn-block min-h-[44px]">{t('auth.register')}</Link>
               </>
             )}
           </div>

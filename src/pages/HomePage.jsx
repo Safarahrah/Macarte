@@ -88,7 +88,7 @@ export default function HomePage({ darkMode, toggleDarkMode, isAuthenticated, ap
             <span className="ui-badge bg-gradient-to-r from-action/10 to-accent/10 text-action dark:text-action-dark border-action/20">
               <Sparkles className="w-3.5 h-3.5" /> {t('home.hero.badge')}
             </span>
-            <h1 className="mt-5 font-display text-4xl sm:text-5xl lg:text-[3.25rem] leading-[1.08] font-bold text-text-primary dark:text-text-primary-dark">
+            <h1 className="mt-5 font-display text-3xl leading-tight py-6 font-bold text-text-primary dark:text-text-primary-dark sm:text-4xl lg:text-[3.25rem] lg:leading-[1.08]">
               {t('home.hero.title')}
             </h1>
             <p className="mt-5 text-lg text-text-muted dark:text-text-muted-dark leading-relaxed max-w-xl">
